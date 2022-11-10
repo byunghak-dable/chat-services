@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/weed082/chat-server/internal/adapter/driver/rest/handler"
+	"github.com/weed082/chat-server/internal/port"
 )
 
 type Rest struct {
@@ -15,7 +16,7 @@ type Rest struct {
 	server *http.Server
 }
 
-func New(logger *log.Logger) *Rest {
+func New(logger *log.Logger, userApp port.UserApp) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 	handler.NewUserHandler(logger).Register(group)
