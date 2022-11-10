@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/weed082/chat-server/internal/adapter/driving/rest"
+	"github.com/weed082/chat-server/internal/adapter/driver/rest"
 )
 
 var (

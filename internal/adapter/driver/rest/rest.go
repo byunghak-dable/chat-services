@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weed082/chat-server/internal/adapter/driving/rest/handler"
+	"github.com/weed082/chat-server/internal/adapter/driver/rest/handler"
 )
 
 type Rest struct {

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/weed082/chat-server/internal/adapter/driving/rest/dto"
 )
 
 type UserHandler struct {
@@ -28,7 +27,9 @@ func (h UserHandler) register(c *gin.Context) {
 }
 
 func (h UserHandler) getUserByIdx(c *gin.Context) {
-	var params dto.GetUserByIdxDto
+	var params struct {
+		Idx uint `uri:"idx"`
+	}
 	if err := c.ShouldBindUri(&params); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
