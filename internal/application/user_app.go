@@ -3,6 +3,7 @@ package application
 import (
 	"log"
 
+	"github.com/weed082/chat-server/internal/domain/dto"
 	"github.com/weed082/chat-server/internal/port"
 )
 
@@ -18,10 +19,6 @@ func NewUserApp(logger *log.Logger, repo port.UserRepo) *UserApp {
 	}
 }
 
-func (a UserApp) Register() {
-
-}
-
-func (a UserApp) GetUserByIdx() {
-
+func (app UserApp) Register(registerDto dto.RegisterDto) error {
+	return nil
 }
