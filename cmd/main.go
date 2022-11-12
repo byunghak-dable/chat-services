@@ -14,9 +14,7 @@ import (
 	"github.com/weed082/chat-server/internal/application"
 )
 
-var (
-	logger = log.New(os.Stdout, "LOG", log.LstdFlags|log.Llongfile)
-)
+var logger = log.New(os.Stdout, "LOG", log.LstdFlags|log.Llongfile)
 
 var (
 	restServer *rest.Rest

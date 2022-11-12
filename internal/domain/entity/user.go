@@ -1,4 +1,3 @@
 package entity
 
-type User struct {
-}
+type User struct{}
