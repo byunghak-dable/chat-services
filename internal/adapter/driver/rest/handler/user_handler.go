@@ -23,7 +23,16 @@ func (h UserHandler) Register(router *gin.RouterGroup) {
 }
 
 func (h UserHandler) register(c *gin.Context) {
-
+	var params struct {
+		Name  string `json:"name" binding:"required"`
+		Email string `json:"email" binding:"required,email"`
+		Token string `json:"token" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&params); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, params)
 }
 
 func (h UserHandler) getUserByIdx(c *gin.Context) {

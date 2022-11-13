@@ -39,7 +39,7 @@ func runRest() {
 	userRepo := repository.NewUserRepo(logger, db)
 	userApp := application.NewUserApp(logger, userRepo)
 	restServer = rest.New(logger, userApp)
-	go restServer.Run("3000")
+	go restServer.Run(os.Getenv("REST_PORT"))
 }
 
 func gracefulShutdown() {
