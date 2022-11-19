@@ -2,7 +2,7 @@
 
 ## App Environment Variable
 
-  Recommand to make .env file for env variable to reuse in docker config
+  Recommand to make `.env` file for env variable to reuse in docker config
 
   - `MYSQL_USER`
   - `MYSQL_PASSWORD`
