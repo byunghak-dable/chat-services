@@ -31,8 +31,8 @@ func init() {
 }
 
 func main() {
+	defer gracefulShutdown()
 	runRest()
-	gracefulShutdown()
 }
 
 func runRest() {
