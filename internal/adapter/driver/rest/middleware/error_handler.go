@@ -1,17 +1,17 @@
 package middleware
 
 import (
-	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 type ErrorHandler struct {
-	logger *log.Logger
+	logger log.FieldLogger
 }
 
-func NewErrorHandler(logger *log.Logger) *ErrorHandler {
+func NewErrorHandler(logger log.FieldLogger) *ErrorHandler {
 	return &ErrorHandler{
 		logger: logger,
 	}
@@ -26,7 +26,7 @@ func (h ErrorHandler) handleError(c *gin.Context) {
 	errs := c.Errors.Errors()
 	timestamp := time.Now()
 
-	h.logger.Printf("[%s] : %s", timestamp, errs)
+	h.logger.Errorf("[%s] : %s", timestamp, errs)
 	c.AbortWithStatusJSON(c.Writer.Status(), gin.H{
 		"messages":  errs,
 		"timestamp": timestamp,

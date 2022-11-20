@@ -2,18 +2,18 @@ package mysql
 
 import (
 	"fmt"
-	"log"
 
+	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 type Mysql struct {
-	logger *log.Logger
+	logger log.FieldLogger
 	*gorm.DB
 }
 
-func New(logger *log.Logger, user, password, host, port, database string) (*Mysql, error) {
+func New(logger log.FieldLogger, user, password, host, port, database string) (*Mysql, error) {
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN: fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, password, host, port, database),
 	}), &gorm.Config{})
@@ -26,13 +26,13 @@ func New(logger *log.Logger, user, password, host, port, database string) (*Mysq
 func (sql *Mysql) Close() {
 	db, err := sql.DB.DB()
 	if err != nil {
-		sql.logger.Printf("get mysql db failure: %v", err)
+		sql.logger.Errorf("get mysql db failure: %v", err)
 		return
 	}
 	err = db.Close()
 	if err != nil {
-		sql.logger.Printf("close mysql failure: %v", err)
+		sql.logger.Errorf("close mysql failure: %v", err)
 		return
 	}
-	sql.logger.Println("mysql successfully closed")
+	sql.logger.Infoln("mysql successfully closed")
 }

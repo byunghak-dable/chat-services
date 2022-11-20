@@ -1,17 +1,17 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 type UserHandler struct {
-	logger *log.Logger
+	logger log.FieldLogger
 }
 
-func NewUserHandler(logger *log.Logger) *UserHandler {
+func NewUserHandler(logger log.FieldLogger) *UserHandler {
 	return &UserHandler{
 		logger: logger,
 	}

@@ -2,18 +2,18 @@ package redis
 
 import (
 	"context"
-	"log"
 
 	"github.com/go-redis/redis/v9"
+	log "github.com/sirupsen/logrus"
 )
 
 type Redis struct {
-	logger *log.Logger
+	logger log.FieldLogger
 	*redis.Client
 	ctx context.Context
 }
 
-func New(logger *log.Logger, address, password string, db int) (*Redis, error) {
+func New(logger log.FieldLogger, address, password string, db int) (*Redis, error) {
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     address,
@@ -33,7 +33,7 @@ func New(logger *log.Logger, address, password string, db int) (*Redis, error) {
 
 func (db *Redis) Close() {
 	if err := db.Conn().Close(); err != nil {
-		db.logger.Printf("close redis failure: %v", err)
+		db.logger.Infof("close redis failure: %v", err)
 	}
-	db.logger.Println("redis successfully closed")
+	db.logger.Infoln("redis successfully closed")
 }

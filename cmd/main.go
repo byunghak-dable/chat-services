@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"github.com/weed082/chat-server/internal/adapter/driven/repository"
 	"github.com/weed082/chat-server/internal/adapter/driven/repository/mysql"
 	"github.com/weed082/chat-server/internal/adapter/driven/repository/redis"
@@ -15,7 +16,7 @@ import (
 	"github.com/weed082/chat-server/internal/application"
 )
 
-var logger = log.New(os.Stdout, "LOG", log.LstdFlags|log.Llongfile)
+var logger = logrus.New()
 var (
 	mysqlDb *mysql.Mysql
 	redisDb *redis.Redis
