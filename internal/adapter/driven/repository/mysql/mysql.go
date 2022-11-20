@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"log"
 
 	"gorm.io/driver/mysql"
@@ -12,17 +13,14 @@ type Mysql struct {
 	*gorm.DB
 }
 
-func New(logger *log.Logger, dsn string) *Mysql {
+func New(logger *log.Logger, user, password, host, port, database string) (*Mysql, error) {
 	db, err := gorm.Open(mysql.New(mysql.Config{
-		DSN: dsn,
+		DSN: fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, password, host, port, database),
 	}), &gorm.Config{})
 	if err != nil {
-		logger.Fatalf("open mysql failed: %s", err)
+		return nil, err
 	}
-	return &Mysql{
-		logger: logger,
-		DB:     db,
-	}
+	return &Mysql{logger: logger, DB: db}, nil
 }
 
 func (sql *Mysql) Close() {

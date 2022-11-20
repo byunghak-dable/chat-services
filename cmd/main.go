@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,40 +16,50 @@ import (
 )
 
 var logger = log.New(os.Stdout, "LOG", log.LstdFlags|log.Llongfile)
-
 var (
-	restServer *rest.Rest
-	mysqlDb    *mysql.Mysql
-	redisDb    *redis.Redis
+	mysqlDb *mysql.Mysql
+	redisDb *redis.Redis
 )
+var restServer *rest.Rest
 
+// init env
 func init() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("error loading .env file")
 	}
-	// init mysql
-	sqlDsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
-	mysqlDb = mysql.New(logger, sqlDsn)
-	// init redis
-	redisHost := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
-	redisDb = redis.New(logger, redisHost, os.Getenv("REDIS_PASSWORD"), 0)
+}
+
+// init database
+func init() {
+	var err error
+
+	mysqlDb, err = mysql.New(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
+	if err != nil {
+		logger.Fatalf("can't connect to sql: %s", err)
+	}
+	redisDb, err = redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
+	if err != nil {
+		mysqlDb.Close()
+		logger.Fatalf("can't connect to redis: %s", err)
+	}
+}
+
+// init servers
+func init() {
+	userRepo := repository.NewUserRepo(logger, mysqlDb)
+	userApp := application.NewUserApp(logger, userRepo)
+	restServer = rest.New(logger, userApp)
 }
 
 func main() {
 	defer gracefulShutdown()
-	runRest()
-}
-
-func runRest() {
-	userRepo := repository.NewUserRepo(logger, mysqlDb)
-	userApp := application.NewUserApp(logger, userRepo)
-	restServer = rest.New(logger, userApp)
 	go restServer.Run(os.Getenv("REST_PORT"))
 }
 
 func gracefulShutdown() {
 	defer mysqlDb.Close()
+	defer redisDb.Close()
 	defer restServer.Stop()
 
 	terminationChan := make(chan os.Signal, 1)
