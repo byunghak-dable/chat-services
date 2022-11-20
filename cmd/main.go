@@ -1,27 +1,30 @@
 package main
 
 import (
-	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/joho/godotenv"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/weed082/chat-server/internal/adapter/driven/repository"
 	"github.com/weed082/chat-server/internal/adapter/driven/repository/mysql"
 	"github.com/weed082/chat-server/internal/adapter/driven/repository/redis"
+	"github.com/weed082/chat-server/internal/adapter/driver/grpc"
 	"github.com/weed082/chat-server/internal/adapter/driver/rest"
 	"github.com/weed082/chat-server/internal/application"
 )
 
-var logger = logrus.New()
+var logger = log.New()
 var (
 	mysqlDb *mysql.Mysql
 	redisDb *redis.Redis
 )
-var restServer *rest.Rest
+var (
+	restServer *rest.Rest
+	grpcServer *grpc.Grpc
+)
 
 // init env
 func init() {
