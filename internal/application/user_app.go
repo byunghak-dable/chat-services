@@ -21,3 +21,8 @@ func NewUserApp(logger log.FieldLogger, repo port.UserRepo) *UserApp {
 func (app UserApp) Register(registerDto dto.RegisterDto) error {
 	return nil
 }
+
+func (app UserApp) Signin(signinDto dto.SigninDto) error {
+	return nil
+
+}
