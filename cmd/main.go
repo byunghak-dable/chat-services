@@ -4,6 +4,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"reflect"
 	"syscall"
 
 	"github.com/joho/godotenv"
@@ -36,16 +37,13 @@ func init() {
 
 // init database
 func init() {
-	var err error
+	var mysqlErr, redisErr error
+	mysqlDb, mysqlErr = mysql.New(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
+	redisDb, redisErr = redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
 
-	mysqlDb, err = mysql.New(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
-	if err != nil {
-		logger.Fatalf("can't connect to sql: %s", err)
-	}
-	redisDb, err = redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
-	if err != nil {
-		mysqlDb.Close()
-		logger.Fatalf("can't connect to redis: %s", err)
+	if mysqlErr != nil || redisErr != nil {
+		close(redisDb, mysqlDb)
+		logger.Fatal("database connection failure")
 	}
 }
 
@@ -62,11 +60,17 @@ func main() {
 }
 
 func gracefulShutdown() {
-	defer mysqlDb.Close()
-	defer redisDb.Close()
-	defer restServer.Stop()
+	defer close(restServer, mysqlDb, redisDb)
 
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 	<-terminationChan
+}
+
+func close(args ...interface{ Close() }) {
+	for _, arg := range args {
+		if !reflect.ValueOf(arg).IsNil() {
+			arg.Close()
+		}
+	}
 }
