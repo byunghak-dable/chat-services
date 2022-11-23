@@ -1,5 +1,5 @@
 # build
-FROM golang:1.18.3-alpine3.16  AS builder
+FROM golang:1.19.3-alpine3.16  AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY . .
 RUN go build cmd/main.go 
 
 # deploy
-FROM alpine:latest
+FROM alpine:3.16
 
 WORKDIR /
 
