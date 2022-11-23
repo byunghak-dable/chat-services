@@ -33,7 +33,7 @@ func New(logger log.FieldLogger, address, password string, db int) (*Redis, erro
 
 func (db *Redis) Close() {
 	if err := db.Conn().Close(); err != nil {
-		db.logger.Infof("close redis failure: %v", err)
+		db.logger.Errorf("close redis failure: %v", err)
 	}
 	db.logger.Infoln("redis successfully closed")
 }
