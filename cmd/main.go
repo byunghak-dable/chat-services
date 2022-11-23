@@ -42,7 +42,7 @@ func init() {
 	redisDb, redisErr = redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
 
 	if mysqlErr != nil || redisErr != nil {
-		close(redisDb, mysqlDb)
+		shutdown(redisDb, mysqlDb)
 		logger.Fatal("database connection failure")
 	}
 }
@@ -60,14 +60,14 @@ func main() {
 }
 
 func gracefulShutdown() {
-	defer close(restServer, mysqlDb, redisDb)
+	defer shutdown(restServer, mysqlDb, redisDb)
 
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 	<-terminationChan
 }
 
-func close(args ...interface{ Close() }) {
+func shutdown(args ...interface{ Close() }) {
 	for _, arg := range args {
 		if !reflect.ValueOf(arg).IsNil() {
 			arg.Close()
