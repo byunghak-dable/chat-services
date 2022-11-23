@@ -42,11 +42,11 @@ func (r *Rest) Run(port string) {
 	}
 }
 
-func (r *Rest) Stop() {
+func (r *Rest) Close() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := r.server.Shutdown(ctx); err != nil {
-		r.logger.Infof("shutting down rest server failed: %s", err)
+		r.logger.Errorf("shutting down rest server failed: %s", err)
 	}
 	r.logger.Info("shutting down rest server")
 }
