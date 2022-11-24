@@ -1,8 +1,10 @@
 package dto
 
 type RegisterDto struct {
-	name  string
-	email string
+	email    string
+	name     string
+	imageUrl string
+	token    string
 }
 
 type SigninDto struct {
