@@ -43,7 +43,7 @@ func init() {
 
 	if mysqlErr != nil || redisErr != nil {
 		shutdown(redisDb, mysqlDb)
-		logger.Fatal("database connection failure")
+		logger.Fatalf("database connection failure\nmysql: %s\nredis: %s", mysqlErr, redisErr)
 	}
 }
 
