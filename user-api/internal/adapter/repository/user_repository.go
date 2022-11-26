@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/weed082/user-api/internal/adapter/repository/mysql"
 	"github.com/weed082/user-api/internal/domain/dto"
+	"github.com/weed082/user-api/internal/domain/entity"
 )
 
 type UserRepo struct {
@@ -22,6 +23,6 @@ func (repo UserRepo) Register(registerDto dto.RegisterReqDto) error {
 	return nil
 }
 
-func (repo UserRepo) Signin(signinDto dto.SigninReqDto) (*dto.SigninResDto, error) {
+func (repo UserRepo) Signin(signinDto dto.SigninReqDto) (*entity.User, error) {
 	return nil, nil
 }
