@@ -5,15 +5,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"github.com/weed082/user-api/internal/port"
 )
 
 type UserHandler struct {
 	logger log.FieldLogger
+	app    port.UserApp
 }
 
-func NewUserHandler(logger log.FieldLogger) *UserHandler {
+func NewUserHandler(logger log.FieldLogger, app port.UserApp) *UserHandler {
 	return &UserHandler{
 		logger: logger,
+		app:    app,
 	}
 }
 

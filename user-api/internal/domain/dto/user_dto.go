@@ -7,11 +7,11 @@ type RegisterReqDto struct {
 	token    string
 }
 
-type SigninReqDto struct {
+type GoogleSigninReqDto struct {
 	token string
 }
 
-type SigninResDto struct {
+type GoogleSigninResDto struct {
 	idx      uint32
 	email    string
 	name     string

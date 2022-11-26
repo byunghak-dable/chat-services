@@ -21,7 +21,7 @@ func New(logger log.FieldLogger, userApp port.UserApp) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 	middleware.NewErrorHandler(logger).Register(group)
-	handler.NewUserHandler(logger).Register(group)
+	handler.NewUserHandler(logger, userApp).Register(group)
 
 	return &Rest{
 		logger: logger,

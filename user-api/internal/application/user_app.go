@@ -18,10 +18,10 @@ func NewUserApp(logger log.FieldLogger, repository port.UserRepository) *UserApp
 	}
 }
 
-func (app UserApp) Register(registerDto dto.RegisterReqDto) error {
+func (app UserApp) Register(registerDto *dto.RegisterReqDto) error {
 	return nil
 }
 
-func (app UserApp) Signin(signinDto dto.SigninReqDto) (*dto.SigninResDto, error) {
+func (app UserApp) GoogleSignin(signinDto *dto.GoogleSigninReqDto) (*dto.GoogleSigninResDto, error) {
 	return nil, nil
 }

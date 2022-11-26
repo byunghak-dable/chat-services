@@ -6,11 +6,11 @@ import (
 )
 
 type UserApp interface {
-	Register(dto.RegisterReqDto) error
-	Signin(dto.SigninReqDto) (*dto.SigninResDto, error)
+	Register(*dto.RegisterReqDto) error
+	GoogleSignin(*dto.GoogleSigninReqDto) (*dto.GoogleSigninResDto, error)
 }
 
 type UserRepository interface {
-	Register(dto.RegisterReqDto) error
-	Signin(dto.SigninReqDto) (*entity.User, error)
+	Register(*entity.User) error
+	GoogleSignin(string) (*entity.User, error)
 }
