@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/weed082/user-api/internal/adapter/driver/rest/handler"
-	"github.com/weed082/user-api/internal/adapter/driver/rest/middleware"
+	"github.com/weed082/user-api/internal/adapter/rest/handler"
+	"github.com/weed082/user-api/internal/adapter/rest/middleware"
 	"github.com/weed082/user-api/internal/port"
 )
 

@@ -7,22 +7,21 @@ import (
 )
 
 type UserApp struct {
-	logger log.FieldLogger
-	repo   port.UserRepo
+	logger     log.FieldLogger
+	repository port.UserRepository
 }
 
-func NewUserApp(logger log.FieldLogger, repo port.UserRepo) *UserApp {
+func NewUserApp(logger log.FieldLogger, repository port.UserRepository) *UserApp {
 	return &UserApp{
-		logger: logger,
-		repo:   repo,
+		logger:     logger,
+		repository: repository,
 	}
 }
 
-func (app UserApp) Register(registerDto dto.RegisterDto) error {
+func (app UserApp) Register(registerDto dto.RegisterReqDto) error {
 	return nil
 }
 
-func (app UserApp) Signin(signinDto dto.SigninDto) error {
-	return nil
-
+func (app UserApp) Signin(signinDto dto.SigninReqDto) (*dto.SigninResDto, error) {
+	return nil, nil
 }

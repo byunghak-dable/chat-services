@@ -9,11 +9,11 @@ import (
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	"github.com/weed082/user-api/internal/adapter/driven/repository"
-	"github.com/weed082/user-api/internal/adapter/driven/repository/mysql"
-	"github.com/weed082/user-api/internal/adapter/driven/repository/redis"
-	"github.com/weed082/user-api/internal/adapter/driver/grpc"
-	"github.com/weed082/user-api/internal/adapter/driver/rest"
+	"github.com/weed082/user-api/internal/adapter/grpc"
+	"github.com/weed082/user-api/internal/adapter/repository"
+	"github.com/weed082/user-api/internal/adapter/repository/mysql"
+	"github.com/weed082/user-api/internal/adapter/repository/redis"
+	"github.com/weed082/user-api/internal/adapter/rest"
 	"github.com/weed082/user-api/internal/application"
 )
 

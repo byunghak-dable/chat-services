@@ -2,7 +2,7 @@ package repository
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/weed082/user-api/internal/adapter/driven/repository/mysql"
+	"github.com/weed082/user-api/internal/adapter/repository/mysql"
 	"github.com/weed082/user-api/internal/domain/dto"
 )
 
@@ -18,6 +18,10 @@ func NewUserRepo(logger log.FieldLogger, db *mysql.Mysql) *UserRepo {
 	}
 }
 
-func (repo UserRepo) Register(registerDto dto.RegisterDto) error {
+func (repo UserRepo) Register(registerDto dto.RegisterReqDto) error {
 	return nil
+}
+
+func (repo UserRepo) Signin(signinDto dto.SigninReqDto) (*dto.SigninResDto, error) {
+	return nil, nil
 }
