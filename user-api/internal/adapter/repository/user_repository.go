@@ -21,6 +21,10 @@ func NewUserRepo(logger log.FieldLogger, db *mysql.Mysql) *UserRepo {
 }
 
 func (repo UserRepo) Register(user *entity.User) error {
+	result := repo.db.Create(user)
+	if result.Error != nil {
+		return result.Error
+	}
 	return nil
 }
 

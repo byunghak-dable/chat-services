@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"github.com/weed082/user-api/internal/domain/dto"
 	"github.com/weed082/user-api/internal/port"
 )
 
@@ -27,15 +28,28 @@ func (h UserHandler) Register(router *gin.RouterGroup) {
 
 func (h UserHandler) register(c *gin.Context) {
 	var params struct {
-		Name  string `json:"name" binding:"required"`
-		Email string `json:"email" binding:"required,email"`
-		Token string `json:"token" binding:"required"`
+		Name     string `json:"name" binding:"required"`
+		Email    string `json:"email" binding:"required,email"`
+		ImageUrl string `json:"image_url" binding:"required,url"`
+		Token    string `json:"token" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&params); err != nil {
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(http.StatusOK, params)
+	h.logger.Info(params.Email)
+	err = h.app.Register(&dto.RegisterReqDto{
+		Email:    params.Email,
+		Name:     params.Name,
+		ImageUrl: params.ImageUrl,
+		Token:    params.Token,
+	})
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, nil)
 }
 
 func (h UserHandler) getUserByIdx(c *gin.Context) {
