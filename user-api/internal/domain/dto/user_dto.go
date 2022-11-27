@@ -1,19 +1,19 @@
 package dto
 
 type RegisterReqDto struct {
-	email    string
-	name     string
-	imageUrl string
-	token    string
+	Email    string
+	Name     string
+	ImageUrl string
+	Token    string
 }
 
 type GoogleSigninReqDto struct {
-	token string
+	Token string
 }
 
 type GoogleSigninResDto struct {
-	idx      uint32
-	email    string
-	name     string
-	imageUrl string
+	Idx      uint32
+	Email    string
+	Name     string
+	ImageUrl string
 }
