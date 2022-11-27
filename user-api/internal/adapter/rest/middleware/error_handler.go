@@ -24,8 +24,11 @@ func (h ErrorHandler) Register(router *gin.RouterGroup) {
 func (h ErrorHandler) handleError(c *gin.Context) {
 	c.Next()
 	errs := c.Errors.Errors()
-	timestamp := time.Now()
+	if len(errs) == 0 {
+		return
+	}
 
+	timestamp := time.Now()
 	h.logger.Errorf("[%s] : %s", timestamp, errs)
 	c.AbortWithStatusJSON(c.Writer.Status(), gin.H{
 		"messages":  errs,
