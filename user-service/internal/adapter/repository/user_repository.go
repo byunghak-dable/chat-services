@@ -2,8 +2,8 @@ package repository
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/weed082/user-api/internal/adapter/repository/mysql"
-	"github.com/weed082/user-api/internal/domain/entity"
+	"github.com/widcraft/user-service/internal/adapter/repository/mysql"
+	"github.com/widcraft/user-service/internal/domain/entity"
 )
 
 type UserRepo struct {

@@ -1,4 +1,4 @@
-module github.com/weed082/user-api
+module github.com/widcraft/user-service
 
 go 1.19
 

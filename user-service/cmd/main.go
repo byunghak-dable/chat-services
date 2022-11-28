@@ -9,12 +9,12 @@ import (
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	"github.com/weed082/user-api/internal/adapter/grpc"
-	"github.com/weed082/user-api/internal/adapter/repository"
-	"github.com/weed082/user-api/internal/adapter/repository/mysql"
-	"github.com/weed082/user-api/internal/adapter/repository/redis"
-	"github.com/weed082/user-api/internal/adapter/rest"
-	"github.com/weed082/user-api/internal/application"
+	"github.com/weed082/user-service/internal/adapter/grpc"
+	"github.com/weed082/user-service/internal/adapter/repository"
+	"github.com/weed082/user-service/internal/adapter/repository/mysql"
+	"github.com/weed082/user-service/internal/adapter/repository/redis"
+	"github.com/weed082/user-service/internal/adapter/rest"
+	"github.com/weed082/user-service/internal/application"
 )
 
 var logger = log.New()

@@ -2,9 +2,9 @@ package application
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/weed082/user-api/internal/domain/dto"
-	"github.com/weed082/user-api/internal/domain/entity"
-	"github.com/weed082/user-api/internal/port"
+	"github.com/widcraft/user-service/internal/domain/dto"
+	"github.com/widcraft/user-service/internal/domain/entity"
+	"github.com/widcraft/user-service/internal/port"
 )
 
 type UserApp struct {

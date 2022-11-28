@@ -1,8 +1,8 @@
 package port
 
 import (
-	"github.com/weed082/user-api/internal/domain/dto"
-	"github.com/weed082/user-api/internal/domain/entity"
+	"github.com/widcraft/user-service/internal/domain/dto"
+	"github.com/widcraft/user-service/internal/domain/entity"
 )
 
 type UserApp interface {
