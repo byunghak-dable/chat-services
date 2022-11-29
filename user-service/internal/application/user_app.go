@@ -19,7 +19,7 @@ func NewUserApp(logger log.FieldLogger, repository port.UserRepository) *UserApp
 	}
 }
 
-func (app UserApp) Register(registerDto *dto.RegisterReqDto) error {
+func (app *UserApp) Register(registerDto *dto.RegisterReqDto) error {
 	return app.repository.Register(&entity.User{
 		Email:    registerDto.Email,
 		Name:     registerDto.Name,
@@ -28,6 +28,6 @@ func (app UserApp) Register(registerDto *dto.RegisterReqDto) error {
 	})
 }
 
-func (app UserApp) GoogleSignin(signinDto *dto.GoogleSigninReqDto) (*dto.GoogleSigninResDto, error) {
+func (app *UserApp) GoogleSignin(signinDto *dto.GoogleSigninReqDto) (*dto.GoogleSigninResDto, error) {
 	return nil, nil
 }

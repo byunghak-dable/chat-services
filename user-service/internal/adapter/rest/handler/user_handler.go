@@ -21,12 +21,12 @@ func NewUserHandler(logger log.FieldLogger, app port.UserApp) *UserHandler {
 	}
 }
 
-func (h UserHandler) Register(router *gin.RouterGroup) {
+func (h *UserHandler) Register(router *gin.RouterGroup) {
 	router.POST("/user", h.register)
 	router.GET("/user/:idx", h.getUserByIdx)
 }
 
-func (h UserHandler) register(c *gin.Context) {
+func (h *UserHandler) register(c *gin.Context) {
 	var params struct {
 		Name     string `json:"name" binding:"required"`
 		Email    string `json:"email" binding:"required,email"`
@@ -52,7 +52,7 @@ func (h UserHandler) register(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-func (h UserHandler) getUserByIdx(c *gin.Context) {
+func (h *UserHandler) getUserByIdx(c *gin.Context) {
 	var params struct {
 		Idx uint `uri:"idx"`
 	}
