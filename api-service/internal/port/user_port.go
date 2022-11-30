@@ -1,8 +1,8 @@
 package port
 
 import (
-	"github.com/widcraft/user-service/internal/domain/dto"
-	"github.com/widcraft/user-service/internal/domain/entity"
+	"github.com/widcraft/api-service/internal/domain/dto"
+	"github.com/widcraft/api-service/internal/domain/entity"
 )
 
 type UserApp interface {

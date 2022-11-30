@@ -1,4 +1,4 @@
-module github.com/widcraft/user-service
+module github.com/widcraft/api-service
 
 go 1.19
 

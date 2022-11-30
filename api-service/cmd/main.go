@@ -9,12 +9,12 @@ import (
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/user-service/internal/adapter/grpc"
-	"github.com/widcraft/user-service/internal/adapter/repository"
-	"github.com/widcraft/user-service/internal/adapter/repository/mysql"
-	"github.com/widcraft/user-service/internal/adapter/repository/redis"
-	"github.com/widcraft/user-service/internal/adapter/rest"
-	"github.com/widcraft/user-service/internal/application"
+	"github.com/widcraft/api-service/internal/adapter/grpc"
+	"github.com/widcraft/api-service/internal/adapter/repository"
+	"github.com/widcraft/api-service/internal/adapter/repository/mysql"
+	"github.com/widcraft/api-service/internal/adapter/repository/redis"
+	"github.com/widcraft/api-service/internal/adapter/rest"
+	"github.com/widcraft/api-service/internal/application"
 )
 
 var logger = log.New()

@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/user-service/internal/domain/dto"
-	"github.com/widcraft/user-service/internal/port"
+	"github.com/widcraft/api-service/internal/domain/dto"
+	"github.com/widcraft/api-service/internal/port"
 )
 
 type UserHandler struct {
