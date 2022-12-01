@@ -67,10 +67,10 @@ func gracefulShutdown() {
 	<-terminationChan
 }
 
-func shutdown(args ...interface{ Close() }) {
-	for _, arg := range args {
-		if !reflect.ValueOf(arg).IsNil() {
-			arg.Close()
+func shutdown(targets ...interface{ Close() }) {
+	for _, target := range targets {
+		if !reflect.ValueOf(target).IsNil() {
+			target.Close()
 		}
 	}
 }
