@@ -1,6 +1,9 @@
-package pool
+package workerpool
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type WorkerPool struct {
 	jobChan chan func()
@@ -28,4 +31,5 @@ func (p *WorkerPool) RegisterJob(job func()) {
 
 func (p *WorkerPool) Close() {
 	close(p.jobChan)
+	fmt.Println("closing workerpool")
 }
