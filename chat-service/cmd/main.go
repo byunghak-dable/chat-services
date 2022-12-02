@@ -8,9 +8,11 @@ import (
 	"sync"
 	"syscall"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/external/workerpool"
 )
 
+var logger = log.New()
 var (
 	wg       = &sync.WaitGroup{}
 	chatPool = workerpool.New(wg, 1)
