@@ -12,16 +12,16 @@ type workerPool interface {
 }
 
 type ChatApp struct {
-	chatRoom map[int][]user
 	pool     workerPool
 	poolChan chan error
+	chatRoom map[int][]user
 }
 
 func NewChatApp(pool workerPool) *ChatApp {
 	return &ChatApp{
-		chatRoom: make(map[int][]user),
 		pool:     pool,
 		poolChan: make(chan error),
+		chatRoom: make(map[int][]user),
 	}
 }
 
