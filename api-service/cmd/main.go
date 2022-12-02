@@ -27,7 +27,7 @@ var (
 	grpcServer *grpc.Grpc
 )
 
-// init env
+// env
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -35,7 +35,7 @@ func init() {
 	}
 }
 
-// init database
+// DB
 func init() {
 	var mysqlErr, redisErr error
 	mysqlDb, mysqlErr = mysql.New(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
@@ -47,7 +47,7 @@ func init() {
 	}
 }
 
-// init servers
+// servers
 func init() {
 	userRepo := repository.NewUserRepo(logger, mysqlDb)
 	userApp := application.NewUserApp(logger, userRepo)
