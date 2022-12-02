@@ -1,17 +1,21 @@
 package port
 
-import "github.com/widcraft/chat-service/internal/domain/entity"
+import (
+	"github.com/widcraft/chat-service/internal/domain/dto"
+	"github.com/widcraft/chat-service/internal/domain/entity"
+)
 
 type ChatApp interface {
-	CreateRoom(name string) error
-	ConnectRoom(roomId, userId uint) error
-	JoinRoom(roomId uint) error
-	SendMessge(roomId uint) error
+	CreateRoom(name string) (uint, error)
+	ConnectRoom(roomIdx, userIdx uint) error
+	JoinRoom(roomIdx uint) error
+	SendMessge(roomIdx uint, message string) error
+	GetMessages(roomIdx uint) ([]dto.MessageDto, error)
 }
 
 type ChatRepository interface {
-	CreateRoom(*entity.Room) error
-	JoinRoom(roomId, userId uint) error
-	SaveMessage() error
-	GetMessage() (*entity.Message, error)
+	CreateRoom(room *entity.Room) error
+	JoinRoom(roomIdx, userIdx uint) error
+	SaveMessage(userIdx uint, message string) error
+	GetMessages(roomIdx uint) ([]entity.Message, error)
 }
