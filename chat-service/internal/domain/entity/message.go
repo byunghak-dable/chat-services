@@ -1,4 +1,4 @@
-package domain
+package entity
 
 type Message struct {
 	UserIdx  uint
