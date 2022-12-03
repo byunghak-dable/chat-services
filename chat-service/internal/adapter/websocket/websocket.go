@@ -13,8 +13,8 @@ import (
 
 type Websocket struct {
 	logger  *log.Logger
-	chatApp port.ChatApp
 	server  *http.Server
+	chatApp port.ChatApp
 }
 
 func New(logger *log.Logger, chatApp port.ChatApp) *Websocket {
@@ -36,7 +36,7 @@ func New(logger *log.Logger, chatApp port.ChatApp) *Websocket {
 func (ws *Websocket) Run(port string) {
 	ws.server.Addr = ":" + port
 	err := ws.server.ListenAndServe()
-	if err != nil {
+	if err != nil && err != http.ErrServerClosed {
 		ws.logger.Errorf("websocket server error: %s", err)
 	}
 }

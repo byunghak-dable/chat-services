@@ -22,18 +22,32 @@ func NewChatHandler(logger *log.Logger, app port.ChatApp) *ChatHandler {
 }
 
 func (h *ChatHandler) Register(router *gin.RouterGroup) {
+	socketBufferSize := 1024
 	upgrader := websocket.Upgrader{
-		// TODO; check for more info
+		ReadBufferSize:  socketBufferSize,
+		WriteBufferSize: socketBufferSize,
 		CheckOrigin: func(r *http.Request) bool {
+			h.logger.Info(r)
 			return true
 		},
 	}
 	router.GET("ws", func(ctx *gin.Context) {
-		socket, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		ws, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
 			h.logger.Error("socket failed: %s", err)
 			return
 		}
-		defer socket.Close()
+		defer ws.Close()
+		h.readMessage(ws)
 	})
+}
+
+func (h *ChatHandler) readMessage(ws *websocket.Conn) error {
+	for {
+		messageType, message, err := ws.ReadMessage()
+		if err != nil {
+			return err
+		}
+		h.logger.Info(messageType, message)
+	}
 }
