@@ -63,7 +63,7 @@ func gracefulShutdown() {
 	// waiting
 	defer wg.Wait()
 	// closing
-	defer shutdown(chatPool)
+	defer shutdown(chatPool, ws, redisDb)
 
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
