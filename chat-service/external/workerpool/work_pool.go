@@ -1,7 +1,7 @@
 package workerpool
 
 import (
-	"fmt"
+	"log"
 	"sync"
 )
 
@@ -31,5 +31,5 @@ func (p *WorkerPool) RegisterJob(job func()) {
 
 func (p *WorkerPool) Close() {
 	close(p.jobChan)
-	fmt.Println("closing workerpool")
+	log.Println("shutting down workerpool")
 }
