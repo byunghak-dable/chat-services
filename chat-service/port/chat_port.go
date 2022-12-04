@@ -11,6 +11,12 @@ type ChatApp interface {
 	JoinRoom(roomIdx uint) error
 	SendMessge(roomIdx uint, message string) error
 	GetMessages(roomIdx uint) ([]dto.MessageDto, error)
+	Disconnect() error
+}
+
+type ChatClient interface {
+	GetUseridx() uint
+	SendMessage() error
 }
 
 type ChatRepository interface {
