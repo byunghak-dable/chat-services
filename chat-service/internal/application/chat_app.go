@@ -20,7 +20,6 @@ type workerPool interface {
 type ChatApp struct {
 	logger   *log.Logger
 	pool     workerPool
-	poolChan chan error
 	chatRoom map[int][]user
 	repo     port.ChatRepository
 }
@@ -29,10 +28,13 @@ func NewChatApp(logger *log.Logger, pool workerPool, repo port.ChatRepository) *
 	return &ChatApp{
 		logger:   logger,
 		pool:     pool,
-		poolChan: make(chan error),
 		chatRoom: make(map[int][]user),
 		repo:     repo,
 	}
+}
+
+func (app *ChatApp) Disconnect() error {
+	return nil
 }
 
 func (app *ChatApp) CreateRoom(name string) (uint, error) {
