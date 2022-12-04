@@ -6,15 +6,15 @@ import (
 )
 
 type ChatClient interface {
-	GetUseridx() uint
-	SendMessage() error
+	GetUserIdx() uint
+	SendMessage(message interface{}) error
 }
 
 type ChatApp interface {
-	ConnectRoom(roomIdx, client ChatClient) error
+	Connect(roomIdx uint, client ChatClient) error
 	SendMessge(roomIdx uint, messageDto dto.MessageDto) error
 	GetMessages(roomIdx uint) ([]dto.MessageDto, error)
-	Disconnect(client ChatClient) error
+	Disconnect(roomIdx uint, client ChatClient) error
 }
 
 type ChatRepository interface {

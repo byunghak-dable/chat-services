@@ -1,9 +1,8 @@
 package chat
 
-type user struct {
-	UserIdx  uint   `json:"user_idx" binding:"required"`
-	Name     string `json:"name" binding:"required"`
-	ImageUrl string `json:"image_url" binding:"required"`
+type connection struct {
+	UserIdx uint `query:"user_idx" binding:"required"`
+	RoomIdx uint `query:"room_idx" binding:"required"`
 }
 
 // chat message

@@ -33,7 +33,7 @@ func NewChatApp(logger *log.Logger, pool workerPool, repo port.ChatRepository) *
 	}
 }
 
-func (app *ChatApp) ConnectRoom(roomIdx, client port.ChatClient) error {
+func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) error {
 	return nil
 }
 
@@ -45,6 +45,6 @@ func (app *ChatApp) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
 	return nil, nil
 }
 
-func (app *ChatApp) Disconnect(client port.ChatClient) error {
+func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
 	return nil
 }

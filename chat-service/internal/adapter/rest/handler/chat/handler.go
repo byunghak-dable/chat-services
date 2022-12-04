@@ -36,19 +36,31 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 		},
 	}
 	return func(ctx *gin.Context) {
+		var param connection
+		err := ctx.ShouldBindQuery(&param)
+		if err != nil {
+			h.logger.Error(err)
+			return
+		}
+
 		ws, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
 			h.logger.Errorf("socket failed: %s", err)
 			return
 		}
 		defer ws.Close()
-		// TODO: need to create client
-		h.handleMessage(ws, nil)
-		// TODO: need to remove client from chat rooms
+
+		client := &client{
+			userIdx: param.UserIdx,
+			conn:    ws,
+		}
+		h.app.Connect(param.RoomIdx, client)
+		defer h.app.Disconnect(param.RoomIdx, client)
+		h.handleMessage(ws)
 	}
 }
 
-func (h *Handler) handleMessage(ws *websocket.Conn, client port.ChatClient) {
+func (h *Handler) handleMessage(ws *websocket.Conn) {
 	for {
 		var msg message
 		err := ws.ReadJSON(&msg)
