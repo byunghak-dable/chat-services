@@ -9,23 +9,23 @@ import (
 	"github.com/widcraft/api-service/internal/port"
 )
 
-type UserHandler struct {
+type Handler struct {
 	logger log.FieldLogger
 	app    port.UserApp
 }
 
-func New(logger log.FieldLogger, app port.UserApp) *UserHandler {
-	return &UserHandler{
+func New(logger log.FieldLogger, app port.UserApp) *Handler {
+	return &Handler{
 		logger: logger,
 		app:    app,
 	}
 }
 
-func (h *UserHandler) Register(router *gin.RouterGroup) {
+func (h *Handler) Register(router *gin.RouterGroup) {
 	router.POST("/user", h.register)
 }
 
-func (h *UserHandler) register(c *gin.Context) {
+func (h *Handler) register(c *gin.Context) {
 	var register *register
 
 	err := c.ShouldBindJSON(register)
