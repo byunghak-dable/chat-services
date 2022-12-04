@@ -56,11 +56,11 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 		}
 		h.app.Connect(param.RoomIdx, client)
 		defer h.app.Disconnect(param.RoomIdx, client)
-		h.handleMessage(ws)
+		h.handleMessage(param.RoomIdx, ws)
 	}
 }
 
-func (h *Handler) handleMessage(ws *websocket.Conn) {
+func (h *Handler) handleMessage(roomIdx uint, ws *websocket.Conn) {
 	for {
 		var msg message
 		err := ws.ReadJSON(&msg)
