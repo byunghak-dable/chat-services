@@ -25,24 +25,24 @@ func (h *Handler) Register(router *gin.RouterGroup) {
 	router.POST("/user", h.register)
 }
 
-func (h *Handler) register(c *gin.Context) {
-	var register *register
+func (h *Handler) register(ctx *gin.Context) {
+	var param *register
 
-	err := c.ShouldBindJSON(register)
+	err := ctx.ShouldBindJSON(param)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	h.logger.Info(register.Email)
+	h.logger.Info(param.Email)
 	err = h.app.Register(&dto.RegisterReqDto{
-		Email:    register.Email,
-		Name:     register.Name,
-		ImageUrl: register.ImageUrl,
-		Token:    register.Token,
+		Email:    param.Email,
+		Name:     param.Name,
+		ImageUrl: param.ImageUrl,
+		Token:    param.Token,
 	})
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(http.StatusOK, nil)
+	ctx.JSON(http.StatusOK, nil)
 }
