@@ -4,7 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/repository/redis"
 	"github.com/widcraft/chat-service/internal/domain/entity"
-	"github.com/widcraft/chat-service/port"
+	"github.com/widcraft/chat-service/internal/port"
 )
 
 type ChatRepository struct {

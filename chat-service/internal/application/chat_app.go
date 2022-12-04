@@ -3,7 +3,7 @@ package application
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/domain/dto"
-	"github.com/widcraft/chat-service/port"
+	"github.com/widcraft/chat-service/internal/port"
 )
 
 type user interface {

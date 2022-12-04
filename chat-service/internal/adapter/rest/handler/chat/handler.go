@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/chat-service/port"
+	"github.com/widcraft/chat-service/internal/port"
 )
 
 type Handler struct {

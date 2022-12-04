@@ -13,7 +13,7 @@ import (
 	"github.com/widcraft/chat-service/external/workerpool"
 	"github.com/widcraft/chat-service/internal/adapter/repository"
 	"github.com/widcraft/chat-service/internal/adapter/repository/redis"
-	"github.com/widcraft/chat-service/internal/adapter/websocket"
+	"github.com/widcraft/chat-service/internal/adapter/rest"
 	"github.com/widcraft/chat-service/internal/application"
 )
 
@@ -25,7 +25,7 @@ var (
 )
 
 var (
-	ws *websocket.Websocket
+	restServer *rest.Rest
 )
 
 // env
@@ -51,16 +51,16 @@ func init() {
 func init() {
 	chatRepo := repository.NewChatRepository(logger, redisDb)
 	chatApp := application.NewChatApp(logger, chatPool, chatRepo)
-	ws = websocket.New(logger, chatApp)
+	restServer = rest.New(logger, chatApp)
 }
 
 func main() {
 	defer gracefulShutdown()
-	go ws.Run(os.Getenv("WS_PORT"))
+	go restServer.Run(os.Getenv("WS_PORT"))
 }
 
 func gracefulShutdown() {
-	defer shutdown(ws, redisDb)
+	defer shutdown(restServer, redisDb)
 
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
