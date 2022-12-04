@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/api-service/internal/adapter/rest/handler/user"
-	"github.com/widcraft/api-service/internal/adapter/rest/middleware"
-	"github.com/widcraft/api-service/internal/port"
+	"github.com/widcraft/user-service/internal/adapter/rest/handler/user"
+	"github.com/widcraft/user-service/internal/adapter/rest/middleware"
+	"github.com/widcraft/user-service/internal/port"
 )
 
 type Rest struct {
