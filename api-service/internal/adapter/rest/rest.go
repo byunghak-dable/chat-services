@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/api-service/internal/adapter/rest/handler"
+	"github.com/widcraft/api-service/internal/adapter/rest/handler/user"
 	"github.com/widcraft/api-service/internal/adapter/rest/middleware"
 	"github.com/widcraft/api-service/internal/port"
 )
@@ -21,7 +21,7 @@ func New(logger log.FieldLogger, userApp port.UserApp) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 	middleware.NewErrorHandler(logger).Register(group)
-	handler.NewUserHandler(logger, userApp).Register(group)
+	user.New(logger, userApp).Register(group)
 
 	return &Rest{
 		logger: logger,
