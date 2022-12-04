@@ -43,27 +43,27 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 			return
 		}
 
-		ws, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
 			h.logger.Errorf("socket failed: %s", err)
 			return
 		}
-		defer ws.Close()
+		defer conn.Close()
 
 		client := &client{
 			userIdx: param.UserIdx,
-			conn:    ws,
+			conn:    conn,
 		}
 		h.app.Connect(param.RoomIdx, client)
 		defer h.app.Disconnect(param.RoomIdx, client)
-		h.handleMessage(param.RoomIdx, ws)
+		h.handleMessage(param.RoomIdx, conn)
 	}
 }
 
-func (h *Handler) handleMessage(roomIdx uint, ws *websocket.Conn) {
+func (h *Handler) handleMessage(roomIdx uint, conn *websocket.Conn) {
 	for {
 		var msg message
-		err := ws.ReadJSON(&msg)
+		err := conn.ReadJSON(&msg)
 		if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
 			h.logger.Info("websocket connection closed")
 			return
