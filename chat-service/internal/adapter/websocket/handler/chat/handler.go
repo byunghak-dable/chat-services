@@ -3,13 +3,10 @@ package chat
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/port"
-)
-
-const (
-	JOIN_ROOM_REQUEST = 1
 )
 
 type Handler struct {
@@ -24,7 +21,11 @@ func New(logger *log.Logger, app port.ChatApp) *Handler {
 	}
 }
 
-func (h *Handler) Register(router *http.ServeMux) {
+func (h *Handler) Register(router *gin.RouterGroup) {
+	router.POST("chat", h.makeChatHandler())
+}
+
+func (h *Handler) makeChatHandler() gin.HandlerFunc {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -33,15 +34,15 @@ func (h *Handler) Register(router *http.ServeMux) {
 			return true
 		},
 	}
-	router.HandleFunc("/chat/v1/ws", func(w http.ResponseWriter, r *http.Request) {
-		ws, err := upgrader.Upgrade(w, r, nil)
+	return func(ctx *gin.Context) {
+		ws, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
 			h.logger.Errorf("socket failed: %s", err)
 			return
 		}
 		defer ws.Close()
-		h.handleMessage(ws) // handle incoming message
-	})
+		h.handleMessage(ws)
+	}
 }
 
 func (h *Handler) handleMessage(ws *websocket.Conn) {
@@ -56,11 +57,6 @@ func (h *Handler) handleMessage(ws *websocket.Conn) {
 		if err != nil {
 			h.logger.Error(err)
 			continue
-		}
-
-		switch msg.request {
-		default:
-			h.logger.Warn("unknown request")
 		}
 	}
 }

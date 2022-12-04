@@ -2,6 +2,9 @@ package chat
 
 import "github.com/gorilla/websocket"
 
+type user struct {
+}
+
 // chat client
 type client struct {
 	userIdx uint
@@ -18,6 +21,6 @@ func (c *client) SendMessage(message interface{}) error {
 
 // chat message
 type message struct {
-	request uint8
-	payload interface{}
+	userIdx uint
+	message string
 }

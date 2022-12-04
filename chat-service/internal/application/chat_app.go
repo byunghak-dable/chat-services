@@ -33,26 +33,18 @@ func NewChatApp(logger *log.Logger, pool workerPool, repo port.ChatRepository) *
 	}
 }
 
-func (app *ChatApp) Disconnect() error {
+func (app *ChatApp) ConnectRoom(roomIdx, client port.ChatClient) error {
 	return nil
 }
 
-func (app *ChatApp) CreateRoom(name string) (uint, error) {
-	return 0, nil
-}
-
-func (app *ChatApp) ConnectRoom(roomIdx, userIdx uint) error {
-	return nil
-}
-
-func (app *ChatApp) JoinRoom(roomIdx uint) error {
-	return nil
-}
-
-func (app *ChatApp) SendMessge(roomIdx uint, message string) error {
+func (app *ChatApp) SendMessge(roomIdx uint, message dto.MessageDto) error {
 	return nil
 }
 
 func (app *ChatApp) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
 	return nil, nil
+}
+
+func (app *ChatApp) Disconnect(client port.ChatClient) error {
+	return nil
 }
