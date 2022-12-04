@@ -1,12 +1,12 @@
 package workerpool
 
 import (
-	"log"
 	"sync"
 )
 
 type WorkerPool struct {
-	jobChan chan func()
+	jobChan  chan func()
+	isClosed bool
 }
 
 func New(wg *sync.WaitGroup, count int) *WorkerPool {
@@ -21,15 +21,21 @@ func New(wg *sync.WaitGroup, count int) *WorkerPool {
 		}()
 	}
 	return &WorkerPool{
-		jobChan: jobChan,
+		jobChan:  jobChan,
+		isClosed: false,
 	}
 }
 
 func (p *WorkerPool) RegisterJob(job func()) {
+	if p.isClosed {
+		// TODO: need logging
+		return
+	}
 	p.jobChan <- job
 }
 
 func (p *WorkerPool) Close() {
 	close(p.jobChan)
-	log.Println("shutting down workerpool")
+	p.isClosed = true
+	// TODO: need logging
 }
