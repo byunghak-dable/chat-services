@@ -10,6 +10,10 @@
 
   **2. Chat Service**
 
+  - Environment Variable
+    - Redis : `REDIS_HOST`, `REDIS_PASSWORD`, `REDIS_PORT`
+    - Server : `REST_PORT`, `GRPC_PORT`
+
   **3. Media Service**
 
 ## Development
