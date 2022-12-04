@@ -22,7 +22,8 @@ func New(logger *log.Logger, app port.ChatApp) *Handler {
 }
 
 func (h *Handler) Register(router *gin.RouterGroup) {
-	router.POST("chat", h.makeChatHandler())
+	// TODO: need to check if client can pass body initially
+	router.GET("chat", h.makeChatHandler())
 }
 
 func (h *Handler) makeChatHandler() gin.HandlerFunc {
@@ -41,22 +42,25 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 			return
 		}
 		defer ws.Close()
-		h.handleMessage(ws)
+		// TODO: need to create client
+		h.handleMessage(ws, nil)
+		// TODO: need to remove client from chat rooms
 	}
 }
 
-func (h *Handler) handleMessage(ws *websocket.Conn) {
+func (h *Handler) handleMessage(ws *websocket.Conn, client port.ChatClient) {
 	for {
-		var msg *message
-		err := ws.ReadJSON(msg)
-
+		var msg message
+		err := ws.ReadJSON(&msg)
 		if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
-			h.logger.Info("connection closed")
+			h.logger.Info("websocket connection closed")
 			return
 		}
 		if err != nil {
 			h.logger.Error(err)
 			continue
 		}
+		h.logger.Info(msg)
+		// TODO: handle message
 	}
 }

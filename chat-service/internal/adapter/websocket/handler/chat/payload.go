@@ -1,26 +1,14 @@
 package chat
 
-import "github.com/gorilla/websocket"
-
 type user struct {
-}
-
-// chat client
-type client struct {
-	userIdx uint
-	conn    *websocket.Conn
-}
-
-func (c *client) GetUserIdx() uint {
-	return c.userIdx
-}
-
-func (c *client) SendMessage(message interface{}) error {
-	return c.conn.WriteJSON(message)
+	UserIdx  uint   `json:"user_idx" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	ImageUrl string `json:"image_url" binding:"required"`
 }
 
 // chat message
 type message struct {
-	userIdx uint
-	message string
+	Type    uint8  `json:"type"`
+	UserIdx uint   `json:"user_idx"`
+	Message string `json:"message"`
 }
