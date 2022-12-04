@@ -22,7 +22,6 @@ func New(logger *log.Logger, app port.ChatApp) *Handler {
 }
 
 func (h *Handler) Register(router *gin.RouterGroup) {
-	// TODO: need to check if client can pass body initially
 	router.GET("chat", h.makeChatHandler())
 }
 
