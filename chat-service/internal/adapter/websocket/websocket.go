@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/chat-service/internal/adapter/websocket/handler"
+	handler "github.com/widcraft/chat-service/internal/adapter/websocket/handler/chat"
 	"github.com/widcraft/chat-service/port"
 )
 
@@ -18,9 +17,9 @@ type Websocket struct {
 }
 
 func New(logger *log.Logger, chatApp port.ChatApp) *Websocket {
-	router := gin.Default()
-	group := router.Group("/chat/v1")
-	handler.NewChatHandler(logger, chatApp).Register(group)
+	router := http.NewServeMux()
+	handler.NewChatHandler(logger, chatApp).Register(router)
+
 	return &Websocket{
 		logger:  logger,
 		chatApp: chatApp,
