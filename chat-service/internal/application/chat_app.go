@@ -28,7 +28,8 @@ func NewChatApp(logger *log.Logger, pool workerPool, repo port.ChatRepository) *
 	}
 }
 
-func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) {
+func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) error {
+	// TODO: check if user is valid from user service
 	app.chatPool.RegisterJob(func() {
 		room, ok := app.rooms[roomIdx]
 		if ok {
@@ -37,6 +38,7 @@ func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) {
 		}
 		app.rooms[roomIdx] = []port.ChatClient{client}
 	})
+	return nil
 }
 
 func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
