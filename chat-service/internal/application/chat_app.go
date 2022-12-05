@@ -1,6 +1,8 @@
 package application
 
 import (
+	"errors"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/port"
@@ -38,7 +40,24 @@ func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) {
 }
 
 func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
-	return nil
+	errChan := make(chan error)
+	defer close(errChan)
+
+	app.chatPool.RegisterJob(func() {
+		room, ok := app.rooms[roomIdx]
+		if !ok {
+			errChan <- errors.New("no existing chat room roomIdx")
+			return
+		}
+		for i, roomClient := range room {
+			if client == roomClient {
+				app.rooms[roomIdx] = append(room[:i], room[i+1:]...)
+				return
+			}
+		}
+		errChan <- errors.New("no client in chat room")
+	})
+	return <-errChan
 }
 
 func (app *ChatApp) SendMessge(roomIdx uint, message dto.MessageDto) error {
