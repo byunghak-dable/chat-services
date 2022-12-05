@@ -54,7 +54,7 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 			conn:    conn,
 		}
 		h.app.Connect(param.RoomIdx, client)
-		defer h.app.Disconnect(param.RoomIdx, client)
+		defer h.logger.Infof("client disconnect err: %s", h.app.Disconnect(param.RoomIdx, client))
 		h.handleMessage(param.RoomIdx, conn)
 	}
 }
