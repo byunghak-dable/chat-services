@@ -52,7 +52,6 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 		client := &client{userIdx: param.UserIdx, conn: conn}
 		if err = h.app.Connect(param.RoomIdx, client); err != nil {
 			h.logger.Errorf("connect client failed", err)
-			// TODO: write message to client
 			return
 		}
 
