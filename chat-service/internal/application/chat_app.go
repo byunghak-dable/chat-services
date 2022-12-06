@@ -2,6 +2,7 @@ package application
 
 import (
 	"errors"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/domain/dto"
@@ -62,8 +63,30 @@ func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
 	return <-errChan
 }
 
-func (app *ChatApp) SendMessge(roomIdx uint, message dto.MessageDto) error {
-	return nil
+func (app *ChatApp) SendMessge(message dto.MessageDto) error {
+	errChan := make(chan error)
+	defer close(errChan)
+
+	app.chatPool.RegisterJob(func() {
+		room, ok := app.rooms[message.RoomIdx]
+		if !ok {
+			errChan <- errors.New("no existing chat room roomIdx")
+			return
+		}
+
+		failedClients := []string{}
+		for _, client := range room {
+			err := client.SendMessage(message)
+			if err != nil {
+				failedClients = append(failedClients, string(client.GetUserIdx()))
+			}
+		}
+
+		if len(failedClients) > 0 {
+			errChan <- errors.New("some clients failed to send message" + strings.Join(failedClients, ", "))
+		}
+	})
+	return <-errChan
 }
 
 func (app *ChatApp) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {

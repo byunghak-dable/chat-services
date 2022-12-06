@@ -13,7 +13,7 @@ type ChatClient interface {
 type ChatApp interface {
 	Connect(roomIdx uint, client ChatClient) error
 	Disconnect(roomIdx uint, client ChatClient) error
-	SendMessge(roomIdx uint, messageDto dto.MessageDto) error
+	SendMessge(messageDto dto.MessageDto) error
 	GetMessages(roomIdx uint) ([]dto.MessageDto, error)
 }
 
