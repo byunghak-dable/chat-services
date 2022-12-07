@@ -15,7 +15,7 @@ type workerPool interface {
 
 type ChatApp struct {
 	logger   *log.Logger
-	chatPool workerPool
+	chatPool workerPool // using single worker(goroutine) to avoid race condition + avoid using mutex for better performance
 	rooms    map[uint][]port.ChatClient
 	repo     port.ChatRepository
 }
@@ -43,34 +43,35 @@ func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) error {
 }
 
 func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
-	errChan := make(chan error)
-	defer close(errChan)
+	resultChan := make(chan error)
+	defer close(resultChan)
 
 	app.chatPool.RegisterJob(func() {
 		room, ok := app.rooms[roomIdx]
 		if !ok {
-			errChan <- errors.New("no existing chat room roomIdx")
+			resultChan <- errors.New("no existing chat room roomIdx")
 			return
 		}
 		for i, roomClient := range room {
 			if client == roomClient {
 				app.rooms[roomIdx] = append(room[:i], room[i+1:]...)
+				resultChan <- nil
 				return
 			}
 		}
-		errChan <- errors.New("no client in chat room")
+		resultChan <- errors.New("no client in chat room")
 	})
-	return <-errChan
+	return <-resultChan
 }
 
 func (app *ChatApp) SendMessge(message dto.MessageDto) error {
-	errChan := make(chan error)
-	defer close(errChan)
+	resultChan := make(chan error)
+	defer close(resultChan)
 
 	app.chatPool.RegisterJob(func() {
 		room, ok := app.rooms[message.RoomIdx]
 		if !ok {
-			errChan <- errors.New("no existing chat room roomIdx")
+			resultChan <- errors.New("no existing chat room roomIdx")
 			return
 		}
 
@@ -83,10 +84,11 @@ func (app *ChatApp) SendMessge(message dto.MessageDto) error {
 		}
 
 		if len(failedClients) > 0 {
-			errChan <- errors.New("some clients failed to send message" + strings.Join(failedClients, ", "))
+			resultChan <- errors.New("some clients failed to send message: " + strings.Join(failedClients, ", "))
 		}
+		resultChan <- nil
 	})
-	return <-errChan
+	return <-resultChan
 }
 
 func (app *ChatApp) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
