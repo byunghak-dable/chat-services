@@ -6,17 +6,13 @@ import (
 	"github.com/widcraft/chat-service/internal/port"
 )
 
-type workerPool interface {
-	RegisterJob(func())
-}
-
 type ChatApp struct {
 	logger     *log.Logger
 	roomManger *roomManager
 	repo       port.ChatRepository
 }
 
-func NewChatApp(logger *log.Logger, pool workerPool, repo port.ChatRepository) *ChatApp {
+func New(logger *log.Logger, repo port.ChatRepository) *ChatApp {
 	return &ChatApp{
 		logger:     logger,
 		roomManger: NewRoomManager(),

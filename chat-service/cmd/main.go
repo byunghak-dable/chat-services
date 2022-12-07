@@ -14,7 +14,7 @@ import (
 	"github.com/widcraft/chat-service/internal/adapter/repository"
 	"github.com/widcraft/chat-service/internal/adapter/repository/redis"
 	"github.com/widcraft/chat-service/internal/adapter/rest"
-	"github.com/widcraft/chat-service/internal/application"
+	chatapp "github.com/widcraft/chat-service/internal/application/chat"
 )
 
 var logger = log.New()
@@ -50,7 +50,7 @@ func init() {
 // servers
 func init() {
 	chatRepo := repository.NewChatRepository(logger, redisDb)
-	chatApp := application.NewChatApp(logger, chatPool, chatRepo)
+	chatApp := chatapp.New(logger, chatRepo)
 	restServer = rest.New(logger, chatApp)
 }
 
@@ -65,9 +65,6 @@ func gracefulShutdown() {
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 	<-terminationChan
-
-	chatPool.Close()
-	wg.Wait()
 }
 
 func shutdown(targets ...interface{ Close() }) {
