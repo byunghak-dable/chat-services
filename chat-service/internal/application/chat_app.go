@@ -14,7 +14,15 @@ type workerPool interface {
 }
 
 type ChatApp struct {
-	logger   *log.Logger
+	logger *log.Logger
+	/**
+	worker pool that has single worker(goroutine) to perform chat room modification job
+
+	- why using single worker(goroutine)
+		TOOD: need to check performance : chat room worker pool vs mutex
+		1. avoid race condition
+		2. avoid using mutex for better performance(locking is expensive)
+	*/
 	chatPool workerPool // using single worker(goroutine) to avoid race condition + avoid using mutex for better performance
 	rooms    map[uint][]port.ChatClient
 	repo     port.ChatRepository
