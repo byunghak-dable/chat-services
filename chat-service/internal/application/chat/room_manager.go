@@ -2,6 +2,7 @@ package chat
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/widcraft/chat-service/internal/domain/dto"
@@ -51,7 +52,7 @@ func (manager *roomManager) sendMessage(message dto.MessageDto) error {
 	failedClients := []string{}
 	for _, client := range room {
 		if err := client.SendMessage(message); err != nil {
-			failedClients = append(failedClients, string(client.GetUserIdx()))
+			failedClients = append(failedClients, strconv.FormatUint(uint64(client.GetUserIdx()), 10))
 		}
 	}
 
