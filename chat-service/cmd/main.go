@@ -5,12 +5,10 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
-	"sync"
 	"syscall"
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/chat-service/external/workerpool"
 	"github.com/widcraft/chat-service/internal/adapter/repository"
 	"github.com/widcraft/chat-service/internal/adapter/repository/redis"
 	"github.com/widcraft/chat-service/internal/adapter/rest"
@@ -19,10 +17,6 @@ import (
 
 var logger = log.New()
 var redisDb *redis.Redis
-var (
-	wg       = &sync.WaitGroup{}
-	chatPool = workerpool.New(wg, 1)
-)
 
 var (
 	restServer *rest.Rest
