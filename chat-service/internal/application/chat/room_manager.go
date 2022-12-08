@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/port"
@@ -12,15 +13,19 @@ import (
 // TOOD: add mutex
 type roomManager struct {
 	rooms map[uint][]port.ChatClient
+	mutex *sync.RWMutex
 }
 
 func NewRoomManager() *roomManager {
 	return &roomManager{
 		rooms: make(map[uint][]port.ChatClient),
+		mutex: new(sync.RWMutex),
 	}
 }
 
 func (manager *roomManager) add(roomIdx uint, client port.ChatClient) {
+	manager.mutex.Lock()
+	defer manager.mutex.Unlock()
 	room, ok := manager.rooms[roomIdx]
 	if ok {
 		manager.rooms[roomIdx] = append(room, client)
@@ -30,6 +35,8 @@ func (manager *roomManager) add(roomIdx uint, client port.ChatClient) {
 }
 
 func (manager *roomManager) quit(roomIdx uint, client port.ChatClient) error {
+	manager.mutex.Lock()
+	defer manager.mutex.Unlock()
 	room, ok := manager.rooms[roomIdx]
 	if !ok {
 		return errors.New("no existing chat room roomIdx")
@@ -44,6 +51,8 @@ func (manager *roomManager) quit(roomIdx uint, client port.ChatClient) error {
 }
 
 func (manager *roomManager) sendMessage(message dto.MessageDto) error {
+	manager.mutex.RLock()
+	defer manager.mutex.RUnlock()
 	room, ok := manager.rooms[message.RoomIdx]
 	if !ok {
 		return errors.New("no existing chat room roomIdx")
