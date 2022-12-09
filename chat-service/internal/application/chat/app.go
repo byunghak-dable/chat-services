@@ -20,10 +20,8 @@ func New(logger *log.Logger, repo port.ChatRepository) *ChatApp {
 	}
 }
 
-func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) error {
-	// TODO: check if user is valid from user service
+func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) {
 	app.roomManger.add(roomIdx, client)
-	return nil
 }
 
 func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
@@ -31,6 +29,7 @@ func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
 }
 
 func (app *ChatApp) SendMessge(message *dto.MessageDto) error {
+	// TODO: save message
 	return app.roomManger.sendMessage(message)
 }
 
