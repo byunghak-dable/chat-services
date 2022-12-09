@@ -30,8 +30,8 @@ func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
 	return app.roomManger.quit(roomIdx, client)
 }
 
-func (app *ChatApp) SendMessge(message dto.MessageDto) error {
-	return app.SendMessge(message)
+func (app *ChatApp) SendMessge(message *dto.MessageDto) error {
+	return app.roomManger.sendMessage(*message)
 }
 
 func (app *ChatApp) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
