@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
+	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/port"
 )
 
@@ -75,6 +76,10 @@ func (h *Handler) handleConnection(conn *websocket.Conn) {
 			h.logger.Error(err)
 			continue
 		}
-		// TODO: handle message
+		h.app.SendMessge(&dto.MessageDto{
+			RoomIdx: msg.RoomIdx,
+			UserIdx: msg.UserIdx,
+			Message: msg.Message,
+		})
 	}
 }
