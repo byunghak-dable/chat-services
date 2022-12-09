@@ -19,6 +19,6 @@ type ChatApp interface {
 
 type ChatRepository interface {
 	ConnectRoom(roomIdx, client ChatClient) error
-	SaveMessage(roomIdx, userIdx uint, message string) error
+	SaveMessage(message *entity.Message) error
 	GetMessages(roomIdx uint) ([]entity.Message, error)
 }

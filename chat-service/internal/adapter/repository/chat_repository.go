@@ -23,7 +23,7 @@ func (repo *ChatRepository) ConnectRoom(roomIdx, client port.ChatClient) error {
 	return nil
 }
 
-func (repo *ChatRepository) SaveMessage(roomIdx, userIdx uint, message string) error {
+func (repo *ChatRepository) SaveMessage(message *entity.Message) error {
 	return nil
 }
 
