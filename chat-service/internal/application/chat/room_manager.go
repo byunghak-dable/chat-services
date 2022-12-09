@@ -49,7 +49,7 @@ func (manager *roomManager) quit(roomIdx uint, client port.ChatClient) error {
 	return errors.New("no client in chat room")
 }
 
-func (manager *roomManager) sendMessage(message dto.MessageDto) error {
+func (manager *roomManager) sendMessage(message *dto.MessageDto) error {
 	manager.mutex.RLock()
 	defer manager.mutex.RUnlock()
 	room, ok := manager.rooms[message.RoomIdx]
