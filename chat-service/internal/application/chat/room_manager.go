@@ -10,7 +10,6 @@ import (
 	"github.com/widcraft/chat-service/internal/port"
 )
 
-// TOOD: add mutex
 type roomManager struct {
 	rooms map[uint][]port.ChatClient
 	mutex *sync.RWMutex
