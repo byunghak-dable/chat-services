@@ -1,9 +1,9 @@
 package chat
 
 import (
+	"bytes"
 	"errors"
-	"strconv"
-	"strings"
+	"fmt"
 	"sync"
 
 	"github.com/widcraft/chat-service/internal/domain/dto"
@@ -57,15 +57,15 @@ func (manager *roomManager) sendMessage(message *dto.MessageDto) error {
 		return errors.New("no existing chat room roomIdx")
 	}
 
-	failedClients := []string{}
+	var errBuffer bytes.Buffer
 	for _, client := range room {
 		if err := client.SendMessage(message); err != nil {
-			failedClients = append(failedClients, strconv.FormatUint(uint64(client.GetUserIdx()), 10))
+			errBuffer.WriteString(fmt.Sprintf("client %d send failed: %s\n", client.GetUserIdx(), err.Error()))
 		}
 	}
 
-	if len(failedClients) > 0 {
-		return errors.New("some clients failed to send message: " + strings.Join(failedClients, ", "))
+	if errBuffer.Len() != 0 {
+		return errors.New(errBuffer.String())
 	}
 	return nil
 }
