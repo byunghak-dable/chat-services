@@ -17,11 +17,11 @@ func NewErrorHandler(logger log.FieldLogger) *ErrorHandler {
 	}
 }
 
-func (h ErrorHandler) Register(router *gin.RouterGroup) {
+func (h *ErrorHandler) Register(router *gin.RouterGroup) {
 	router.Use(h.handleError)
 }
 
-func (h ErrorHandler) handleError(c *gin.Context) {
+func (h *ErrorHandler) handleError(c *gin.Context) {
 	c.Next()
 	errs := c.Errors.Errors()
 	if len(errs) == 0 {
