@@ -51,11 +51,7 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 		defer conn.Close()
 
 		client := &client{userIdx: param.UserIdx, conn: conn}
-		if err = h.app.Connect(param.RoomIdx, client); err != nil {
-			h.logger.Errorf("connect client failed", err)
-			return
-		}
-
+		h.app.Connect(param.RoomIdx, client)
 		h.handleConnection(conn)
 
 		if err = h.app.Disconnect(param.RoomIdx, client); err != nil {
