@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -10,16 +11,44 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type messageObj struct {
+	RoomIdx uint   `json:"room_idx"`
+	UserIdx uint   `json:"user_idx"`
+	Message string `json:"message"`
+}
+
 func main() {
 	wg := &sync.WaitGroup{}
-	c := NewClient()
-	go c.read(wg)
+
+	arr := [2]*Client{}
+	for i, _ := range arr {
+		c := NewClient()
+		go c.read(wg)
+		arr[i] = c
+	}
+
+	for {
+		var msg string
+		fmt.Scanln(&msg)
+		if msg == "exit" {
+			break
+		}
+		for _, c := range arr {
+			c.conn.WriteJSON(&messageObj{
+				RoomIdx: 1,
+				UserIdx: 1,
+				Message: msg,
+			})
+		}
+	}
 
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 	<-terminationChan
 
-	c.conn.Close()
+	for _, c := range arr {
+		c.conn.Close()
+	}
 	wg.Wait()
 	log.Println("waiting finished")
 }
