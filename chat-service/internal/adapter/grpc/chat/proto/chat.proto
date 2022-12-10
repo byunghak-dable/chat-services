@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package pb;
+option go_package = "../pb";
+
+service Chat {
+  rpc chat(stream MessageReq) returns (stream MessageRes) {}
+}
+
+message MessageReq {
+  uint32 type = 1;
+  uint32 room_idx = 2;
+  uint32 user_idx = 3;
+  string message = 4;
+}
+
+message MessageRes {
+  uint32 type = 1;
+  uint32 room_idx = 2;
+  uint32 user_idx = 3;
+  string name = 4;
+  string image_url = 5;
+  string message = 6;
+}
