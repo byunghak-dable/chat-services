@@ -29,7 +29,6 @@ func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
 }
 
 func (app *ChatApp) SendMessge(message *dto.MessageDto) error {
-	// TODO: save message
 	return app.roomManger.sendMessage(message)
 }
 
