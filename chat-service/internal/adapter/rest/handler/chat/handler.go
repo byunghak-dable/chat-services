@@ -71,12 +71,12 @@ func (h *Handler) handleConnection(conn *websocket.Conn) {
 		if err != nil {
 			h.logger.Errorf("read message failed: %s", err)
 		}
-		msgDto := dto.MessageDto{
+		err = h.app.SendMessge(&dto.MessageDto{
 			RoomIdx: msg.RoomIdx,
 			UserIdx: msg.UserIdx,
 			Message: msg.Message,
-		}
-		if err = h.app.SendMessge(&msgDto); err != nil {
+		})
+		if err != nil {
 			h.logger.Errorf("send message failed: %s", err)
 		}
 	}
