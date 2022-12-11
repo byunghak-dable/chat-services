@@ -34,8 +34,7 @@ func init() {
 
 // DB
 func init() {
-	var err error
-	redisDb, err = redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
+	redisDb, err := redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
 
 	if err != nil {
 		shutdown(redisDb)
