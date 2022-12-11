@@ -50,18 +50,18 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 		}
 		defer conn.Close()
 
-		client := &client{userIdx: param.UserIdx, conn: conn}
-		h.app.Connect(param.RoomIdx, client)
+		client := client{userIdx: param.UserIdx, conn: conn}
+		h.app.Connect(param.RoomIdx, &client)
 		defer func() {
-			if err = h.app.Disconnect(param.RoomIdx, client); err != nil {
+			if err = h.app.Disconnect(param.RoomIdx, &client); err != nil {
 				h.logger.Errorf("disconnect client failed: %s", err)
 			}
 		}()
-		h.handleConnection(conn)
+		h.handleConnection(conn, param.RoomIdx, param.UserIdx)
 	}
 }
 
-func (h *Handler) handleConnection(conn *websocket.Conn) {
+func (h *Handler) handleConnection(conn *websocket.Conn, roomIdx, userIdx uint) {
 	for {
 		var msg message
 		err := conn.ReadJSON(&msg)
@@ -72,8 +72,8 @@ func (h *Handler) handleConnection(conn *websocket.Conn) {
 			h.logger.Errorf("read message failed: %s", err)
 		}
 		err = h.app.SendMessge(&dto.MessageDto{
-			RoomIdx: msg.RoomIdx,
-			UserIdx: msg.UserIdx,
+			RoomIdx: roomIdx,
+			UserIdx: userIdx,
 			Message: msg.Message,
 		})
 		if err != nil {
