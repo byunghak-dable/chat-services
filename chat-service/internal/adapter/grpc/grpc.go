@@ -17,10 +17,13 @@ type Grpc struct {
 }
 
 func New(logger *log.Logger, chatApp port.ChatApp) *Grpc {
+	server := grpc.NewServer()
+	pb.RegisterChatServer(server, chat.New(logger))
+
 	return &Grpc{
 		logger:  logger,
 		chatApp: chatApp,
-		server:  grpc.NewServer(),
+		server:  server,
 	}
 }
 
@@ -35,7 +38,6 @@ func (g *Grpc) Run(port string) {
 		}
 	}()
 
-	pb.RegisterChatServer(g.server, chat.New(g.logger))
 	if err = g.server.Serve(listener); err != nil {
 		g.logger.Errorf("serve grpc error: %s", err)
 	}
