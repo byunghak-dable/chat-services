@@ -16,10 +16,18 @@ func New(logger *log.Logger) *Server {
 	}
 }
 
-func (s *Server) Receive(req *pb.ConnectReq, stream pb.Chat_ReceiveServer) error {
-	return nil
-}
-
-func (s *Server) Send(stream pb.Chat_SendServer) error {
+func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
+	for {
+		req, err := stream.Recv()
+		if err != nil {
+			return err
+		}
+		switch v := req.GetType().(type) {
+		case *pb.ChatReq_Join:
+			s.logger.Infoln("join", v)
+		case *pb.ChatReq_Message:
+			s.logger.Infoln("message", v)
+		}
+	}
 	return nil
 }

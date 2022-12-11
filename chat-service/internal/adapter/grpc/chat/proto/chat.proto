@@ -4,13 +4,17 @@ package pb;
 option go_package = "../pb";
 
 service Chat {
-  rpc receive(ConnectReq) returns (stream MessageRes) {}
-  rpc send(stream MessageReq) returns (Empty) {}
+  rpc connect(stream ChatReq) returns (stream MessageRes) {}
 }
 
-message Empty {}
+message ChatReq {
+  oneof Type {
+    JoinReq join = 1;
+    MessageReq message = 2;
+  }
+}
 
-message ConnectReq {
+message JoinReq {
   uint32 room_idx = 1;
   uint32 user_idx = 2;
 }
