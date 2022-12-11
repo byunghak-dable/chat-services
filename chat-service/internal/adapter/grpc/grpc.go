@@ -4,6 +4,8 @@ import (
 	"net"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/widcraft/chat-service/internal/adapter/grpc/chat"
+	"github.com/widcraft/chat-service/internal/adapter/grpc/chat/pb"
 	"github.com/widcraft/chat-service/internal/port"
 	"google.golang.org/grpc"
 )
@@ -33,6 +35,7 @@ func (g *Grpc) Run(port string) {
 		}
 	}()
 
+	pb.RegisterChatServer(g.server, chat.New(g.logger))
 	if err = g.server.Serve(listener); err != nil {
 		g.logger.Errorf("serve grpc error: %s", err)
 	}
@@ -40,5 +43,5 @@ func (g *Grpc) Run(port string) {
 
 func (g *Grpc) Close() {
 	g.server.GracefulStop()
-	g.logger.Infoln("grpc server closed")
+	g.logger.Infoln("shutting down grpc server")
 }
