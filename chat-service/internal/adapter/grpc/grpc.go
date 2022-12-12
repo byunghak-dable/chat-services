@@ -32,11 +32,6 @@ func (g *Grpc) Run(port string) {
 	if err != nil {
 		g.logger.Errorf("failed to listen on port %s", port)
 	}
-	defer func() {
-		if err = listener.Close(); err != nil {
-			g.logger.Errorf("failed to close tcp connection", err)
-		}
-	}()
 
 	if err = g.server.Serve(listener); err != nil {
 		g.logger.Errorf("serve grpc error: %s", err)
