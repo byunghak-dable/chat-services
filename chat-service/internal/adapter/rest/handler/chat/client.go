@@ -1,16 +1,16 @@
 package chat
 
-import "github.com/gorilla/websocket"
+import "github.com/widcraft/chat-service/internal/domain/dto"
 
 type client struct {
-	userIdx uint
-	conn    *websocket.Conn
+	userIdx uint32
+	send    func(interface{}) error
 }
 
-func (c *client) GetUserIdx() uint {
+func (c *client) GetUserIdx() uint32 {
 	return c.userIdx
 }
 
-func (c *client) SendMessage(message interface{}) error {
-	return c.conn.WriteJSON(message)
+func (c *client) SendMessage(message *dto.MessageDto) error {
+	return c.send(message)
 }

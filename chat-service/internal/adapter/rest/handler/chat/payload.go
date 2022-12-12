@@ -1,8 +1,8 @@
 package chat
 
 type connection struct {
-	UserIdx uint `form:"user_idx" binding:"required"`
-	RoomIdx uint `form:"room_idx" binding:"required"`
+	UserIdx uint32 `form:"user_idx" binding:"required"`
+	RoomIdx uint32 `form:"room_idx" binding:"required"`
 }
 
 // chat message
