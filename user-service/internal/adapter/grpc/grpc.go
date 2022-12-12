@@ -1,18 +1,21 @@
 package grpc
 
 import (
+	"net"
+
 	log "github.com/sirupsen/logrus"
+	"github.com/widcraft/user-service/internal/port"
+	"google.golang.org/grpc"
 )
 
 type Grpc struct {
 	logger  *log.Logger
 	server  *grpc.Server
-	userApp port.userApp
+	userApp port.UserApp
 }
 
-func New(logger *log.Logger, userApp port.userApp) *Grpc {
+func New(logger *log.Logger, userApp port.UserApp) *Grpc {
 	server := grpc.NewServer()
-	pb.RegisterChatServer(server, chat.New(logger))
 
 	return &Grpc{
 		logger:  logger,
