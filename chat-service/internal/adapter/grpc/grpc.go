@@ -18,7 +18,7 @@ type Grpc struct {
 
 func New(logger *log.Logger, chatApp port.ChatApp) *Grpc {
 	server := grpc.NewServer()
-	pb.RegisterChatServer(server, chat.New(logger))
+	pb.RegisterChatServer(server, chat.New(logger, chatApp))
 
 	return &Grpc{
 		logger:  logger,
