@@ -52,11 +52,13 @@ func init() {
 	userRepo := repository.NewUserRepo(logger, mysqlDb)
 	userApp := application.NewUserApp(logger, userRepo)
 	restServer = rest.New(logger, userApp)
+	grpcServer = grpc.New(logger, userApp)
 }
 
 func main() {
 	defer gracefulShutdown()
 	go restServer.Run(os.Getenv("REST_PORT"))
+	go grpcServer.Run(os.Getenv("GRPC_PORT"))
 }
 
 func gracefulShutdown() {
