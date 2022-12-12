@@ -38,7 +38,7 @@ func (g *Grpc) Run(port string) {
 	}
 }
 
-func (g *Grpc) Close() {
+func (g *Grpc) Close() error {
 	g.server.GracefulStop()
-	g.logger.Infoln("shutting down grpc server")
+	return nil
 }

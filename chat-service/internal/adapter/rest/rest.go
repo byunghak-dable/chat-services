@@ -42,11 +42,8 @@ func (ws *Rest) Run(port string) {
 	}
 }
 
-func (ws *Rest) Close() {
+func (ws *Rest) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err := ws.server.Shutdown(ctx); err != nil {
-		ws.logger.Errorf("shutting down websocket server failed: %s", err)
-	}
-	ws.logger.Info("shutting down websocket server")
+	return ws.server.Shutdown(ctx)
 }

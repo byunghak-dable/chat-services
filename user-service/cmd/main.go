@@ -67,10 +67,12 @@ func gracefulShutdown() {
 	<-terminationChan
 }
 
-func shutdown(targets ...interface{ Close() }) {
+func shutdown(targets ...interface{ Close() error }) {
 	for _, target := range targets {
 		if !reflect.ValueOf(target).IsNil() {
-			target.Close()
+			if err := target.Close(); err != nil {
+				logger.Errorf("%s closing failed: %s", reflect.TypeOf(target), err)
+			}
 		}
 	}
 }

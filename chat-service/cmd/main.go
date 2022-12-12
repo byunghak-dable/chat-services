@@ -34,7 +34,8 @@ func init() {
 
 // DB
 func init() {
-	redisDb, err := redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
+	var err error
+	redisDb, err = redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
 
 	if err != nil {
 		shutdown(redisDb)
@@ -65,10 +66,12 @@ func gracefulShutdown() {
 	<-terminationChan
 }
 
-func shutdown(targets ...interface{ Close() }) {
+func shutdown(targets ...interface{ Close() error }) {
 	for _, target := range targets {
 		if !reflect.ValueOf(target).IsNil() {
-			target.Close()
+			if err := target.Close(); err != nil {
+				logger.Errorf("%s closing failed: %s", reflect.TypeOf(target), err)
+			}
 		}
 	}
 }

@@ -23,16 +23,10 @@ func New(logger log.FieldLogger, user, password, host, port, database string) (*
 	return &Mysql{logger: logger, DB: db}, nil
 }
 
-func (sql *Mysql) Close() {
+func (sql *Mysql) Close() error {
 	db, err := sql.DB.DB()
 	if err != nil {
-		sql.logger.Errorf("get mysql db failure: %v", err)
-		return
+		return err
 	}
-	err = db.Close()
-	if err != nil {
-		sql.logger.Errorf("close mysql failure: %v", err)
-		return
-	}
-	sql.logger.Infoln("mysql successfully closed")
+	return db.Close()
 }
