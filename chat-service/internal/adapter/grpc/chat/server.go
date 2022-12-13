@@ -1,6 +1,8 @@
 package chat
 
 import (
+	"errors"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/grpc/chat/pb"
 	"github.com/widcraft/chat-service/internal/port"
@@ -25,12 +27,37 @@ func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
 		if err != nil {
 			return err
 		}
-		switch v := req.GetType().(type) {
+		var c *client
+		switch payload := req.GetType().(type) {
 		case *pb.ChatReq_Join:
-			s.logger.Infoln("join", v)
+			if err := s.join(payload.Join, c, stream); err != nil {
+				return err
+			}
+			defer func() {
+				if err = s.app.Disconnect(uint(payload.Join.RoomIdx), c); err != nil {
+					s.logger.Errorf("disconnect client failed: %s", err)
+				}
+			}()
 		case *pb.ChatReq_Message:
-			s.logger.Infoln("message", v)
+			if err := s.handleMessage(payload.Message); err != nil {
+				return err
+			}
+		default:
+			return errors.New("not available parameter")
 		}
 	}
+}
+
+func (s *Server) join(payload *pb.JoinReq, c *client, stream pb.Chat_ConnectServer) error {
+	if c != nil {
+		return errors.New("already joined")
+	}
+	// TODO: check user validation from user service
+	c = &client{userIdx: uint(payload.UserIdx), send: stream.Send}
+	s.app.Connect(uint(payload.RoomIdx), c)
+	return nil
+}
+
+func (s *Server) handleMessage(payload *pb.MessageReq) error {
 	return nil
 }
