@@ -3,11 +3,11 @@ package chat
 import "github.com/widcraft/chat-service/internal/domain/dto"
 
 type client struct {
-	userIdx uint32
+	userIdx uint
 	send    func(interface{}) error
 }
 
-func (c *client) GetUserIdx() uint32 {
+func (c *client) GetUserIdx() uint {
 	return c.userIdx
 }
 

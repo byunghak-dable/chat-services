@@ -27,6 +27,6 @@ func (repo *ChatRepository) SaveMessage(message *entity.Message) error {
 	return nil
 }
 
-func (repo *ChatRepository) GetMessages(roomIdx uint32) ([]entity.Message, error) {
+func (repo *ChatRepository) GetMessages(roomIdx uint) ([]entity.Message, error) {
 	return nil, nil
 }

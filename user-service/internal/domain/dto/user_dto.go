@@ -12,7 +12,7 @@ type GoogleSigninReqDto struct {
 }
 
 type GoogleSigninResDto struct {
-	Idx      uint32
+	Idx      uint
 	Email    string
 	Name     string
 	ImageUrl string

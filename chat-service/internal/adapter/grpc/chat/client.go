@@ -16,8 +16,8 @@ func (c *client) GetUserIdx() uint {
 
 func (c *client) SendMessage(message *dto.MessageDto) error {
 	return c.send(&pb.MessageRes{
-		RoomIdx:  message.RoomIdx,
-		UserIdx:  message.UserIdx,
+		RoomIdx:  uint32(message.RoomIdx),
+		UserIdx:  uint32(message.UserIdx),
 		Name:     message.Name,
 		ImageUrl: message.ImageUrl,
 	})

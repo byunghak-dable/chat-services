@@ -61,7 +61,7 @@ func (h *Handler) makeChatHandler() gin.HandlerFunc {
 	}
 }
 
-func (h *Handler) handleConnection(conn *websocket.Conn, roomIdx, userIdx uint32) {
+func (h *Handler) handleConnection(conn *websocket.Conn, roomIdx, userIdx uint) {
 	for {
 		var msg message
 		err := conn.ReadJSON(&msg)

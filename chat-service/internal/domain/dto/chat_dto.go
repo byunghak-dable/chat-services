@@ -1,8 +1,8 @@
 package dto
 
 type MessageDto struct {
-	RoomIdx  uint32
-	UserIdx  uint32
+	RoomIdx  uint
+	UserIdx  uint
 	ImageUrl string
 	Name     string
 	Message  string
