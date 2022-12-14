@@ -30,7 +30,7 @@ func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
 		var c *client
 		switch payload := req.GetType().(type) {
 		case *pb.ChatReq_Join:
-			if err := s.join(payload.Join, c, stream); err != nil {
+			if err = s.join(payload.Join, c, stream); err != nil {
 				return err
 			}
 			defer func() {
@@ -39,7 +39,7 @@ func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
 				}
 			}()
 		case *pb.ChatReq_Message:
-			if err := s.handleMessage(payload.Message); err != nil {
+			if err = s.handleMessage(payload.Message); err != nil {
 				return err
 			}
 		default:
