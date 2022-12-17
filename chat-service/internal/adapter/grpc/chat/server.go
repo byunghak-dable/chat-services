@@ -42,7 +42,7 @@ func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
 				}
 			}()
 		case *pb.ChatReq_Message:
-			if err = s.handleMessage(payload.Message); err != nil {
+			if err = s.handleMessage(payload.Message, roomIdx, c); err != nil {
 				return err
 			}
 		default:
@@ -65,8 +65,8 @@ func (s *Server) handleMessage(payload *pb.MessageReq, roomIdx uint, c *client) 
 	return s.app.SendMessge(&dto.MessageDto{
 		RoomIdx:  roomIdx,
 		UserIdx:  c.userIdx,
-		Name:     c.Name,
-		ImageUrl: c.ImageUrl,
+		Name:     c.name,
+		ImageUrl: c.imageUrl,
 		Message:  payload.Message,
 	})
 }
