@@ -21,7 +21,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 
 	arr := [2]*Client{}
-	for i, _ := range arr {
+	for i := range arr {
 		c := NewClient()
 		go c.read(wg)
 		arr[i] = c
