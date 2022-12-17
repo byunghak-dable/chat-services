@@ -2,6 +2,7 @@ package chat
 
 import (
 	"errors"
+	"reflect"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/grpc/chat/pb"
@@ -23,50 +24,47 @@ func New(logger *log.Logger, app port.ChatApp) *Server {
 }
 
 func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
-	var c *client
-	var roomIdx uint
+	req, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+
+	joinReq, ok := req.GetType().(*pb.ChatReq_Join)
+	if !ok {
+		return errors.New("should join before other request")
+	}
+
+	userIdx, roomIdx := uint(joinReq.Join.RoomIdx), uint(joinReq.Join.UserIdx)
+	c := &client{userIdx: userIdx, send: stream.Send}
+	s.app.Connect(roomIdx, c)
+	defer func() {
+		if err = s.app.Disconnect(roomIdx, c); err != nil {
+			s.logger.Errorf("disconnect client failed: %s", err)
+		}
+	}()
+	return s.handleConnection(stream, roomIdx, c)
+}
+
+func (s *Server) handleConnection(stream pb.Chat_ConnectServer, roomIdx uint, c *client) error {
 	for {
 		req, err := stream.Recv()
 		if err != nil {
 			return err
 		}
 		switch payload := req.GetType().(type) {
-		case *pb.ChatReq_Join:
-			if err = s.join(payload.Join, c, stream); err != nil {
-				return err
-			}
-			roomIdx = uint(payload.Join.RoomIdx)
-			defer func() {
-				if err = s.app.Disconnect(uint(payload.Join.RoomIdx), c); err != nil {
-					s.logger.Errorf("disconnect client failed: %s", err)
-				}
-			}()
 		case *pb.ChatReq_Message:
-			if err = s.handleMessage(payload.Message, roomIdx, c); err != nil {
-				return err
+			err = s.app.SendMessge(&dto.MessageDto{
+				RoomIdx:  roomIdx,
+				UserIdx:  c.userIdx,
+				Name:     c.name,
+				ImageUrl: c.imageUrl,
+				Message:  payload.Message.GetMessage(),
+			})
+			if err != nil {
+				s.logger.Errorf("send message failed: %s", err)
 			}
 		default:
-			return errors.New("not available parameter")
+			return errors.New("wrong request type")
 		}
 	}
-}
-
-func (s *Server) join(payload *pb.JoinReq, c *client, stream pb.Chat_ConnectServer) error {
-	if c != nil {
-		return errors.New("already joined")
-	}
-	// TODO: check user validation from user service
-	c = &client{userIdx: uint(payload.UserIdx), send: stream.Send}
-	s.app.Connect(uint(payload.RoomIdx), c)
-	return nil
-}
-
-func (s *Server) handleMessage(payload *pb.MessageReq, roomIdx uint, c *client) error {
-	return s.app.SendMessge(&dto.MessageDto{
-		RoomIdx:  roomIdx,
-		UserIdx:  c.userIdx,
-		Name:     c.name,
-		ImageUrl: c.imageUrl,
-		Message:  payload.Message,
-	})
 }
