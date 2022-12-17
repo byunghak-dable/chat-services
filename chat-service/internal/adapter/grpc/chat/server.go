@@ -50,14 +50,15 @@ func (s *Server) handleConnection(stream pb.Chat_ConnectServer, roomIdx uint, c 
 		if err != nil {
 			return err
 		}
-		switch payload := req.GetType().(type) {
+		switch typedReq := req.GetType().(type) {
 		case *pb.ChatReq_Message:
+			payload := typedReq.Message
 			err = s.app.SendMessge(&dto.MessageDto{
 				RoomIdx:  roomIdx,
 				UserIdx:  c.userIdx,
 				Name:     c.name,
 				ImageUrl: c.imageUrl,
-				Message:  payload.Message.GetMessage(),
+				Message:  payload.GetMessage(),
 			})
 			if err != nil {
 				s.logger.Errorf("send message failed: %s", err)
