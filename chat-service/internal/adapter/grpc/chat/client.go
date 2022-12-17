@@ -6,8 +6,10 @@ import (
 )
 
 type client struct {
-	userIdx uint
-	send    func(*pb.MessageRes) error
+	userIdx  uint
+	name     string
+	imageUrl string
+	send     func(*pb.MessageRes) error
 }
 
 func (c *client) GetUserIdx() uint {

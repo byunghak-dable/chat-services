@@ -3,8 +3,10 @@ package chat
 import "github.com/widcraft/chat-service/internal/domain/dto"
 
 type client struct {
-	userIdx uint
-	send    func(interface{}) error
+	userIdx  uint
+	name     string
+	imageUrl string
+	send     func(interface{}) error
 }
 
 func (c *client) GetUserIdx() uint {
