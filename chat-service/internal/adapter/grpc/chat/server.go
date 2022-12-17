@@ -2,7 +2,6 @@ package chat
 
 import (
 	"errors"
-	"reflect"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/grpc/chat/pb"
