@@ -39,19 +39,29 @@ func runClient(wg *sync.WaitGroup) {
 }
 
 func sendMessage(stream pb.Chat_ConnectClient) {
+	err := stream.Send(&pb.ChatReq{
+		Type: &pb.ChatReq_Join{
+			Join: &pb.JoinReq{
+				RoomIdx: 1,
+				UserIdx: 1,
+			},
+		},
+	})
+	if err != nil {
+		log.Fatalf("send to server err: %s", err)
+	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		err := stream.Send(&pb.ChatReq{
-			Type: &pb.ChatReq_Join{
-				Join: &pb.JoinReq{
-					RoomIdx: 1,
-					UserIdx: 1,
+		err = stream.Send(&pb.ChatReq{
+			Type: &pb.ChatReq_Message{
+				Message: &pb.MessageReq{
+					Type:    1,
+					Message: "testing",
 				},
 			},
 		})
 		if err != nil {
 			log.Fatalf("send to server err: %s", err)
-			break
 		}
 	}
 }
