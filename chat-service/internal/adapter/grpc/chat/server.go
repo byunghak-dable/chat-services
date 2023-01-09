@@ -41,6 +41,7 @@ func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
 			s.logger.Errorf("disconnect client failed: %s", err)
 		}
 	}()
+
 	return s.handleConnection(stream, roomIdx, c)
 }
 
@@ -50,6 +51,7 @@ func (s *Server) handleConnection(stream pb.Chat_ConnectServer, roomIdx uint, c 
 		if err != nil {
 			return err
 		}
+
 		switch typedReq := req.GetType().(type) {
 		case *pb.ChatReq_Message:
 			payload := typedReq.Message

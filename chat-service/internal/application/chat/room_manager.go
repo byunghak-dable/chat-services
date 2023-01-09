@@ -25,6 +25,7 @@ func NewRoomManager() *roomManager {
 func (manager *roomManager) add(roomIdx uint, client port.ChatClient) {
 	manager.mutex.Lock()
 	defer manager.mutex.Unlock()
+
 	room, ok := manager.rooms[roomIdx]
 	if ok {
 		manager.rooms[roomIdx] = append(room, client)
@@ -36,10 +37,12 @@ func (manager *roomManager) add(roomIdx uint, client port.ChatClient) {
 func (manager *roomManager) quit(roomIdx uint, client port.ChatClient) error {
 	manager.mutex.Lock()
 	defer manager.mutex.Unlock()
+
 	room, ok := manager.rooms[roomIdx]
 	if !ok {
 		return errors.New("no existing chat room roomIdx")
 	}
+
 	for i, roomClient := range room {
 		if client == roomClient {
 			manager.rooms[roomIdx] = append(room[:i], room[i+1:]...)
@@ -52,6 +55,7 @@ func (manager *roomManager) quit(roomIdx uint, client port.ChatClient) error {
 func (manager *roomManager) sendMessage(message *dto.MessageDto) error {
 	manager.mutex.RLock()
 	defer manager.mutex.RUnlock()
+
 	room, ok := manager.rooms[message.RoomIdx]
 	if !ok {
 		return errors.New("no existing chat room roomIdx")
