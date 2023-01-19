@@ -20,6 +20,7 @@ func (c *client) SendMessage(message *dto.MessageDto) error {
 	return c.send(&pb.MessageRes{
 		RoomIdx:  uint32(message.RoomIdx),
 		UserIdx:  uint32(message.UserIdx),
+		Message:  message.Message,
 		Name:     message.Name,
 		ImageUrl: message.ImageUrl,
 	})
