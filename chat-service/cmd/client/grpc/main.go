@@ -23,7 +23,7 @@ func main() {
 
 func runClient(wg *sync.WaitGroup) {
 	defer wg.Done()
-	conn, err := grpc.Dial(":8080", grpc.WithInsecure())
+	conn, err := grpc.Dial(":8081", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("could not connect to: %s", err)
 	}
@@ -52,11 +52,12 @@ func sendMessage(stream pb.Chat_ConnectClient) {
 	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
+		msg := scanner.Text()
 		err = stream.Send(&pb.ChatReq{
 			Type: &pb.ChatReq_Message{
 				Message: &pb.MessageReq{
 					Type:    1,
-					Message: "testing",
+					Message: msg,
 				},
 			},
 		})
