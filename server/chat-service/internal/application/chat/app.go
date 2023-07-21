@@ -3,6 +3,7 @@ package chat
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/domain/dto"
+	"github.com/widcraft/chat-service/internal/domain/entity"
 	"github.com/widcraft/chat-service/internal/port"
 )
 
@@ -15,7 +16,7 @@ type ChatApp struct {
 func New(logger *log.Logger, repo port.ChatRepository) *ChatApp {
 	return &ChatApp{
 		logger:     logger,
-		roomManger: NewRoomManager(),
+		roomManger: NewRoomManager(logger),
 		repo:       repo,
 	}
 }
@@ -29,6 +30,17 @@ func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
 }
 
 func (app *ChatApp) SendMessge(message *dto.MessageDto) error {
+	// TODO: save message
+	err := app.repo.SaveMessage(&entity.Message{
+		RoomIdx:  message.RoomIdx,
+		UserIdx:  message.UserIdx,
+		ImageUrl: message.ImageUrl,
+		Name:     message.Name,
+		Message:  message.Message,
+	})
+	if err != nil {
+		return err
+	}
 	return app.roomManger.sendMessage(message)
 }
 

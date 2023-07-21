@@ -6,19 +6,22 @@ import (
 	"fmt"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/port"
 )
 
 type roomManager struct {
-	rooms map[uint][]port.ChatClient
-	mutex *sync.RWMutex
+	logger *log.Logger
+	rooms  map[uint][]port.ChatClient
+	mutex  *sync.RWMutex
 }
 
-func NewRoomManager() *roomManager {
+func NewRoomManager(logger *log.Logger) *roomManager {
 	return &roomManager{
-		rooms: make(map[uint][]port.ChatClient),
-		mutex: new(sync.RWMutex),
+		logger: logger,
+		rooms:  make(map[uint][]port.ChatClient),
+		mutex:  new(sync.RWMutex),
 	}
 }
 
@@ -29,6 +32,7 @@ func (manager *roomManager) add(roomIdx uint, client port.ChatClient) {
 	room, ok := manager.rooms[roomIdx]
 	if ok {
 		manager.rooms[roomIdx] = append(room, client)
+		manager.logger.Infof("room id: %d, count: %d", roomIdx, len(room))
 		return
 	}
 	manager.rooms[roomIdx] = []port.ChatClient{client}
