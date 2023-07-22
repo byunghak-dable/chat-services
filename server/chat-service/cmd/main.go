@@ -24,7 +24,7 @@ type Closable interface {
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("error loading .env file")
+		panic(err)
 	}
 }
 
@@ -53,12 +53,12 @@ func main() {
 }
 
 func shutdown(logger log.FieldLogger, closables ...Closable) {
-	for _, target := range closables {
-		if reflect.ValueOf(target).IsNil() {
+	for _, closable := range closables {
+		if reflect.ValueOf(closable).IsNil() {
 			continue
 		}
-		if err := target.Close(); err != nil {
-			logger.Errorf("%s closing failed: %s", reflect.TypeOf(target), err)
+		if err := closable.Close(); err != nil {
+			logger.Errorf("%s closing failed: %s", reflect.TypeOf(closable), err)
 		}
 	}
 }
