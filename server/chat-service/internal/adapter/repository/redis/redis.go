@@ -15,18 +15,18 @@ type Redis struct {
 
 func New(logger log.FieldLogger, address, password string, db int) (*Redis, error) {
 	ctx := context.Background()
-	rdb := redis.NewClient(&redis.Options{
+	client := redis.NewClient(&redis.Options{
 		Addr:     address,
 		Password: password,
 		DB:       db,
 	})
 
-	if _, err := rdb.Ping(ctx).Result(); err != nil {
+	if _, err := client.Ping(ctx).Result(); err != nil {
 		return nil, err
 	}
 	return &Redis{
 		logger: logger,
-		Client: rdb,
+		Client: client,
 		ctx:    ctx,
 	}, nil
 }
