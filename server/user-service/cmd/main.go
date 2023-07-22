@@ -17,15 +17,9 @@ import (
 	"github.com/widcraft/user-service/internal/application"
 )
 
-var logger = log.New()
-var (
-	mysqlDb *mysql.Mysql
-	redisDb *redis.Redis
-)
-var (
-	restServer *rest.Rest
-	grpcServer *grpc.Grpc
-)
+type Closable interface {
+	Close() error
+}
 
 // env
 func init() {
@@ -35,46 +29,38 @@ func init() {
 	}
 }
 
-// DB
-func init() {
-	var mysqlErr, redisErr error
-	mysqlDb, mysqlErr = mysql.New(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
-	redisDb, redisErr = redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
+func main() {
+	logger := log.New()
+	mysqlDb, mysqlErr := mysql.New(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
+	redisDb, redisErr := redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
+	defer shutdown(logger, mysqlDb, redisDb)
 
 	if mysqlErr != nil || redisErr != nil {
-		shutdown(redisDb, mysqlDb)
-		logger.Fatalf("database connection failure\nmysql: %s\nredis: %s", mysqlErr, redisErr)
+		logger.Error(mysqlErr, redisErr)
+		return
 	}
-}
 
-// servers
-func init() {
 	userRepo := repository.NewUserRepo(logger, mysqlDb)
 	userApp := application.NewUserApp(logger, userRepo)
-	restServer = rest.New(logger, userApp)
-	grpcServer = grpc.New(logger, userApp)
-}
+	restServer := rest.New(logger, userApp)
+	grpcServer := grpc.New(logger, userApp)
+	defer shutdown(logger, restServer, grpcServer)
 
-func main() {
-	defer gracefulShutdown()
 	go restServer.Run(os.Getenv("REST_PORT"))
 	go grpcServer.Run(os.Getenv("GRPC_PORT"))
-}
-
-func gracefulShutdown() {
-	defer shutdown(restServer, mysqlDb, redisDb)
 
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 	<-terminationChan
 }
 
-func shutdown(targets ...interface{ Close() error }) {
-	for _, target := range targets {
-		if !reflect.ValueOf(target).IsNil() {
-			if err := target.Close(); err != nil {
-				logger.Errorf("%s closing failed: %s", reflect.TypeOf(target), err)
-			}
+func shutdown(logger log.FieldLogger, closables ...Closable) {
+	for _, target := range closables {
+		if reflect.ValueOf(target).IsNil() {
+			continue
+		}
+		if err := target.Close(); err != nil {
+			logger.Errorf("%s closing failed: %s", reflect.TypeOf(target), err)
 		}
 	}
 }
