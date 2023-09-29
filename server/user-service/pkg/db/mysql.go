@@ -1,19 +1,19 @@
-package mysql
+package db
 
 import (
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/widcraft/user-service/pkg/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 type Mysql struct {
-	logger log.FieldLogger
+	logger logger.Logger
 	*gorm.DB
 }
 
-func New(logger log.FieldLogger, user, password, host, port, database string) (*Mysql, error) {
+func NewMysql(logger logger.Logger, user, password, host, port, database string) (*Mysql, error) {
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN: fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, password, host, port, database),
 	}), &gorm.Config{})

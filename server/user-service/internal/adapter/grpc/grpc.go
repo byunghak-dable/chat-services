@@ -3,18 +3,18 @@ package grpc
 import (
 	"net"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/user-service/internal/port"
+	"github.com/widcraft/user-service/pkg/logger"
 	"google.golang.org/grpc"
 )
 
 type Grpc struct {
-	logger  *log.Logger
+	logger  logger.Logger
 	server  *grpc.Server
 	userApp port.UserApp
 }
 
-func New(logger *log.Logger, userApp port.UserApp) *Grpc {
+func New(logger logger.Logger, userApp port.UserApp) *Grpc {
 	server := grpc.NewServer()
 
 	return &Grpc{

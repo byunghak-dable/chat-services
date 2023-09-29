@@ -11,9 +11,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/repository"
-	"github.com/widcraft/chat-service/internal/adapter/repository/redis"
 	"github.com/widcraft/chat-service/internal/adapter/rest"
 	chatapp "github.com/widcraft/chat-service/internal/application/chat"
+	"github.com/widcraft/chat-service/pkg/db"
+	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type Closable interface {
@@ -30,7 +31,7 @@ func init() {
 
 func main() {
 	logger := log.New()
-	redisDb, err := redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
+	redisDb, err := db.NewRedis(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
 	defer shutdown(logger, redisDb)
 
 	if err != nil {
@@ -52,7 +53,7 @@ func main() {
 	<-terminationChan
 }
 
-func shutdown(logger log.FieldLogger, closables ...Closable) {
+func shutdown(logger logger.Logger, closables ...Closable) {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue

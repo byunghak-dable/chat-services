@@ -5,17 +5,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/port"
+	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type Handler struct {
-	logger *log.Logger
+	logger logger.Logger
 	app    port.ChatApp
 }
 
-func New(logger *log.Logger, app port.ChatApp) *Handler {
+func New(logger logger.Logger, app port.ChatApp) *Handler {
 	return &Handler{
 		logger: logger,
 		app:    app,

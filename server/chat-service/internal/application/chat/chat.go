@@ -1,19 +1,19 @@
 package chat
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/domain/entity"
 	"github.com/widcraft/chat-service/internal/port"
+	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type ChatApp struct {
-	logger     *log.Logger
+	logger     logger.Logger
 	roomManger *roomManager
 	repo       port.ChatRepository
 }
 
-func New(logger *log.Logger, repo port.ChatRepository) *ChatApp {
+func New(logger logger.Logger, repo port.ChatRepository) *ChatApp {
 	return &ChatApp{
 		logger:     logger,
 		roomManger: NewRoomManager(logger),

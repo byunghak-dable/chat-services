@@ -11,10 +11,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/user-service/internal/adapter/grpc"
 	"github.com/widcraft/user-service/internal/adapter/repository"
-	"github.com/widcraft/user-service/internal/adapter/repository/mysql"
-	"github.com/widcraft/user-service/internal/adapter/repository/redis"
 	"github.com/widcraft/user-service/internal/adapter/rest"
 	"github.com/widcraft/user-service/internal/application"
+	"github.com/widcraft/user-service/pkg/db"
+	"github.com/widcraft/user-service/pkg/logger"
 )
 
 type Closable interface {
@@ -31,8 +31,8 @@ func init() {
 
 func main() {
 	logger := log.New()
-	mysqlDb, mysqlErr := mysql.New(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
-	redisDb, redisErr := redis.New(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
+	mysqlDb, mysqlErr := db.NewMysql(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
+	redisDb, redisErr := db.NewRedis(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
 	defer shutdown(logger, mysqlDb, redisDb)
 
 	if mysqlErr != nil || redisErr != nil {
@@ -54,7 +54,7 @@ func main() {
 	<-terminationChan
 }
 
-func shutdown(logger log.FieldLogger, closables ...Closable) {
+func shutdown(logger logger.Logger, closables ...Closable) {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue

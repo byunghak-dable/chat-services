@@ -6,18 +6,18 @@ import (
 	"fmt"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/port"
+	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type roomManager struct {
-	logger *log.Logger
+	logger logger.Logger
 	rooms  map[uint][]port.ChatClient
 	mutex  *sync.RWMutex
 }
 
-func NewRoomManager(logger *log.Logger) *roomManager {
+func NewRoomManager(logger logger.Logger) *roomManager {
 	return &roomManager{
 		logger: logger,
 		rooms:  make(map[uint][]port.ChatClient),

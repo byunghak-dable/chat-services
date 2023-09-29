@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/rest/handler/chat"
 	"github.com/widcraft/chat-service/internal/port"
+	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type Rest struct {
-	logger  *log.Logger
+	logger  logger.Logger
 	server  *http.Server
 	chatApp port.ChatApp
 }
 
-func New(logger *log.Logger, chatApp port.ChatApp) *Rest {
+func New(logger logger.Logger, chatApp port.ChatApp) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 	chat.New(logger, chatApp).Register(group)

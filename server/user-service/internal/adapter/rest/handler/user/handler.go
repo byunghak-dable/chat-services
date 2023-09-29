@@ -4,17 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/user-service/internal/domain/dto"
 	"github.com/widcraft/user-service/internal/port"
+	"github.com/widcraft/user-service/pkg/logger"
 )
 
 type Handler struct {
-	logger log.FieldLogger
+	logger logger.Logger
 	app    port.UserApp
 }
 
-func New(logger log.FieldLogger, app port.UserApp) *Handler {
+func New(logger logger.Logger, app port.UserApp) *Handler {
 	return &Handler{
 		logger: logger,
 		app:    app,

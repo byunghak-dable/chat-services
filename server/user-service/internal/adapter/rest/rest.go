@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/user-service/internal/adapter/rest/handler/user"
 	"github.com/widcraft/user-service/internal/adapter/rest/middleware"
 	"github.com/widcraft/user-service/internal/port"
+	"github.com/widcraft/user-service/pkg/logger"
 )
 
 type Rest struct {
-	logger log.FieldLogger
+	logger logger.Logger
 	server *http.Server
 }
 
-func New(logger log.FieldLogger, userApp port.UserApp) *Rest {
+func New(logger logger.Logger, userApp port.UserApp) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 	middleware.NewErrorHandler(logger).Register(group)

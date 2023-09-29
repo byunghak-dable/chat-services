@@ -1,7 +1,7 @@
 package chatroom
 
-import "log"
+import "github.com/widcraft/user-service/pkg/loggerger"
 
 type Handler struct {
-	logger *log.Logger
+	logger logger.Logger
 }

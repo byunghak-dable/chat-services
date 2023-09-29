@@ -1,17 +1,17 @@
 package repository
 
 import (
-	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/user-service/internal/adapter/repository/mysql"
 	"github.com/widcraft/user-service/internal/domain/entity"
+	"github.com/widcraft/user-service/pkg/db"
+	"github.com/widcraft/user-service/pkg/logger"
 )
 
 type UserRepo struct {
-	logger log.FieldLogger
-	db     *mysql.Mysql
+	logger logger.Logger
+	db     *db.Mysql
 }
 
-func NewUserRepo(logger log.FieldLogger, db *mysql.Mysql) *UserRepo {
+func NewUserRepo(logger logger.Logger, db *db.Mysql) *UserRepo {
 	db.AutoMigrate(&entity.User{})
 
 	return &UserRepo{

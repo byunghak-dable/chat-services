@@ -1,18 +1,18 @@
 package application
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/user-service/internal/domain/dto"
 	"github.com/widcraft/user-service/internal/domain/entity"
 	"github.com/widcraft/user-service/internal/port"
+	"github.com/widcraft/user-service/pkg/logger"
 )
 
 type UserApp struct {
-	logger     log.FieldLogger
+	logger     logger.Logger
 	repository port.UserRepository
 }
 
-func NewUserApp(logger log.FieldLogger, repository port.UserRepository) *UserApp {
+func NewUserApp(logger logger.Logger, repository port.UserRepository) *UserApp {
 	return &UserApp{
 		logger:     logger,
 		repository: repository,

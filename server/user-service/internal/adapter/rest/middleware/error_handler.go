@@ -4,14 +4,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+	"github.com/widcraft/user-service/pkg/logger"
 )
 
 type ErrorHandler struct {
-	logger log.FieldLogger
+	logger logger.Logger
 }
 
-func NewErrorHandler(logger log.FieldLogger) *ErrorHandler {
+func NewErrorHandler(logger logger.Logger) *ErrorHandler {
 	return &ErrorHandler{
 		logger: logger,
 	}

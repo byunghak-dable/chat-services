@@ -3,19 +3,19 @@ package chat
 import (
 	"errors"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/grpc/chat/pb"
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/port"
+	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type Server struct {
-	logger *log.Logger
-	app    port.ChatApp
 	pb.UnimplementedChatServer
+	logger logger.Logger
+	app    port.ChatApp
 }
 
-func New(logger *log.Logger, app port.ChatApp) *Server {
+func New(logger logger.Logger, app port.ChatApp) *Server {
 	return &Server{
 		logger: logger,
 		app:    app,

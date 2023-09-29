@@ -1,18 +1,18 @@
 package repository
 
 import (
-	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/chat-service/internal/adapter/repository/redis"
 	"github.com/widcraft/chat-service/internal/domain/entity"
 	"github.com/widcraft/chat-service/internal/port"
+	"github.com/widcraft/chat-service/pkg/db"
+	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type ChatRepository struct {
-	logger *log.Logger
-	db     *redis.Redis
+	logger logger.Logger
+	db     *db.Redis
 }
 
-func NewChatRepository(logger *log.Logger, redis *redis.Redis) *ChatRepository {
+func NewChatRepository(logger logger.Logger, redis *db.Redis) *ChatRepository {
 	return &ChatRepository{
 		logger: logger,
 		db:     redis,
