@@ -37,6 +37,7 @@ func New(logger logger.Logger, chatApp port.ChatApp) *Rest {
 func (ws *Rest) Run(port string) {
 	ws.server.Addr = ":" + port
 	err := ws.server.ListenAndServe()
+
 	if err != nil && err != http.ErrServerClosed {
 		ws.logger.Errorf("websocket server error: %s", err)
 	}
