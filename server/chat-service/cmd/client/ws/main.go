@@ -12,9 +12,9 @@ import (
 )
 
 type messageObj struct {
+	Message string `json:"message"`
 	RoomIdx uint   `json:"room_idx"`
 	UserIdx uint   `json:"user_idx"`
-	Message string `json:"message"`
 }
 
 func main() {
