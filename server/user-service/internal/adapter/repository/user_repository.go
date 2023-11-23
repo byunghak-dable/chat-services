@@ -12,8 +12,6 @@ type UserRepo struct {
 }
 
 func NewUserRepo(logger logger.Logger, db *db.Mysql) *UserRepo {
-	db.AutoMigrate(&entity.User{})
-
 	return &UserRepo{
 		logger: logger,
 		db:     db,
@@ -21,10 +19,6 @@ func NewUserRepo(logger logger.Logger, db *db.Mysql) *UserRepo {
 }
 
 func (repo *UserRepo) Register(user *entity.User) error {
-	result := repo.db.Create(user)
-	if result.Error != nil {
-		return result.Error
-	}
 	return nil
 }
 

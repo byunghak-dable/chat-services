@@ -1,32 +1,31 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 
-	"github.com/widcraft/user-service/pkg/logger"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	_ "github.com/go-sql-driver/mysql"
 )
 
+type MysqlConfig struct {
+	User     string
+	Password string
+	Database string
+	Host     string
+	Port     string
+}
+
 type Mysql struct {
-	logger logger.Logger
-	*gorm.DB
+	*sql.DB
 }
 
-func NewMysql(logger logger.Logger, user, password, host, port, database string) (*Mysql, error) {
-	db, err := gorm.Open(mysql.New(mysql.Config{
-		DSN: fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, password, host, port, database),
-	}), &gorm.Config{})
+func NewMysql(config MysqlConfig) (*Mysql, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", config.User, config.Password, config.Host, config.Port, config.Database)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	return &Mysql{logger: logger, DB: db}, nil
-}
 
-func (sql *Mysql) Close() error {
-	db, err := sql.DB.DB()
-	if err != nil {
-		return err
-	}
-	return db.Close()
+	return &Mysql{DB: db}, nil
 }

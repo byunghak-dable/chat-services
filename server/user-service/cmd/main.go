@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net"
 	"os"
 	"os/signal"
 	"reflect"
@@ -14,14 +13,14 @@ import (
 	"github.com/widcraft/user-service/internal/adapter/rest"
 	"github.com/widcraft/user-service/internal/application"
 	"github.com/widcraft/user-service/pkg/db"
-	"github.com/widcraft/user-service/pkg/logger"
 )
+
+var logger = log.New()
 
 type Closable interface {
 	Close() error
 }
 
-// env
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -30,10 +29,23 @@ func init() {
 }
 
 func main() {
-	logger := log.New()
-	mysqlDb, mysqlErr := db.NewMysql(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"))
-	redisDb, redisErr := db.NewRedis(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
-	defer shutdown(logger, mysqlDb, redisDb)
+	mysqlConfig := db.MysqlConfig{
+		User:     os.Getenv("MYSQL_USER"),
+		Password: os.Getenv("MYSQL_PASSWORD"),
+		Host:     os.Getenv("MYSQL_HOST"),
+		Port:     os.Getenv("MYSQL_PORT"),
+		Database: os.Getenv("MYSQL_DATABASE"),
+	}
+	redisConfig := db.RedisConfig{
+		Host:     os.Getenv("REDIS_HOST"),
+		Port:     os.Getenv("REDIS_PORT"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		Db:       0,
+	}
+	mysqlDb, mysqlErr := db.NewMysql(mysqlConfig)
+	redisDb, redisErr := db.NewRedis(redisConfig)
+
+	defer shutdown(mysqlDb, redisDb)
 
 	if mysqlErr != nil || redisErr != nil {
 		logger.Error(mysqlErr, redisErr)
@@ -44,7 +56,8 @@ func main() {
 	userApp := application.NewUserApp(logger, userRepo)
 	restServer := rest.New(logger, userApp)
 	grpcServer := grpc.New(logger, userApp)
-	defer shutdown(logger, restServer, grpcServer)
+
+	defer shutdown(restServer, grpcServer)
 
 	go restServer.Run(os.Getenv("REST_PORT"))
 	go grpcServer.Run(os.Getenv("GRPC_PORT"))
@@ -54,7 +67,7 @@ func main() {
 	<-terminationChan
 }
 
-func shutdown(logger logger.Logger, closables ...Closable) {
+func shutdown(closables ...Closable) {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue

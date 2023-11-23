@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net"
 	"os"
 	"os/signal"
 	"reflect"
@@ -14,8 +13,9 @@ import (
 	"github.com/widcraft/chat-service/internal/adapter/rest"
 	chatapp "github.com/widcraft/chat-service/internal/application/chat"
 	"github.com/widcraft/chat-service/pkg/db"
-	"github.com/widcraft/chat-service/pkg/logger"
 )
+
+var logger = log.New()
 
 type Closable interface {
 	Close() error
@@ -30,9 +30,15 @@ func init() {
 }
 
 func main() {
-	logger := log.New()
-	redisDb, err := db.NewRedis(logger, net.JoinHostPort(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")), os.Getenv("REDIS_PASSWORD"), 0)
-	defer shutdown(logger, redisDb)
+	redisConfig := db.RedisConfig{
+		Host:     os.Getenv("REDIS_HOST"),
+		Port:     os.Getenv("REDIS_PORT"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		Db:       0,
+	}
+	redisDb, err := db.NewRedis(redisConfig)
+
+	defer shutdown(redisDb)
 
 	if err != nil {
 		logger.Error(err)
@@ -43,7 +49,8 @@ func main() {
 	chatApp := chatapp.New(logger, chatRepo)
 	restServer := rest.New(logger, chatApp)
 	grpcServer := grpc.New(logger, chatApp)
-	defer shutdown(logger, restServer, grpcServer)
+
+	defer shutdown(restServer, grpcServer)
 
 	go restServer.Run(os.Getenv("REST_PORT"))
 	go grpcServer.Run(os.Getenv("GRPC_PORT"))
@@ -53,12 +60,14 @@ func main() {
 	<-terminationChan
 }
 
-func shutdown(logger logger.Logger, closables ...Closable) {
+func shutdown(closables ...Closable) {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue
 		}
-		if err := closable.Close(); err != nil {
+
+		err := closable.Close()
+		if err != nil {
 			logger.Errorf("%s closing failed: %s", reflect.TypeOf(closable), err)
 		}
 	}

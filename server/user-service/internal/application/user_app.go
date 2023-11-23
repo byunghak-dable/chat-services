@@ -27,7 +27,3 @@ func (app *UserApp) Register(registerDto *dto.RegisterReqDto) error {
 		Token:    registerDto.Token,
 	})
 }
-
-func (app *UserApp) GoogleSignin(signinDto *dto.GoogleSigninReqDto) (*dto.GoogleSigninResDto, error) {
-	return nil, nil
-}

@@ -2,30 +2,36 @@ package db
 
 import (
 	"context"
+	"net"
 
 	"github.com/go-redis/redis/v9"
-	"github.com/widcraft/chat-service/pkg/logger"
 )
 
-type Redis struct {
-	logger logger.Logger
-	*redis.Client
-	ctx context.Context
+type RedisConfig struct {
+	Host     string
+	Port     string
+	Password string
+	Db       int
 }
 
-func NewRedis(logger logger.Logger, address, password string, db int) (*Redis, error) {
+type Redis struct {
+	ctx context.Context
+	*redis.Client
+}
+
+func NewRedis(config RedisConfig) (*Redis, error) {
 	ctx := context.Background()
 	client := redis.NewClient(&redis.Options{
-		Addr:     address,
-		Password: password,
-		DB:       db,
+		Addr:     net.JoinHostPort(config.Host, config.Port),
+		Password: config.Password,
+		DB:       config.Db,
 	})
 
 	if _, err := client.Ping(ctx).Result(); err != nil {
 		return nil, err
 	}
+
 	return &Redis{
-		logger: logger,
 		Client: client,
 		ctx:    ctx,
 	}, nil
