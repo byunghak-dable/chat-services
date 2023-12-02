@@ -21,12 +21,12 @@ func New(logger logger.Logger, repo port.ChatRepository) *ChatApp {
 	}
 }
 
-func (app *ChatApp) Connect(roomIdx uint, client port.ChatClient) {
-	app.roomManger.add(roomIdx, client)
+func (app *ChatApp) Connect(client port.ChatClient) {
+	app.roomManger.add(client)
 }
 
-func (app *ChatApp) Disconnect(roomIdx uint, client port.ChatClient) error {
-	return app.roomManger.quit(roomIdx, client)
+func (app *ChatApp) Disconnect(client port.ChatClient) {
+	app.roomManger.quit(client)
 }
 
 func (app *ChatApp) SendMessge(message *dto.MessageDto) error {
@@ -41,6 +41,7 @@ func (app *ChatApp) SendMessge(message *dto.MessageDto) error {
 	if err != nil {
 		return err
 	}
+
 	return app.roomManger.sendMessage(message)
 }
 

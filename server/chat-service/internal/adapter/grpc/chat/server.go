@@ -33,40 +33,47 @@ func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
 		return errors.New("should join before other request")
 	}
 
-	userIdx, roomIdx := uint(joinReq.Join.RoomIdx), uint(joinReq.Join.UserIdx)
-	c := &client{userIdx: userIdx, send: stream.Send}
-	s.app.Connect(roomIdx, c)
-	defer func() {
-		if err = s.app.Disconnect(roomIdx, c); err != nil {
-			s.logger.Errorf("disconnect client failed: %s", err)
-		}
-	}()
-
-	return s.handleConnection(stream, roomIdx, c)
+	return s.handleConnetcion(stream, joinReq.Join)
 }
 
-func (s *Server) handleConnection(stream pb.Chat_ConnectServer, roomIdx uint, c *client) error {
+func (s *Server) handleConnetcion(stream pb.Chat_ConnectServer, joinReq *pb.JoinReq) error {
+	client := &client{
+		stream:  stream,
+		roomIdx: uint(joinReq.UserIdx),
+		userIdx: uint(joinReq.RoomIdx),
+	}
+
+	s.app.Connect(client)
+	defer s.app.Disconnect(client)
+
+	return s.handleMessage(client)
+}
+
+func (s *Server) handleMessage(client *client) error {
 	for {
-		req, err := stream.Recv()
+		req, err := client.stream.Recv()
 		if err != nil {
 			return err
 		}
 
 		switch typedReq := req.GetType().(type) {
 		case *pb.ChatReq_Message:
-			payload := typedReq.Message
-			err = s.app.SendMessge(&dto.MessageDto{
-				RoomIdx:  roomIdx,
-				UserIdx:  c.userIdx,
-				Name:     c.name,
-				ImageUrl: c.imageUrl,
-				Message:  payload.GetMessage(),
-			})
-			if err != nil {
-				s.logger.Errorf("send message failed: %s", err)
-			}
+			s.sendMessage(client, typedReq.Message)
 		default:
 			return errors.New("wrong request type")
 		}
+	}
+}
+
+func (s *Server) sendMessage(client *client, payload *pb.MessageReq) {
+	err := s.app.SendMessge(&dto.MessageDto{
+		RoomIdx:  client.roomIdx,
+		UserIdx:  client.userIdx,
+		Name:     client.name,
+		ImageUrl: client.imageUrl,
+		Message:  payload.GetMessage(),
+	})
+	if err != nil {
+		s.logger.Errorf("send message failed: %s", err)
 	}
 }

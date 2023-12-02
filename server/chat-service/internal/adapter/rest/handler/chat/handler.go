@@ -54,35 +54,44 @@ func (h *Handler) chat(ctx *gin.Context) {
 }
 
 func (h *Handler) handleConnection(conn *websocket.Conn, param connection) {
-	client := &client{websocketConn: conn, roomIdx: param.RoomIdx, userIdx: param.UserIdx}
+	client := &client{
+		websocketConn: conn,
+		roomIdx:       param.RoomIdx,
+		userIdx:       param.UserIdx,
+	}
 
 	h.app.Connect(client)
-	h.handleMessage(conn, client)
-	err := h.app.Disconnect(client)
-	if err != nil {
-		h.logger.Errorf("disconnect client failed: %s", err)
-	}
+	defer h.app.Disconnect(client)
+
+	h.handleMessage(client)
 }
 
-func (h *Handler) handleMessage(conn *websocket.Conn, client *client) {
+func (h *Handler) handleMessage(client *client) {
 	for {
-		var msg message
-		err := conn.ReadJSON(&msg)
+		var msg *message
+		err := client.websocketConn.ReadJSON(msg)
+
 		if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
 			return
 		}
+
 		if err != nil {
 			h.logger.Errorf("read message failed: %s", err)
 		}
-		err = h.app.SendMessge(&dto.MessageDto{
-			RoomIdx:  client.roomIdx,
-			UserIdx:  client.userIdx,
-			Name:     client.name,
-			ImageUrl: client.imageUrl,
-			Message:  msg.Message,
-		})
-		if err != nil {
-			h.logger.Errorf("send message failed: %s", err)
-		}
+
+		h.sendMessge(client, msg)
+	}
+}
+
+func (h *Handler) sendMessge(client *client, msg *message) {
+	err := h.app.SendMessge(&dto.MessageDto{
+		RoomIdx:  client.roomIdx,
+		UserIdx:  client.userIdx,
+		Name:     client.name,
+		ImageUrl: client.imageUrl,
+		Message:  msg.Message,
+	})
+	if err != nil {
+		h.logger.Errorf("send message failed: %s", err)
 	}
 }
