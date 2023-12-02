@@ -11,57 +11,60 @@ import (
 )
 
 type Handler struct {
-	logger logger.Logger
-	app    port.ChatApp
+	logger   logger.Logger
+	app      port.ChatApp
+	upgrader *websocket.Upgrader
 }
 
 func New(logger logger.Logger, app port.ChatApp) *Handler {
 	return &Handler{
 		logger: logger,
 		app:    app,
+		upgrader: &websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+			CheckOrigin: func(request *http.Request) bool {
+				logger.Info("checking origin ", request)
+				return true
+			},
+		},
 	}
 }
 
 func (h *Handler) Register(router *gin.RouterGroup) {
-	router.GET("chat", h.makeChatHandler())
+	router.GET("chat", h.chat)
 }
 
-func (h *Handler) makeChatHandler() gin.HandlerFunc {
-	upgrader := websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin: func(r *http.Request) bool {
-			h.logger.Info("checking origin ", r)
-			return true
-		},
+func (h *Handler) chat(ctx *gin.Context) {
+	var param connection
+	err := ctx.ShouldBindQuery(&param)
+	if err != nil {
+		h.logger.Error(err)
+		return
 	}
-	return func(ctx *gin.Context) {
-		var param connection
-		err := ctx.ShouldBindQuery(&param)
-		if err != nil {
-			h.logger.Error(err)
-			return
-		}
 
-		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-		if err != nil {
-			h.logger.Errorf("socket failed: %s", err)
-			return
-		}
-		defer conn.Close()
+	conn, err := h.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	if err != nil {
+		h.logger.Errorf("socket failed: %s", err)
+		return
+	}
+	defer conn.Close()
 
-		client := &client{userIdx: param.UserIdx, send: conn.WriteJSON}
-		h.app.Connect(param.RoomIdx, client)
-		defer func() {
-			if err = h.app.Disconnect(param.RoomIdx, client); err != nil {
-				h.logger.Errorf("disconnect client failed: %s", err)
-			}
-		}()
-		h.handleConnection(conn, param.RoomIdx, client)
+	h.handleConnection(conn, param)
+}
+
+func (h *Handler) handleConnection(conn *websocket.Conn, param connection) {
+	client := &client{websocketConn: conn, roomIdx: param.RoomIdx, userIdx: param.UserIdx}
+
+	h.app.Connect(client)
+	h.handleMessage(conn, client)
+	err := h.app.Disconnect(client)
+	if err != nil {
+		h.logger.Errorf("disconnect client failed: %s", err)
 	}
 }
 
-func (h *Handler) handleConnection(conn *websocket.Conn, roomIdx uint, client *client) {
+func (h *Handler) handleMessage(conn *websocket.Conn, client *client) {
 	for {
 		var msg message
 		err := conn.ReadJSON(&msg)
@@ -72,7 +75,7 @@ func (h *Handler) handleConnection(conn *websocket.Conn, roomIdx uint, client *c
 			h.logger.Errorf("read message failed: %s", err)
 		}
 		err = h.app.SendMessge(&dto.MessageDto{
-			RoomIdx:  roomIdx,
+			RoomIdx:  client.roomIdx,
 			UserIdx:  client.userIdx,
 			Name:     client.name,
 			ImageUrl: client.imageUrl,

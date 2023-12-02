@@ -7,6 +7,6 @@ type connection struct {
 
 // chat message
 type message struct {
-	Type    uint8  `json:"type"`
 	Message string `json:"message"`
+	Type    uint8  `json:"type"`
 }

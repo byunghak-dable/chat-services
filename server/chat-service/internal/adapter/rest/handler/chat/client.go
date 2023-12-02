@@ -1,12 +1,20 @@
 package chat
 
-import "github.com/widcraft/chat-service/internal/domain/dto"
+import (
+	"github.com/gorilla/websocket"
+	"github.com/widcraft/chat-service/internal/domain/dto"
+)
 
 type client struct {
-	userIdx  uint
-	name     string
-	imageUrl string
-	send     func(interface{}) error
+	websocketConn *websocket.Conn
+	name          string
+	imageUrl      string
+	userIdx       uint
+	roomIdx       uint
+}
+
+func (c *client) GetRoomIdx() uint {
+	return c.roomIdx
 }
 
 func (c *client) GetUserIdx() uint {
@@ -14,5 +22,5 @@ func (c *client) GetUserIdx() uint {
 }
 
 func (c *client) SendMessage(message *dto.MessageDto) error {
-	return c.send(message)
+	return c.websocketConn.WriteJSON(message)
 }
