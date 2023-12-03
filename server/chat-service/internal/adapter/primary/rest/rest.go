@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/widcraft/chat-service/internal/adapter/rest/handler/chat"
+	"github.com/widcraft/chat-service/internal/adapter/primary/rest/handler/chat"
 	"github.com/widcraft/chat-service/internal/port"
 	"github.com/widcraft/chat-service/pkg/logger"
 )

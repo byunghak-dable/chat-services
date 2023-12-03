@@ -3,8 +3,8 @@ package grpc
 import (
 	"net"
 
-	"github.com/widcraft/chat-service/internal/adapter/grpc/chat"
-	"github.com/widcraft/chat-service/internal/adapter/grpc/chat/pb"
+	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat"
+	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat/pb"
 	"github.com/widcraft/chat-service/internal/port"
 	"github.com/widcraft/chat-service/pkg/logger"
 	"google.golang.org/grpc"

@@ -8,10 +8,12 @@ import (
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/chat-service/internal/adapter/grpc"
-	"github.com/widcraft/chat-service/internal/adapter/repository"
-	"github.com/widcraft/chat-service/internal/adapter/rest"
-	chatapp "github.com/widcraft/chat-service/internal/application/chat"
+	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
+	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
+	chat_repo "github.com/widcraft/chat-service/internal/adapter/secondary/repository/chat"
+	chat_app "github.com/widcraft/chat-service/internal/application/chat"
+	chat_messenger_app "github.com/widcraft/chat-service/internal/application/chat/messenger"
+	chat_storage_app "github.com/widcraft/chat-service/internal/application/chat/storage"
 	"github.com/widcraft/chat-service/pkg/db"
 )
 
@@ -45,10 +47,12 @@ func main() {
 		return
 	}
 
-	chatRepo := repository.NewChatRepository(logger, redisDb)
-	chatApp := chatapp.New(logger, chatRepo)
-	restServer := rest.New(logger, chatApp)
-	grpcServer := grpc.New(logger, chatApp)
+	chatRepo := chat_repo.NewChatRepository(logger, redisDb)
+	chatStorageApp := chat_storage_app.New(logger, chatRepo)
+	chatMessengerApp := chat_messenger_app.New(logger)
+	chatFacade := chat_app.New(logger, chatStorageApp, chatMessengerApp)
+	restServer := rest.New(logger, chatFacade)
+	grpcServer := grpc.New(logger, chatFacade)
 
 	defer shutdown(restServer, grpcServer)
 

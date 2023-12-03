@@ -3,7 +3,7 @@ package chat
 import (
 	"errors"
 
-	"github.com/widcraft/chat-service/internal/adapter/grpc/chat/pb"
+	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat/pb"
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/port"
 	"github.com/widcraft/chat-service/pkg/logger"
