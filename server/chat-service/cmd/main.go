@@ -46,10 +46,10 @@ func main() {
 	}
 
 	messageRepo := repository.NewMessageRepository(logger, redisDb)
-	chatFacade := service.NewMessageFacade(logger, messageRepo)
+	messageFacade := service.NewMessageFacade(logger, messageRepo)
 
-	restServer := rest.New(logger, chatFacade)
-	grpcServer := grpc.New(logger, chatFacade)
+	restServer := rest.New(logger, messageFacade)
+	grpcServer := grpc.New(logger, messageFacade)
 
 	defer shutdown(restServer, grpcServer)
 
