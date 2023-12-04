@@ -12,10 +12,10 @@ import (
 type Server struct {
 	pb.UnimplementedChatServer
 	logger logger.Logger
-	app    port.ChatApp
+	app    port.MessageService
 }
 
-func New(logger logger.Logger, app port.ChatApp) *Server {
+func New(logger logger.Logger, app port.MessageService) *Server {
 	return &Server{
 		logger: logger,
 		app:    app,

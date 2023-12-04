@@ -13,10 +13,10 @@ import (
 type Grpc struct {
 	logger  logger.Logger
 	server  *grpc.Server
-	chatApp port.ChatApp
+	chatApp port.MessageService
 }
 
-func New(logger logger.Logger, chatApp port.ChatApp) *Grpc {
+func New(logger logger.Logger, chatApp port.MessageService) *Grpc {
 	server := grpc.NewServer()
 	pb.RegisterChatServer(server, chat.New(logger, chatApp))
 

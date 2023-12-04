@@ -1,4 +1,4 @@
-package storage
+package message
 
 import (
 	"github.com/widcraft/chat-service/internal/domain/dto"
@@ -7,19 +7,19 @@ import (
 	"github.com/widcraft/chat-service/pkg/logger"
 )
 
-type ChatStorageApp struct {
+type MessageStorageService struct {
 	logger logger.Logger
-	repo   port.ChatRepository
+	repo   port.MessageRepository
 }
 
-func New(logger logger.Logger, repo port.ChatRepository) *ChatStorageApp {
-	return &ChatStorageApp{
+func NewMessageStorageService(logger logger.Logger, repo port.MessageRepository) *MessageStorageService {
+	return &MessageStorageService{
 		logger: logger,
 		repo:   repo,
 	}
 }
 
-func (app *ChatStorageApp) SaveMessage(message *dto.MessageDto) error {
+func (app *MessageStorageService) SaveMessage(message *dto.MessageDto) error {
 	err := app.repo.SaveMessage(&entity.Message{
 		RoomIdx:  message.RoomIdx,
 		UserIdx:  message.UserIdx,
@@ -34,6 +34,6 @@ func (app *ChatStorageApp) SaveMessage(message *dto.MessageDto) error {
 	return nil
 }
 
-func (app *ChatStorageApp) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
+func (app *MessageStorageService) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
 	return nil, nil
 }

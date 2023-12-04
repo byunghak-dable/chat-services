@@ -5,21 +5,20 @@ import (
 	"github.com/widcraft/chat-service/internal/domain/entity"
 )
 
-type ChatClient interface {
+type MessengerClient interface {
 	GetRoomIdx() uint
 	GetUserIdx() uint
 	SendMessage(message *dto.MessageDto) error
 }
 
-type ChatApp interface {
-	Connect(client ChatClient)
-	Disconnect(client ChatClient)
+type MessageService interface {
+	Connect(client MessengerClient)
+	Disconnect(client MessengerClient)
 	SendMessge(messageDto *dto.MessageDto) error
 	GetMessages(roomIdx uint) ([]dto.MessageDto, error)
 }
 
-type ChatRepository interface {
-	ConnectRoom(roomIdx, client ChatClient) error
+type MessageRepository interface {
 	SaveMessage(message *entity.Message) error
 	GetMessages(roomIdx uint) ([]entity.Message, error)
 }

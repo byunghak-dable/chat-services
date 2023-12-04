@@ -1,4 +1,4 @@
-package messenger
+package message
 
 import (
 	"fmt"
@@ -9,21 +9,21 @@ import (
 	"github.com/widcraft/chat-service/pkg/logger"
 )
 
-type ChatMessengerApp struct {
+type MessengerService struct {
 	logger logger.Logger
-	rooms  map[uint][]port.ChatClient
+	rooms  map[uint][]port.MessengerClient
 	mutex  *sync.RWMutex
 }
 
-func New(logger logger.Logger) *ChatMessengerApp {
-	return &ChatMessengerApp{
+func NewMessengerService(logger logger.Logger) *MessengerService {
+	return &MessengerService{
 		logger: logger,
-		rooms:  make(map[uint][]port.ChatClient),
+		rooms:  make(map[uint][]port.MessengerClient),
 		mutex:  new(sync.RWMutex),
 	}
 }
 
-func (app *ChatMessengerApp) Participate(client port.ChatClient) {
+func (app *MessengerService) Participate(client port.MessengerClient) {
 	app.mutex.Lock()
 	defer app.mutex.Unlock()
 
@@ -36,11 +36,11 @@ func (app *ChatMessengerApp) Participate(client port.ChatClient) {
 		return
 	}
 
-	app.rooms[roomIdx] = []port.ChatClient{client}
+	app.rooms[roomIdx] = []port.MessengerClient{client}
 	app.logger.Infof("room id: %d added", roomIdx, len(room))
 }
 
-func (app *ChatMessengerApp) Quit(client port.ChatClient) {
+func (app *MessengerService) Quit(client port.MessengerClient) {
 	// TODO: try to find better way to handle race condition than mutex
 	app.mutex.Lock()
 	defer app.mutex.Unlock()
@@ -62,7 +62,7 @@ func (app *ChatMessengerApp) Quit(client port.ChatClient) {
 	app.logger.Error("no client in chat room")
 }
 
-func (app *ChatMessengerApp) SendMessage(message *dto.MessageDto) error {
+func (app *MessengerService) SendMessage(message *dto.MessageDto) error {
 	app.mutex.RLock()
 	defer app.mutex.RUnlock()
 

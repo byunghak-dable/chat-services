@@ -14,10 +14,10 @@ import (
 type Rest struct {
 	logger  logger.Logger
 	server  *http.Server
-	chatApp port.ChatApp
+	chatApp port.MessageService
 }
 
-func New(logger logger.Logger, chatApp port.ChatApp) *Rest {
+func New(logger logger.Logger, chatApp port.MessageService) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 	chat.New(logger, chatApp).Register(group)

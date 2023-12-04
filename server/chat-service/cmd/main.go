@@ -10,10 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
-	chat_repo "github.com/widcraft/chat-service/internal/adapter/secondary/repository/chat"
-	chat_app "github.com/widcraft/chat-service/internal/application/chat"
-	chat_messenger_app "github.com/widcraft/chat-service/internal/application/chat/messenger"
-	chat_storage_app "github.com/widcraft/chat-service/internal/application/chat/storage"
+	"github.com/widcraft/chat-service/internal/adapter/secondary/repository"
+	"github.com/widcraft/chat-service/internal/service"
 	"github.com/widcraft/chat-service/pkg/db"
 )
 
@@ -47,10 +45,8 @@ func main() {
 		return
 	}
 
-	chatRepo := chat_repo.NewChatRepository(logger, redisDb)
-	chatStorageApp := chat_storage_app.New(logger, chatRepo)
-	chatMessengerApp := chat_messenger_app.New(logger)
-	chatFacade := chat_app.New(logger, chatStorageApp, chatMessengerApp)
+	messageRepo := repository.NewMessageRepository(logger, redisDb)
+	chatFacade := service.NewMessageFacade(logger, messageRepo)
 	restServer := rest.New(logger, chatFacade)
 	grpcServer := grpc.New(logger, chatFacade)
 
