@@ -3,18 +3,18 @@ package service
 import (
 	"github.com/widcraft/chat-service/internal/adapter/secondary/repository"
 	"github.com/widcraft/chat-service/internal/domain/dto"
+	"github.com/widcraft/chat-service/internal/infra"
 	"github.com/widcraft/chat-service/internal/port"
 	"github.com/widcraft/chat-service/internal/service/message"
-	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type MessageFacade struct {
-	logger           logger.Logger
+	logger           infra.Logger
 	storageService   *message.MessageStorageService
 	messengerService *message.MessengerService
 }
 
-func NewMessageFacade(logger logger.Logger, messageRepo *repository.MessageRepository) *MessageFacade {
+func NewMessageFacade(logger infra.Logger, messageRepo *repository.MessageRepository) *MessageFacade {
 	return &MessageFacade{
 		logger:           logger,
 		storageService:   message.NewMessageStorageService(logger, messageRepo),

@@ -11,8 +11,8 @@ import (
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
 	"github.com/widcraft/chat-service/internal/adapter/secondary/repository"
+	"github.com/widcraft/chat-service/internal/adapter/secondary/repository/db"
 	"github.com/widcraft/chat-service/internal/service"
-	"github.com/widcraft/chat-service/pkg/db"
 )
 
 var logger = log.New()

@@ -6,17 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/widcraft/chat-service/internal/domain/dto"
+	"github.com/widcraft/chat-service/internal/infra"
 	"github.com/widcraft/chat-service/internal/port"
-	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type Handler struct {
-	logger   logger.Logger
+	logger   infra.Logger
 	app      port.MessageService
 	upgrader *websocket.Upgrader
 }
 
-func New(logger logger.Logger, app port.MessageService) *Handler {
+func New(logger infra.Logger, app port.MessageService) *Handler {
 	return &Handler{
 		logger: logger,
 		app:    app,

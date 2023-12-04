@@ -5,17 +5,17 @@ import (
 
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat/pb"
 	"github.com/widcraft/chat-service/internal/domain/dto"
+	"github.com/widcraft/chat-service/internal/infra"
 	"github.com/widcraft/chat-service/internal/port"
-	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type Server struct {
 	pb.UnimplementedChatServer
-	logger logger.Logger
+	logger infra.Logger
 	app    port.MessageService
 }
 
-func New(logger logger.Logger, app port.MessageService) *Server {
+func New(logger infra.Logger, app port.MessageService) *Server {
 	return &Server{
 		logger: logger,
 		app:    app,

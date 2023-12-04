@@ -1,7 +1,7 @@
 package chatroom
 
-import "github.com/widcraft/chat-service/pkg/logger"
+import "github.com/widcraft/chat-service/internal/infra"
 
 type Handler struct {
-	logger logger.Logger
+	logger infra.Logger
 }

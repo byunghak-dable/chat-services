@@ -5,18 +5,18 @@ import (
 
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat"
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat/pb"
+	"github.com/widcraft/chat-service/internal/infra"
 	"github.com/widcraft/chat-service/internal/port"
-	"github.com/widcraft/chat-service/pkg/logger"
 	"google.golang.org/grpc"
 )
 
 type Grpc struct {
-	logger  logger.Logger
+	logger  infra.Logger
 	server  *grpc.Server
 	chatApp port.MessageService
 }
 
-func New(logger logger.Logger, chatApp port.MessageService) *Grpc {
+func New(logger infra.Logger, chatApp port.MessageService) *Grpc {
 	server := grpc.NewServer()
 	pb.RegisterChatServer(server, chat.New(logger, chatApp))
 

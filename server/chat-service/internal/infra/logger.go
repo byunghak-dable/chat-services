@@ -1,4 +1,4 @@
-package logger
+package infra
 
 type Logger interface {
 	Debugf(format string, args ...interface{})

@@ -5,17 +5,17 @@ import (
 	"sync"
 
 	"github.com/widcraft/chat-service/internal/domain/dto"
+	"github.com/widcraft/chat-service/internal/infra"
 	"github.com/widcraft/chat-service/internal/port"
-	"github.com/widcraft/chat-service/pkg/logger"
 )
 
 type MessengerService struct {
-	logger logger.Logger
+	logger infra.Logger
 	rooms  map[uint][]port.MessengerClient
 	mutex  *sync.RWMutex
 }
 
-func NewMessengerService(logger logger.Logger) *MessengerService {
+func NewMessengerService(logger infra.Logger) *MessengerService {
 	return &MessengerService{
 		logger: logger,
 		rooms:  make(map[uint][]port.MessengerClient),
