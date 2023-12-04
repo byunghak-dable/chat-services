@@ -47,6 +47,7 @@ func main() {
 
 	messageRepo := repository.NewMessageRepository(logger, redisDb)
 	chatFacade := service.NewMessageFacade(logger, messageRepo)
+
 	restServer := rest.New(logger, chatFacade)
 	grpcServer := grpc.New(logger, chatFacade)
 

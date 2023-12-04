@@ -41,7 +41,6 @@ func (app *MessengerService) Participate(client port.MessengerClient) {
 }
 
 func (app *MessengerService) Quit(client port.MessengerClient) {
-	// TODO: try to find better way to handle race condition than mutex
 	app.mutex.Lock()
 	defer app.mutex.Unlock()
 
