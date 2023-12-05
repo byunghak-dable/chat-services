@@ -22,11 +22,11 @@ func NewMessageFacade(logger infra.Logger, messageRepo *repository.MessageReposi
 	}
 }
 
-func (facade *MessageFacade) Connect(client port.MessengerClient) {
+func (facade *MessageFacade) Join(client port.MessengerClient) {
 	facade.messengerService.Participate(client)
 }
 
-func (facade *MessageFacade) Disconnect(client port.MessengerClient) {
+func (facade *MessageFacade) Leave(client port.MessengerClient) {
 	facade.messengerService.Quit(client)
 }
 

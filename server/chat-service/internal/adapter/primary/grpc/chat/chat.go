@@ -43,8 +43,8 @@ func (s *Server) handleConnetcion(stream pb.Chat_ConnectServer, joinReq *pb.Join
 		userIdx: uint(joinReq.RoomIdx),
 	}
 
-	s.app.Connect(client)
-	defer s.app.Disconnect(client)
+	s.app.Join(client)
+	defer s.app.Leave(client)
 
 	return s.handleMessage(client)
 }

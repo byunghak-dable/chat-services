@@ -60,8 +60,8 @@ func (h *Handler) handleConnection(conn *websocket.Conn, param connection) {
 		userIdx:       param.UserIdx,
 	}
 
-	h.app.Connect(client)
-	defer h.app.Disconnect(client)
+	h.app.Join(client)
+	defer h.app.Leave(client)
 
 	h.handleMessage(client)
 }

@@ -12,8 +12,8 @@ type MessengerClient interface {
 }
 
 type MessageService interface {
-	Connect(client MessengerClient)
-	Disconnect(client MessengerClient)
+	Join(client MessengerClient)
+	Leave(client MessengerClient)
 	SendMessge(messageDto *dto.MessageDto) error
 	GetMessages(roomIdx uint) ([]dto.MessageDto, error)
 }
