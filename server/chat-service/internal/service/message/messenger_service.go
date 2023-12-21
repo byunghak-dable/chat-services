@@ -23,21 +23,21 @@ func NewMessengerService(logger infra.Logger) *MessengerService {
 	}
 }
 
-func (app *MessengerService) Participate(client port.MessengerClient) {
-	app.mutex.Lock()
-	defer app.mutex.Unlock()
+func (service *MessengerService) Participate(client port.MessengerClient) {
+	service.mutex.Lock()
+	defer service.mutex.Unlock()
 
 	roomIdx := client.GetRoomIdx()
-	room, ok := app.rooms[roomIdx]
+	room, ok := service.rooms[roomIdx]
 
 	if ok {
-		app.rooms[roomIdx] = append(room, client)
-		app.logger.Infof("room id: %d, count: %d", roomIdx, len(room))
+		service.rooms[roomIdx] = append(room, client)
+		service.logger.Infof("room id: %d, count: %d", roomIdx, len(room))
 		return
 	}
 
-	app.rooms[roomIdx] = []port.MessengerClient{client}
-	app.logger.Infof("room id: %d added", roomIdx, len(room))
+	service.rooms[roomIdx] = []port.MessengerClient{client}
+	service.logger.Infof("room id: %d added", roomIdx, len(room))
 }
 
 func (app *MessengerService) Quit(client port.MessengerClient) {
@@ -61,11 +61,11 @@ func (app *MessengerService) Quit(client port.MessengerClient) {
 	app.logger.Error("no client in chat room")
 }
 
-func (app *MessengerService) SendMessage(message *dto.MessageDto) error {
-	app.mutex.RLock()
-	defer app.mutex.RUnlock()
+func (service *MessengerService) SendMessage(message *dto.MessageDto) error {
+	service.mutex.RLock()
+	defer service.mutex.RUnlock()
 
-	room, ok := app.rooms[message.RoomIdx]
+	room, ok := service.rooms[message.RoomIdx]
 
 	if !ok {
 		return fmt.Errorf("no existing chat room roomIdx")

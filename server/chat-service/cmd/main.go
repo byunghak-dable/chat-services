@@ -46,15 +46,15 @@ func main() {
 	}
 
 	messageRepo := repository.NewMessageRepository(logger, redisDb)
-	messageFacade := service.NewMessageFacade(logger, messageRepo)
+	messageServiceFacade := service.NewMessageServiceFacade(logger, messageRepo)
 
-	restServer := rest.New(logger, messageFacade)
-	grpcServer := grpc.New(logger, messageFacade)
+	restApp := rest.New(logger, messageServiceFacade)
+	grpcApp := grpc.New(logger, messageServiceFacade)
 
-	defer shutdown(restServer, grpcServer)
+	defer shutdown(restApp, grpcApp)
 
-	go restServer.Run(os.Getenv("REST_PORT"))
-	go grpcServer.Run(os.Getenv("GRPC_PORT"))
+	go restApp.Run(os.Getenv("REST_PORT"))
+	go grpcApp.Run(os.Getenv("GRPC_PORT"))
 
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)

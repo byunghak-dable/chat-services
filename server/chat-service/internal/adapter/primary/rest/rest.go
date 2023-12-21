@@ -20,6 +20,7 @@ type Rest struct {
 func New(logger infra.Logger, chatApp port.MessageService) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
+
 	chat.New(logger, chatApp).Register(group)
 
 	return &Rest{
@@ -34,17 +35,17 @@ func New(logger infra.Logger, chatApp port.MessageService) *Rest {
 	}
 }
 
-func (ws *Rest) Run(port string) {
-	ws.server.Addr = ":" + port
-	err := ws.server.ListenAndServe()
+func (rest *Rest) Run(port string) {
+	rest.server.Addr = ":" + port
+	err := rest.server.ListenAndServe()
 
 	if err != nil && err != http.ErrServerClosed {
-		ws.logger.Errorf("websocket server error: %s", err)
+		rest.logger.Errorf("websocket server error: %s", err)
 	}
 }
 
-func (ws *Rest) Close() error {
+func (rest *Rest) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	return ws.server.Shutdown(ctx)
+	return rest.server.Shutdown(ctx)
 }

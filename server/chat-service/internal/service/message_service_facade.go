@@ -8,29 +8,29 @@ import (
 	"github.com/widcraft/chat-service/internal/service/message"
 )
 
-type MessageFacade struct {
+type MessageServiceFacade struct {
 	logger           infra.Logger
-	storageService   *message.MessageStorageService
+	storageService   *message.StorageService
 	messengerService *message.MessengerService
 }
 
-func NewMessageFacade(logger infra.Logger, messageRepo *repository.MessageRepository) *MessageFacade {
-	return &MessageFacade{
+func NewMessageServiceFacade(logger infra.Logger, messageRepo *repository.MessageRepository) *MessageServiceFacade {
+	return &MessageServiceFacade{
 		logger:           logger,
-		storageService:   message.NewMessageStorageService(logger, messageRepo),
+		storageService:   message.NewStorageService(logger, messageRepo),
 		messengerService: message.NewMessengerService(logger),
 	}
 }
 
-func (facade *MessageFacade) Join(client port.MessengerClient) {
+func (facade *MessageServiceFacade) Join(client port.MessengerClient) {
 	facade.messengerService.Participate(client)
 }
 
-func (facade *MessageFacade) Leave(client port.MessengerClient) {
+func (facade *MessageServiceFacade) Leave(client port.MessengerClient) {
 	facade.messengerService.Quit(client)
 }
 
-func (facade *MessageFacade) SendMessge(message *dto.MessageDto) error {
+func (facade *MessageServiceFacade) SendMessge(message *dto.MessageDto) error {
 	err := facade.messengerService.SendMessage(message)
 	if err != nil {
 		return err
@@ -39,6 +39,6 @@ func (facade *MessageFacade) SendMessge(message *dto.MessageDto) error {
 	return facade.storageService.SaveMessage(message)
 }
 
-func (facade *MessageFacade) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
+func (facade *MessageServiceFacade) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
 	return nil, nil
 }
