@@ -1,10 +1,10 @@
 #!/bin/sh
 
-unamestr=$(uname)
-envfile=".env"
+uname=$(uname)
+env=".env"
 
-if [ "$unamestr" = 'Linux' ]; then
-	export $(grep -v '^#' "$envfile" | xargs -d '\n')
+if [ "$uname" = 'Linux' ]; then
+	export $(grep -v '^#' "$env" | xargs -d '\n')
 fi
 
 ./gradlew bootRun
