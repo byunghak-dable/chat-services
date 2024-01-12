@@ -1,5 +1,9 @@
 package org.wid.userservice.port.primary;
 
-public interface UserServicePort {
+import org.wid.userservice.dto.user.RegisterUserDto;
 
+public interface UserServicePort {
+  void register(RegisterUserDto registerUserDto);
+
+  void login();
 }
