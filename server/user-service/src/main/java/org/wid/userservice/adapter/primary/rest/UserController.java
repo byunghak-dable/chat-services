@@ -10,10 +10,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.wid.userservice.dto.user.RegisterUserDto;
+import org.wid.userservice.dto.user.UserDto;
 import org.wid.userservice.port.primary.UserServicePort;
+
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class UserController {
   private final UserServicePort userService;
 
@@ -22,10 +26,10 @@ public class UserController {
   }
 
   @PostMapping("/user")
-  public ResponseEntity<Void> uploadUser(@Validated @RequestBody RegisterUserDto registerUserDto) {
+  public ResponseEntity<String> register(@Validated @RequestBody RegisterUserDto registerUserDto) {
     userService.register(registerUserDto);
 
-    return ResponseEntity.ok().build();
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("register");
   }
 
   public ResponseEntity<String> login() {
@@ -34,9 +38,10 @@ public class UserController {
   }
 
   @GetMapping("/user/{userId}")
-  public ResponseEntity<String> getUser(@PathVariable int userId) {
-    System.out.println("checking get user" + userId);
+  public ResponseEntity<UserDto> getUser(@PathVariable long userId) {
+    log.info("get user id:{}", userId);
+    UserDto userDto = userService.getUser(userId);
 
-    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("getUser");
+    return ResponseEntity.ok(userDto);
   }
 }
