@@ -8,10 +8,10 @@ import org.wid.userservice.mapper.UserMapper;
 import org.wid.userservice.port.primary.UserServicePort;
 import org.wid.userservice.port.secondary.UserRepositoryPort;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService implements UserServicePort {
 
   private final UserRepositoryPort userRepository;

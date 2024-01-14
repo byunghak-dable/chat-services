@@ -13,11 +13,11 @@ import org.wid.userservice.dto.user.RegisterUserDto;
 import org.wid.userservice.dto.user.UserDto;
 import org.wid.userservice.port.primary.UserServicePort;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserController {
   private final UserServicePort userService;
 
