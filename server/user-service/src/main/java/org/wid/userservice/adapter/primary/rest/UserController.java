@@ -13,17 +13,13 @@ import org.wid.userservice.dto.user.RegisterUserDto;
 import org.wid.userservice.dto.user.UserDto;
 import org.wid.userservice.port.primary.UserServicePort;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1")
-@Slf4j
+@AllArgsConstructor
 public class UserController {
   private final UserServicePort userService;
-
-  public UserController(UserServicePort userService) {
-    this.userService = userService;
-  }
 
   @PostMapping("/user")
   public ResponseEntity<String> register(@Validated @RequestBody RegisterUserDto registerUserDto) {
@@ -39,7 +35,6 @@ public class UserController {
 
   @GetMapping("/user/{userId}")
   public ResponseEntity<UserDto> getUser(@PathVariable long userId) {
-    log.info("get user id:{}", userId);
     UserDto userDto = userService.getUser(userId);
 
     return ResponseEntity.ok(userDto);

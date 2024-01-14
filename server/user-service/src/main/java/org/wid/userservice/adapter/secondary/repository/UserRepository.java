@@ -5,17 +5,16 @@ import org.springframework.stereotype.Repository;
 import org.wid.userservice.entity.entity.User;
 import org.wid.userservice.port.secondary.UserRepositoryPort;
 
+import lombok.AllArgsConstructor;
+
 interface UserDao extends JpaRepository<User, Long> {
 }
 
 @Repository
+@AllArgsConstructor
 public class UserRepository implements UserRepositoryPort {
 
   private final UserDao userDao;
-
-  public UserRepository(UserDao userDao) {
-    this.userDao = userDao;
-  }
 
   @Override
   public void register(User user) {

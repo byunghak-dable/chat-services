@@ -8,16 +8,14 @@ import org.wid.userservice.mapper.UserMapper;
 import org.wid.userservice.port.primary.UserServicePort;
 import org.wid.userservice.port.secondary.UserRepositoryPort;
 
+import lombok.AllArgsConstructor;
+
 @Service
+@AllArgsConstructor
 public class UserService implements UserServicePort {
 
   private final UserRepositoryPort userRepository;
   private final UserMapper userMapper;
-
-  private UserService(UserRepositoryPort userRepository, UserMapper userMapper) {
-    this.userRepository = userRepository;
-    this.userMapper = userMapper;
-  }
 
   @Override
   public void register(RegisterUserDto registerUserDto) {
