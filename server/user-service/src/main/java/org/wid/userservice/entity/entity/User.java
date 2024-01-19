@@ -21,10 +21,19 @@ public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
   private String email;
+
   private String password;
-  private String name;
+
+  @Column(name = "first_ame")
+  private String firstName;
+
+  @Column(name = "last_name")
+  private String lastName;
+
   private Boolean gender;
+
   @Column(name = "thumbnail_url")
   private String thumbnailUrl;
 }
