@@ -1,8 +1,7 @@
-package org.wid.userservice.adapter.primary.rest;
+package org.wid.userservice.adapter.primary.rest.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +12,7 @@ import org.wid.userservice.dto.user.RegisterUserDto;
 import org.wid.userservice.dto.user.UserDto;
 import org.wid.userservice.port.primary.UserServicePort;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,7 +22,7 @@ public class UserController {
   private final UserServicePort userService;
 
   @PostMapping("/user")
-  public ResponseEntity<String> register(@Validated @RequestBody RegisterUserDto registerUserDto) {
+  public ResponseEntity<String> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
     userService.register(registerUserDto);
 
     return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("register");
