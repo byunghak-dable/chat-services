@@ -38,3 +38,15 @@ spring:
             scope:
               - profile
               - email
+          github:
+            client-id: ${GITHUB_OAUTH_CLIENT_ID}
+            client-secret: ${GITHUB_OAUTH_CLIENT_SECRET}
+            redirect-uri: ${GITHUB_OAUTH_REDIRECT_URI}
+            resource-uri: https://api.github.com/user
+            scope:
+              - user
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
