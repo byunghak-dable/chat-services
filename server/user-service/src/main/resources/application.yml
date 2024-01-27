@@ -2,49 +2,25 @@ server:
   port: ${REST_PORT}
 
 spring:
-  jpa:
-    open-in-view: true
-    hibernate:
-      ddl-auto: create # for dev
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true
-    properties:
-      hibernate.format_sql: true
-      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
-
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
-
   data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+    mongodb:
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT}
+      database: ${MONGODB_DB}
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
-            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
-            redirect-uri: ${GOOGLE_OAUTH_REDIRECT_URI}
-            token-uri: https://oauth2.googleapis.com/token
-            resource-uri: https://www.googleapis.com/oauth2/v2/userinfo
-            scope:
-              - profile
-              - email
-          github:
-            client-id: ${GITHUB_OAUTH_CLIENT_ID}
-            client-secret: ${GITHUB_OAUTH_CLIENT_SECRET}
-            redirect-uri: ${GITHUB_OAUTH_REDIRECT_URI}
-            resource-uri: https://api.github.com/user
-            scope:
-              - user
+  oauth2:
+    provider:
+      google:
+        client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+        client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+        token-uri: https://oauth2.googleapis.com/token
+        resource-uri: https://www.googleapis.com/oauth2/v2/userinfo
+      github:
+        client-id: ${GITHUB_OAUTH_CLIENT_ID}
+        client-secret: ${GITHUB_OAUTH_CLIENT_SECRET}
+        token-uri: https://github.com/login/oauth/access_token
+        resource-uri: https://api.github.com/user
+
 logging:
   level:
     org:

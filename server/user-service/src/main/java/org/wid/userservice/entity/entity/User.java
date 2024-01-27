@@ -3,56 +3,50 @@ package org.wid.userservice.entity.entity;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
+@Document(collection = "user")
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "user")
 public class User implements UserDetails {
 
   public enum Role {
     USER, ADMIN
   }
 
+  public enum LoginType {
+    GOOGLE, GITHUB
+  }
+
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String id;
 
   private String email;
 
   private String password;
 
-  @Column(name = "first_ame")
   private String firstName;
 
-  @Column(name = "last_name")
   private String lastName;
 
   private Boolean gender;
 
-  @Column(name = "thumbnail_url")
   private String thumbnailUrl;
 
-  @Enumerated(EnumType.STRING)
   private Role role;
+
+  private LoginType loginType;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -2,10 +2,10 @@ package org.wid.userservice.port.secondary;
 
 import org.wid.userservice.entity.entity.User;
 
+import reactor.core.publisher.Mono;
+
 public interface UserRepositoryPort {
-  void register(User user);
+  Mono<User> register(User user);
 
-  void login();
-
-  User getUser(long userId);
+  Mono<User> getUserById(String userId);
 }
