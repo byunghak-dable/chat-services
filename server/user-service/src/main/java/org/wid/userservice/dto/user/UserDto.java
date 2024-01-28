@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserDto(
-    Long id,
+    String id,
     String email,
     String firstName,
     String lastName,
