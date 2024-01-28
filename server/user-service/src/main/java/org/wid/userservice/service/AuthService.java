@@ -1,8 +1,11 @@
 package org.wid.userservice.service;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.wid.userservice.dto.user.OauthLoginResponseDto;
+import org.wid.userservice.dto.auth.Oauth2LoginRequestDto;
+import org.wid.userservice.entity.entity.User.LoginType;
 import org.wid.userservice.port.primary.AuthServicePort;
 import org.wid.userservice.service.oauth2.Oauth2Service;
 
@@ -11,23 +14,16 @@ import reactor.core.publisher.Mono;
 @Service
 public class AuthService implements AuthServicePort {
 
-  private final Oauth2Service googleService;
-  private final Oauth2Service githubService;
+  private final Map<LoginType, Oauth2Service> oauth2ServiceMap;
 
-  public AuthService(
-      @Qualifier("GoogleOauth2Service") Oauth2Service googleService,
-      @Qualifier("GithubOauth2Service") Oauth2Service githubService) {
-    this.googleService = googleService;
-    this.githubService = githubService;
+  public AuthService(@Qualifier("GoogleOauth2Service") Oauth2Service googleOauth2Service) {
+    oauth2ServiceMap = Map.of(LoginType.GOOGLE, googleOauth2Service);
   }
 
   @Override
-  public Mono<OauthLoginResponseDto> googleLogin(String code) {
-    return googleService.getToken(code);
-  }
+  public Mono<Object> oauth2Login(Oauth2LoginRequestDto loginDto) {
+    Oauth2Service oauth2Service = oauth2ServiceMap.get(loginDto.getType());
 
-  @Override
-  public Mono<OauthLoginResponseDto> githubLogin(String code) {
-    return githubService.getToken(code);
+    return oauth2Service.requestAccessToken(loginDto.getCode());
   }
 }

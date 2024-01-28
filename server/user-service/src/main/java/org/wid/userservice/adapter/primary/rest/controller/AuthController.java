@@ -1,12 +1,13 @@
 package org.wid.userservice.adapter.primary.rest.controller;
 
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.wid.userservice.dto.user.OauthLoginResponseDto;
+import org.wid.userservice.dto.auth.Oauth2LoginRequestDto;
 import org.wid.userservice.port.primary.AuthServicePort;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -16,13 +17,10 @@ import reactor.core.publisher.Mono;
 public class AuthController {
   private final AuthServicePort authService;
 
-  @PostMapping("/login/google/code/{code}")
-  public Mono<OauthLoginResponseDto> googleLogin(@PathVariable String code) {
-    return authService.googleLogin(code);
-  }
+  @PostMapping("/login/oauth2")
+  public Mono<Object> googleLogin(@Valid @RequestBody Oauth2LoginRequestDto loginRequestDto)
+      throws IllegalArgumentException {
 
-  @PostMapping("/login/github/code/{code}")
-  public Mono<OauthLoginResponseDto> githubLogin(@PathVariable String code) {
-    return authService.githubLogin(code);
+    return authService.oauth2Login(loginRequestDto);
   }
 }
