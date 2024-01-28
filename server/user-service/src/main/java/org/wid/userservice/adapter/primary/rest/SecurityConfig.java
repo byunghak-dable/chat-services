@@ -1,4 +1,4 @@
-package org.wid.userservice.adapter.primary.rest.config;
+package org.wid.userservice.adapter.primary.rest;
 
 import java.util.List;
 
