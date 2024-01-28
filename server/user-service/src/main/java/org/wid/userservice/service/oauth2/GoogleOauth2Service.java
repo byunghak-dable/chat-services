@@ -7,15 +7,13 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.config.Oauth2ClientConfig.OAuth2ClientProperties;
-import org.wid.userservice.dto.oauth2.GoogleTokenRequestDto;
-import org.wid.userservice.dto.oauth2.GoogleTokenResponseDto;
+import org.wid.userservice.dto.oauth2.TokenRequestDto;
+import org.wid.userservice.dto.oauth2.TokenResponseDto;
 
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Service
 @Qualifier("GoogleOauth2Service")
-@Slf4j
 public class GoogleOauth2Service implements Oauth2Service {
 
   private final OAuth2ClientProperties googleProperties;
@@ -29,8 +27,8 @@ public class GoogleOauth2Service implements Oauth2Service {
   }
 
   @Override
-  public Mono<Object> requestAccessToken(String code) {
-    GoogleTokenRequestDto tokenRequestDto = new GoogleTokenRequestDto(
+  public Mono<TokenResponseDto> requestAccessToken(String code) {
+    TokenRequestDto tokenRequestDto = new TokenRequestDto(
         googleProperties.getClientId(),
         googleProperties.getClientSecret(),
         code);
@@ -40,6 +38,6 @@ public class GoogleOauth2Service implements Oauth2Service {
         .accept(MediaType.APPLICATION_JSON)
         .bodyValue(tokenRequestDto)
         .retrieve()
-        .bodyToMono(Object.class);
+        .bodyToMono(TokenResponseDto.class);
   }
 }

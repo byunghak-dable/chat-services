@@ -1,6 +1,6 @@
 package org.wid.userservice.service.oauth2;
 
-import org.wid.userservice.dto.oauth2.GoogleTokenResponseDto;
+import org.wid.userservice.dto.oauth2.TokenResponseDto;
 
 import reactor.core.publisher.Mono;
 
@@ -9,5 +9,5 @@ public interface Oauth2Service {
     TOKEN, RESOURCE
   }
 
-  Mono<Object> requestAccessToken(String code);
+  Mono<TokenResponseDto> requestAccessToken(String code);
 }
