@@ -21,10 +21,13 @@ public class AuthService implements AuthServicePort {
   }
 
   @Override
-  public Mono<Void> oauth2Login(Oauth2LoginRequestDto loginDto) {
+  public Mono<Object> oauth2Login(Oauth2LoginRequestDto loginDto) {
     Oauth2Service oauth2Service = oauth2ServiceMap.get(loginDto.getType());
 
-    oauth2Service.requestAccessToken(loginDto.getCode());
-    return Mono.empty();
+    return oauth2Service
+        .getToken(loginDto.getCode())
+        .flatMap(tokenResponseDto -> {
+          return oauth2Service.getResource(tokenResponseDto.accessToken());
+        });
   }
 }

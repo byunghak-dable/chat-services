@@ -18,7 +18,7 @@ public class AuthController {
   private final AuthServicePort authService;
 
   @PostMapping("/login/oauth2")
-  public Mono<Void> googleLogin(@Valid @RequestBody Oauth2LoginRequestDto loginRequestDto)
+  public Mono<Object> googleLogin(@Valid @RequestBody Oauth2LoginRequestDto loginRequestDto)
       throws IllegalArgumentException {
 
     return authService.oauth2Login(loginRequestDto);

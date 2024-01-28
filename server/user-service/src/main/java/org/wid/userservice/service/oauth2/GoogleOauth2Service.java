@@ -27,7 +27,7 @@ public class GoogleOauth2Service implements Oauth2Service {
   }
 
   @Override
-  public Mono<TokenResponseDto> requestAccessToken(String code) {
+  public Mono<TokenResponseDto> getToken(String code) {
     TokenRequestDto tokenRequestDto = new TokenRequestDto(
         googleProperties.getClientId(),
         googleProperties.getClientSecret(),
@@ -39,5 +39,17 @@ public class GoogleOauth2Service implements Oauth2Service {
         .bodyValue(tokenRequestDto)
         .retrieve()
         .bodyToMono(TokenResponseDto.class);
+  }
+
+  @Override
+  public Mono<Object> getResource(String accessToken) {
+    return oauthClientMap.get(RequestType.RESOURCE)
+        .get()
+        .uri(uriBuilder -> uriBuilder
+            .queryParam("access_token", accessToken)
+            .build())
+        .accept(MediaType.APPLICATION_JSON)
+        .retrieve()
+        .bodyToMono(Object.class);
   }
 }

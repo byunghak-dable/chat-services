@@ -9,5 +9,7 @@ public interface Oauth2Service {
     TOKEN, RESOURCE
   }
 
-  Mono<TokenResponseDto> requestAccessToken(String code);
+  Mono<TokenResponseDto> getToken(String code);
+
+  Mono<Object> getResource(String accessToken);
 }
