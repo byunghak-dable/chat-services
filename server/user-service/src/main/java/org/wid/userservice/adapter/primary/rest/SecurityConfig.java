@@ -10,7 +10,6 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-import org.wid.userservice.port.primary.AuthServicePort;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,8 +17,6 @@ import lombok.RequiredArgsConstructor;
 @EnableWebFluxSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-  private final AuthServicePort authService;
 
   @Bean
   public SecurityWebFilterChain basicFilterChain(ServerHttpSecurity http) throws Exception {
