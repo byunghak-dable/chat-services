@@ -1,4 +1,4 @@
-package org.wid.userservice.dto.oauth2;
+package org.wid.userservice.dto.oauth2.token;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

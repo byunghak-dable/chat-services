@@ -1,4 +1,4 @@
-package org.wid.userservice.dto.oauth2;
+package org.wid.userservice.dto.oauth2.token;
 
 import java.util.Optional;
 
@@ -10,6 +10,5 @@ public record TokenResponseDto(
     String tokenType,
     String accessToken,
     String scope,
-    Optional<String> refreshToken,
-    Optional<Integer> expiresIn) {
+    Optional<String> refreshToken) {
 }
