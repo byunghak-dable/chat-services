@@ -1,5 +1,7 @@
 package org.wid.userservice.dto.user;
 
+import org.wid.userservice.entity.entity.User.LoginType;
+
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
@@ -7,8 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public record UserDto(
     String id,
     String email,
-    String firstName,
-    String lastName,
-    Boolean gender,
-    String thumbnailUrl) {
+    String name,
+    String profile,
+    LoginType loginType) {
 }
