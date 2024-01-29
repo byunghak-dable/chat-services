@@ -25,6 +25,7 @@ public class Oauth2ClientConfig {
   public static class OAuth2ClientProperties {
     private String clientId;
     private String clientSecret;
+    private String redirectUri;
     private String tokenUri;
     private String resourceUri;
   }

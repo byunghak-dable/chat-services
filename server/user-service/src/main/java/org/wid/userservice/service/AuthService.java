@@ -9,15 +9,21 @@ import org.wid.userservice.entity.entity.User.LoginType;
 import org.wid.userservice.port.primary.AuthServicePort;
 import org.wid.userservice.service.oauth2.Oauth2Service;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Service
+@Slf4j
 public class AuthService implements AuthServicePort {
 
   private final Map<LoginType, Oauth2Service> oauth2ServiceMap;
 
-  public AuthService(@Qualifier("GoogleOauth2Service") Oauth2Service googleOauth2Service) {
-    oauth2ServiceMap = Map.of(LoginType.GOOGLE, googleOauth2Service);
+  public AuthService(
+      @Qualifier("GoogleOauth2Service") Oauth2Service googleOauth2Service,
+      @Qualifier("GithubOauth2Service") Oauth2Service githubOauth2Service) {
+    oauth2ServiceMap = Map.of(
+        LoginType.GOOGLE, googleOauth2Service,
+        LoginType.GITHUB, githubOauth2Service);
   }
 
   @Override
@@ -27,6 +33,7 @@ public class AuthService implements AuthServicePort {
     return oauth2Service
         .getToken(loginDto.getCode())
         .flatMap(tokenResponseDto -> {
+          log.info("accessToken: {}", tokenResponseDto.accessToken());
           return oauth2Service.getResource(tokenResponseDto.accessToken());
         });
   }

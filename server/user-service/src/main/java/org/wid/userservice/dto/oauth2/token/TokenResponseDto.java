@@ -2,13 +2,13 @@ package org.wid.userservice.dto.oauth2.token;
 
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonNaming(SnakeCaseStrategy.class)
 public record TokenResponseDto(
     String tokenType,
-    String accessToken,
     String scope,
+    String accessToken,
     Optional<String> refreshToken) {
 }
