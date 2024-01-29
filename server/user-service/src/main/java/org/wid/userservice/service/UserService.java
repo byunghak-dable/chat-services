@@ -21,6 +21,6 @@ public class UserService implements UserServicePort {
   public Mono<UserDto> getUser(String userId) {
     Mono<User> user = userRepository.getUserById(userId);
 
-    return userMapper.entityToUserDtoAsync(user);
+    return user.map(userMapper::entityToUserDto);
   }
 }

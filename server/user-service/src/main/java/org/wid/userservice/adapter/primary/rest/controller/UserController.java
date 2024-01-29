@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.wid.userservice.dto.user.UserDto;
+import org.wid.userservice.entity.entity.User.LoginType;
 import org.wid.userservice.port.primary.UserServicePort;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,6 @@ public class UserController {
 
   @PostMapping("/user")
   public Mono<UserDto> getTestUser(@RequestBody Map<String, String> t) {
-    return Mono.just(new UserDto("1", "email", "firstName", t.get("test"), true, "thumnail"));
+    return Mono.just(new UserDto("1", "email", "firstName", "thumnail", LoginType.GOOGLE));
   }
 }

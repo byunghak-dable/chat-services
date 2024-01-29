@@ -3,12 +3,16 @@ package org.wid.userservice.service.oauth2;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.config.Oauth2ClientConfig.OAuth2ClientProperties;
-import org.wid.userservice.dto.oauth2.TokenRequestDto;
-import org.wid.userservice.dto.oauth2.TokenResponseDto;
+import org.wid.userservice.dto.oauth2.resource.GoogleUserDto;
+import org.wid.userservice.dto.oauth2.token.TokenRequestDto;
+import org.wid.userservice.dto.oauth2.token.TokenResponseDto;
+import org.wid.userservice.dto.user.UserDto;
+import org.wid.userservice.mapper.UserMapper;
 
 import reactor.core.publisher.Mono;
 
@@ -17,13 +21,21 @@ import reactor.core.publisher.Mono;
 public class GoogleOauth2Service implements Oauth2Service {
 
   private final OAuth2ClientProperties googleProperties;
+  private final UserMapper userMapper;
   private final Map<RequestType, WebClient> oauthClientMap;
 
-  public GoogleOauth2Service(OAuth2ClientProperties googleProperties) {
+  public GoogleOauth2Service(OAuth2ClientProperties googleProperties, UserMapper userMapper) {
     this.googleProperties = googleProperties;
+    this.userMapper = userMapper;
     this.oauthClientMap = Map.of(
-        RequestType.TOKEN, WebClient.builder().baseUrl(googleProperties.getTokenUri()).build(),
-        RequestType.RESOURCE, WebClient.builder().baseUrl(googleProperties.getResourceUri()).build());
+        RequestType.TOKEN, WebClient.builder()
+            .baseUrl(googleProperties.getTokenUri())
+            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .build(),
+        RequestType.RESOURCE, WebClient.builder()
+            .baseUrl(googleProperties.getResourceUri())
+            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .build());
   }
 
   @Override
@@ -35,21 +47,20 @@ public class GoogleOauth2Service implements Oauth2Service {
 
     return oauthClientMap.get(RequestType.TOKEN)
         .post()
-        .accept(MediaType.APPLICATION_JSON)
         .bodyValue(tokenRequestDto)
         .retrieve()
         .bodyToMono(TokenResponseDto.class);
   }
 
   @Override
-  public Mono<Object> getResource(String accessToken) {
+  public Mono<UserDto> getResource(String accessToken) {
     return oauthClientMap.get(RequestType.RESOURCE)
         .get()
         .uri(uriBuilder -> uriBuilder
             .queryParam("access_token", accessToken)
             .build())
-        .accept(MediaType.APPLICATION_JSON)
         .retrieve()
-        .bodyToMono(Object.class);
+        .bodyToMono(GoogleUserDto.class)
+        .map(userMapper::googleUserDtoToUserDto);
   }
 }
