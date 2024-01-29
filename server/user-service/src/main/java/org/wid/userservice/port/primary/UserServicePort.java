@@ -1,5 +1,9 @@
 package org.wid.userservice.port.primary;
 
-public interface UserServicePort {
+import org.wid.userservice.dto.user.UserDto;
 
+import reactor.core.publisher.Mono;
+
+public interface UserServicePort {
+  Mono<UserDto> getUser(String userId);
 }

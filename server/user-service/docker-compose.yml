@@ -1,29 +1,28 @@
 version: "3.9"
 services:
-  mysql:
-    image: mysql:8.0.31
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
+  mongodb:
+    image: mongo
+    container_name: mongodb
     ports:
-      - ${MYSQL_PORT}:3306
+      - ${MONGODB_PORT}:${MONGODB_PORT}
+    volumes:
+      - mongodb-data:/data/db
     environment:
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-    volumes:
-      - mysql-data:/var/lib/mysql
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DB}
 
-  redis:
-    image: redis:7.0.5-alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD} --port 6379
-    volumes:
-      - redis-data:/var/lib/redis/data
+  mongo-express:
+    image: mongo-express
     ports:
-      - ${REDIS_PORT}:6379
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGODB_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongodb:${MONGODB_PORT}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGODB_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGODB_PASSWORD}
 
 volumes:
-  mysql-data:
-    driver: local
-  redis-data:
+  mongodb-data:
     driver: local

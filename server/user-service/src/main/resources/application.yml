@@ -2,20 +2,29 @@ server:
   port: ${REST_PORT}
 
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
+  data:
+    mongodb:
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT}
+      database: ${MONGODB_DB}
 
-  jpa:
-    open-in-view: true
-    hibernate:
-      ddl-auto: create
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-      use-new-id-generator-mappings: false
-    show-sql: true
-    properties:
-      hibernate.format_sql: true
-      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+oauth2:
+  provider:
+    google:
+      client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+      client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      redirect-uri: ${GOOGLE_OAUTH_REDIRECT_URI}
+      token-uri: https://oauth2.googleapis.com/token
+      resource-uri: https://www.googleapis.com/oauth2/v2/userinfo
+    github:
+      client-id: ${GITHUB_OAUTH_CLIENT_ID}
+      client-secret: ${GITHUB_OAUTH_CLIENT_SECRET}
+      redirect-uri: ${GITHUB_OAUTH_REDIRECT_URI}
+      token-uri: https://github.com/login/oauth/access_token
+      resource-uri: https://api.github.com/user
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
