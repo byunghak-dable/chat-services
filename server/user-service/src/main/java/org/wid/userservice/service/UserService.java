@@ -18,9 +18,17 @@ public class UserService implements UserServicePort {
   private final UserMapper userMapper;
 
   @Override
+  public Mono<Void> upsertUser(UserDto userDto) {
+    User user = userMapper.userDtoToEntity(userDto);
+
+    return userRepository.upsertUser(user).then();
+  }
+
+  @Override
   public Mono<UserDto> getUser(String userId) {
     Mono<User> user = userRepository.getUserById(userId);
 
     return user.map(userMapper::entityToUserDto);
   }
+
 }

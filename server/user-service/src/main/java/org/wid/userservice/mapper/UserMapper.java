@@ -13,6 +13,8 @@ import org.wid.userservice.entity.entity.User;
 @Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
 public interface UserMapper {
 
+  User userDtoToEntity(UserDto dto);
+
   UserDto entityToUserDto(User user);
 
   @Mapping(target = "id", ignore = true)
