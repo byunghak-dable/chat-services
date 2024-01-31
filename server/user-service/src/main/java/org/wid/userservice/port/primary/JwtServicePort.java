@@ -4,6 +4,4 @@ public interface JwtServicePort {
   String createAccessToken();
 
   String createRefreshToken();
-
-  boolean validateToken(String token);
 }

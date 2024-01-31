@@ -17,10 +17,4 @@ public class JwtService implements JwtServicePort {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createRefreshToken'");
   }
-
-  @Override
-  public boolean validateToken(String token) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'validateToken'");
-  }
 }
