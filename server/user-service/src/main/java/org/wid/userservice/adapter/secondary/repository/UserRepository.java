@@ -18,7 +18,7 @@ public class UserRepository implements UserRepositoryPort {
   private final UserDao userDao;
 
   @Override
-  public Mono<User> register(User user) {
+  public Mono<User> upsertUser(User user) {
     return userDao.save(user);
   }
 
