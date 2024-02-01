@@ -7,6 +7,11 @@ spring:
       host: ${MONGODB_HOST}
       port: ${MONGODB_PORT}
       database: ${MONGODB_DB}
+      username: ${MONGODB_USER}
+      password: ${MONGODB_PASSWORD}
+      authentication-database: ${MONGODB_AUTH_DB}
+      auto-index-creation: true
+      field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
 
 oauth2:
   provider:
