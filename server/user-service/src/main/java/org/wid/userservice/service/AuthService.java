@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.wid.userservice.dto.auth.Oauth2LoginRequestDto;
 import org.wid.userservice.entity.entity.User.LoginType;
 import org.wid.userservice.port.primary.AuthServicePort;
+import org.wid.userservice.port.primary.UserServicePort;
 import org.wid.userservice.service.oauth2.Oauth2Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +17,15 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class AuthService implements AuthServicePort {
 
+  private final UserServicePort userService;
   private final Map<LoginType, Oauth2Service> oauth2ServiceMap;
 
   public AuthService(
+      UserServicePort userService,
       @Qualifier("GoogleOauth2Service") Oauth2Service googleOauth2Service,
       @Qualifier("GithubOauth2Service") Oauth2Service githubOauth2Service) {
-    oauth2ServiceMap = Map.of(
+    this.userService = userService;
+    this.oauth2ServiceMap = Map.of(
         LoginType.GOOGLE, googleOauth2Service,
         LoginType.GITHUB, githubOauth2Service);
   }
@@ -35,6 +39,8 @@ public class AuthService implements AuthServicePort {
         .flatMap(tokenResponseDto -> {
           log.info("accessToken: {}", tokenResponseDto.accessToken());
           return oauth2Service.getResource(tokenResponseDto.accessToken());
+        }).flatMap(userDto -> {
+          return userService.upsertUser(userDto);
         });
   }
 }
