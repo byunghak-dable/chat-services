@@ -1,4 +1,4 @@
-package org.wid.userservice.config;
+package org.wid.userservice;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;

@@ -7,7 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.wid.userservice.config.Oauth2ClientConfig.OAuth2ClientProperties;
+import org.wid.userservice.Oauth2ClientConfig.OAuth2ClientProperties;
 import org.wid.userservice.dto.oauth2.resource.GoogleUserDto;
 import org.wid.userservice.dto.oauth2.token.GoogleTokenRequestDto;
 import org.wid.userservice.dto.oauth2.token.TokenResponseDto;

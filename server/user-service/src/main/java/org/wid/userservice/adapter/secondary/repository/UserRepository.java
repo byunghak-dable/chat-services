@@ -18,7 +18,8 @@ public class UserRepository implements UserRepositoryPort {
   private final UserDao userDao;
 
   @Override
-  public Mono<User> register(User user) {
+  public Mono<User> upsertUser(User user) {
+    // TODO: need to check if upserting is working in mongodb
     return userDao.save(user);
   }
 
