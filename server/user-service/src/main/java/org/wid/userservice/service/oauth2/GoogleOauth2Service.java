@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.Oauth2ClientConfig.OAuth2ClientProperties;
 import org.wid.userservice.dto.oauth2.resource.GoogleUserDto;
 import org.wid.userservice.dto.oauth2.token.GoogleTokenRequestDto;
 import org.wid.userservice.dto.oauth2.token.TokenResponseDto;
 import org.wid.userservice.dto.user.UserDto;
+import org.wid.userservice.exception.BadRequestException;
 import org.wid.userservice.mapper.UserMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +55,7 @@ public class GoogleOauth2Service implements Oauth2Service {
         .post()
         .bodyValue(requestDto)
         .retrieve()
+        .onStatus(status -> status.is4xxClientError(), this::handleErrorResponse)
         .bodyToMono(TokenResponseDto.class);
   }
 
@@ -64,7 +67,12 @@ public class GoogleOauth2Service implements Oauth2Service {
             .queryParam("access_token", accessToken)
             .build())
         .retrieve()
+        .onStatus(status -> status.is4xxClientError(), this::handleErrorResponse)
         .bodyToMono(GoogleUserDto.class)
         .map(userMapper::googleUserDtoToUserDto);
+  }
+
+  private Mono<? extends Throwable> handleErrorResponse(ClientResponse errorResponse) {
+    return errorResponse.bodyToMono(String.class).map(BadRequestException::new);
   }
 }
