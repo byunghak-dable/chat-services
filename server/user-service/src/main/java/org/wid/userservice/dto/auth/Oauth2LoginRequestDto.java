@@ -4,9 +4,9 @@ import org.wid.userservice.entity.entity.User.LoginType;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class Oauth2LoginRequestDto {
   @NotNull
   private final LoginType type;
