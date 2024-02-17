@@ -6,14 +6,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.config.Oauth2ClientConfig.OAuth2ClientProperties;
 import org.wid.userservice.dto.oauth2.resource.GithubUserDto;
 import org.wid.userservice.dto.oauth2.token.GithubTokenRequestDto;
 import org.wid.userservice.dto.oauth2.token.TokenResponseDto;
 import org.wid.userservice.dto.user.UserDto;
-import org.wid.userservice.exception.BadRequestException;
 import org.wid.userservice.mapper.UserMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +52,7 @@ public class GithubOauth2Service implements Oauth2Service {
         .post()
         .bodyValue(requestDto)
         .retrieve()
-        .onStatus(status -> status.is4xxClientError(), this::handleErrorResponse)
+        .onStatus(status -> status.is4xxClientError(), this::handleClientErrorResponse)
         .bodyToMono(TokenResponseDto.class);
   }
 
@@ -64,12 +62,8 @@ public class GithubOauth2Service implements Oauth2Service {
         .get()
         .headers(headers -> headers.setBearerAuth(accessToken))
         .retrieve()
-        .onStatus(status -> status.is4xxClientError(), this::handleErrorResponse)
+        .onStatus(status -> status.is4xxClientError(), this::handleClientErrorResponse)
         .bodyToMono(GithubUserDto.class)
         .map(userMapper::githubUserDtoToUserDto);
-  }
-
-  private Mono<? extends Throwable> handleErrorResponse(ClientResponse errorResponse) {
-    return errorResponse.bodyToMono(String.class).map(BadRequestException::new);
   }
 }
