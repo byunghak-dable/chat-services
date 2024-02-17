@@ -1,6 +1,6 @@
 package org.wid.userservice.port.secondary;
 
-import org.wid.userservice.entity.entity.User;
+import org.wid.userservice.entity.User;
 
 import reactor.core.publisher.Mono;
 

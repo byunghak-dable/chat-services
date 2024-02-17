@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.wid.userservice.dto.auth.JwtDto;
 import org.wid.userservice.dto.auth.Oauth2LoginRequestDto;
-import org.wid.userservice.entity.entity.User.LoginType;
+import org.wid.userservice.entity.User.LoginType;
 import org.wid.userservice.port.primary.AuthServicePort;
 import org.wid.userservice.port.primary.JwtServicePort;
 import org.wid.userservice.port.primary.UserServicePort;
