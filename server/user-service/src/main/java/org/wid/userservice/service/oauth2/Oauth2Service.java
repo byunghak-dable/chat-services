@@ -15,7 +15,7 @@ public interface Oauth2Service {
 
   Mono<TokenResponseDto> getToken(String code);
 
-  Mono<UserDto> getResource(String accessToken);
+  Mono<UserDto> getResource(TokenResponseDto tokenResponseDto);
 
   default Mono<? extends Throwable> handleClientErrorResponse(ClientResponse errorResponse) {
     return errorResponse.bodyToMono(String.class).map(BadRequestException::new);

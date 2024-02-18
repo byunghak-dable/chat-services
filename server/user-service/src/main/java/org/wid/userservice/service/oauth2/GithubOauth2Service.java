@@ -57,10 +57,10 @@ public class GithubOauth2Service implements Oauth2Service {
   }
 
   @Override
-  public Mono<UserDto> getResource(String accessToken) {
+  public Mono<UserDto> getResource(TokenResponseDto tokenResponseDto) {
     return webClientMap.get(RequestType.RESOURCE)
         .get()
-        .headers(headers -> headers.setBearerAuth(accessToken))
+        .headers(headers -> headers.setBearerAuth(tokenResponseDto.accessToken()))
         .retrieve()
         .onStatus(status -> status.is4xxClientError(), this::handleClientErrorResponse)
         .bodyToMono(GithubUserDto.class)

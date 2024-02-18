@@ -57,11 +57,11 @@ public class GoogleOauth2Service implements Oauth2Service {
   }
 
   @Override
-  public Mono<UserDto> getResource(String accessToken) {
+  public Mono<UserDto> getResource(TokenResponseDto tokenResponseDto) {
     return oauthClientMap.get(RequestType.RESOURCE)
         .get()
         .uri(uriBuilder -> uriBuilder
-            .queryParam("access_token", accessToken)
+            .queryParam("access_token", tokenResponseDto.accessToken())
             .build())
         .retrieve()
         .onStatus(status -> status.is4xxClientError(), this::handleClientErrorResponse)
