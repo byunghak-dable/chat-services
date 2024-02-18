@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Date;
 
 import org.springframework.stereotype.Service;
+import org.wid.userservice.dto.auth.JwtDto;
 import org.wid.userservice.dto.user.UserDto;
 import org.wid.userservice.port.primary.JwtServicePort;
 
@@ -13,20 +14,31 @@ import io.jsonwebtoken.Jwts;
 public class JwtService implements JwtServicePort {
 
   @Override
-  public String createAccessToken(UserDto userDto) {
-    long expiredSeconds = 5 * 60;
-
-    return createToken(userDto, expiredSeconds);
+  public JwtDto generateTokens(UserDto userDto) {
+    return new JwtDto(
+        generateAccessToken(userDto),
+        generateRefreshToken(userDto));
   }
 
   @Override
-  public String createRefreshToken(UserDto userDto) {
-    long expiredSecondsToAdd = 14 * 24 * 60 * 60;
-
-    return createToken(userDto, expiredSecondsToAdd);
+  public JwtDto refresh(String refreshToken) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'refresh'");
   }
 
-  private String createToken(UserDto userDto, long expirationDurationSeconds) {
+  private String generateAccessToken(UserDto userDto) {
+    long expiredSeconds = 5 * 60;
+
+    return generateToken(userDto, expiredSeconds);
+  }
+
+  private String generateRefreshToken(UserDto userDto) {
+    long expiredSecondsToAdd = 14 * 24 * 60 * 60;
+
+    return generateToken(userDto, expiredSecondsToAdd);
+  }
+
+  private String generateToken(UserDto userDto, long expirationDurationSeconds) {
     Instant currentUtc = Instant.now();
     Instant expirationInstant = currentUtc.plusSeconds(expirationDurationSeconds);
 
