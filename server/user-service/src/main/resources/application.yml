@@ -30,6 +30,4 @@ oauth2:
 
 logging:
   level:
-    org:
-      springframework:
-        security: DEBUG
+    org.springframework.data.mongodb: DEBUG
