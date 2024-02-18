@@ -1,6 +1,6 @@
 package org.wid.userservice.dto.user;
 
-import org.wid.userservice.entity.entity.User.LoginType;
+import org.wid.userservice.entity.User.LoginType;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

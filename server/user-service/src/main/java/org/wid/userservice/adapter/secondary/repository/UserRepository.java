@@ -2,7 +2,7 @@ package org.wid.userservice.adapter.secondary.repository;
 
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
-import org.wid.userservice.entity.entity.User;
+import org.wid.userservice.entity.User;
 import org.wid.userservice.port.secondary.UserRepositoryPort;
 
 import lombok.RequiredArgsConstructor;

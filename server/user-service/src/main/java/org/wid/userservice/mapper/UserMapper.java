@@ -8,7 +8,7 @@ import org.mapstruct.ReportingPolicy;
 import org.wid.userservice.dto.oauth2.resource.GithubUserDto;
 import org.wid.userservice.dto.oauth2.resource.GoogleUserDto;
 import org.wid.userservice.dto.user.UserDto;
-import org.wid.userservice.entity.entity.User;
+import org.wid.userservice.entity.User;
 
 @Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
 public interface UserMapper {

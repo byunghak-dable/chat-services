@@ -7,7 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.wid.userservice.Oauth2ClientConfig.OAuth2ClientProperties;
+import org.wid.userservice.config.Oauth2ClientConfig.OAuth2ClientProperties;
 import org.wid.userservice.dto.oauth2.resource.GoogleUserDto;
 import org.wid.userservice.dto.oauth2.token.GoogleTokenRequestDto;
 import org.wid.userservice.dto.oauth2.token.TokenResponseDto;
@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 @Qualifier("GoogleOauth2Service")
 @Slf4j
 public class GoogleOauth2Service implements Oauth2Service {
-
   private final OAuth2ClientProperties googleProperties;
   private final UserMapper userMapper;
   private final Map<RequestType, WebClient> oauthClientMap;
@@ -53,17 +52,19 @@ public class GoogleOauth2Service implements Oauth2Service {
         .post()
         .bodyValue(requestDto)
         .retrieve()
+        .onStatus(status -> status.is4xxClientError(), this::handleClientErrorResponse)
         .bodyToMono(TokenResponseDto.class);
   }
 
   @Override
-  public Mono<UserDto> getResource(String accessToken) {
+  public Mono<UserDto> getResource(TokenResponseDto tokenResponseDto) {
     return oauthClientMap.get(RequestType.RESOURCE)
         .get()
         .uri(uriBuilder -> uriBuilder
-            .queryParam("access_token", accessToken)
+            .queryParam("access_token", tokenResponseDto.accessToken())
             .build())
         .retrieve()
+        .onStatus(status -> status.is4xxClientError(), this::handleClientErrorResponse)
         .bodyToMono(GoogleUserDto.class)
         .map(userMapper::googleUserDtoToUserDto);
   }

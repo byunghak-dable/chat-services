@@ -2,7 +2,7 @@ package org.wid.userservice.service;
 
 import org.springframework.stereotype.Service;
 import org.wid.userservice.dto.user.UserDto;
-import org.wid.userservice.entity.entity.User;
+import org.wid.userservice.entity.User;
 import org.wid.userservice.mapper.UserMapper;
 import org.wid.userservice.port.primary.UserServicePort;
 import org.wid.userservice.port.secondary.UserRepositoryPort;
@@ -18,10 +18,10 @@ public class UserService implements UserServicePort {
   private final UserMapper userMapper;
 
   @Override
-  public Mono<Void> upsertUser(UserDto userDto) {
+  public Mono<UserDto> upsertUser(UserDto userDto) {
     User user = userMapper.userDtoToEntity(userDto);
 
-    return userRepository.upsertUser(user).then();
+    return userRepository.upsertUser(user).map(userMapper::entityToUserDto);
   }
 
   @Override

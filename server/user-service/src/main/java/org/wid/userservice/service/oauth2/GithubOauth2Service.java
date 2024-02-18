@@ -7,7 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.wid.userservice.Oauth2ClientConfig.OAuth2ClientProperties;
+import org.wid.userservice.config.Oauth2ClientConfig.OAuth2ClientProperties;
 import org.wid.userservice.dto.oauth2.resource.GithubUserDto;
 import org.wid.userservice.dto.oauth2.token.GithubTokenRequestDto;
 import org.wid.userservice.dto.oauth2.token.TokenResponseDto;
@@ -52,15 +52,17 @@ public class GithubOauth2Service implements Oauth2Service {
         .post()
         .bodyValue(requestDto)
         .retrieve()
+        .onStatus(status -> status.is4xxClientError(), this::handleClientErrorResponse)
         .bodyToMono(TokenResponseDto.class);
   }
 
   @Override
-  public Mono<UserDto> getResource(String accessToken) {
+  public Mono<UserDto> getResource(TokenResponseDto tokenResponseDto) {
     return webClientMap.get(RequestType.RESOURCE)
         .get()
-        .headers(headers -> headers.setBearerAuth(accessToken))
+        .headers(headers -> headers.setBearerAuth(tokenResponseDto.accessToken()))
         .retrieve()
+        .onStatus(status -> status.is4xxClientError(), this::handleClientErrorResponse)
         .bodyToMono(GithubUserDto.class)
         .map(userMapper::githubUserDtoToUserDto);
   }
