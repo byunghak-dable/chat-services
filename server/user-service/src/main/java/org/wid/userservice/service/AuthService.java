@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.wid.userservice.dto.auth.JwtDto;
 import org.wid.userservice.dto.auth.Oauth2LoginRequestDto;
-import org.wid.userservice.dto.user.UserDto;
 import org.wid.userservice.entity.User.LoginType;
 import org.wid.userservice.port.primary.AuthServicePort;
 import org.wid.userservice.port.primary.JwtServicePort;
@@ -35,19 +34,13 @@ public class AuthService implements AuthServicePort {
   }
 
   @Override
-  public Mono<Object> oauth2Login(Oauth2LoginRequestDto loginDto) {
+  public Mono<JwtDto> oauth2Login(Oauth2LoginRequestDto loginDto) {
     Oauth2Service oauth2Service = oauth2ServiceMap.get(loginDto.getType());
 
     return oauth2Service
         .getToken(loginDto.getCode())
         .flatMap(oauth2Service::getResource)
         .flatMap(userService::upsertUser)
-        .flatMap(this::createJwtResponse);
-  }
-
-  private Mono<JwtDto> createJwtResponse(UserDto userDto) {
-    return Mono.just(new JwtDto(
-        jwtService.createAccessToken(userDto),
-        jwtService.createRefreshToken(userDto)));
+        .map(jwtService::generateTokens);
   }
 }

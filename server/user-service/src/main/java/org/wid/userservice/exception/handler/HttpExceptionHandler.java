@@ -20,9 +20,12 @@ public class HttpExceptionHandler {
     return Mono.just(new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
   }
 
-  @ExceptionHandler(BadRequestException.class)
+  @ExceptionHandler({
+      BadRequestException.class,
+      IllegalArgumentException.class
+  })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public Mono<ErrorResponseDto> handleBadRequest(BadRequestException e) {
+  public Mono<ErrorResponseDto> handleBadRequest(Exception e) {
     return Mono.just(new ErrorResponseDto(HttpStatus.BAD_REQUEST, e.getMessage()));
   }
 }
