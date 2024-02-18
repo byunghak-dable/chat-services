@@ -30,4 +30,4 @@ oauth2:
 
 logging:
   level:
-    org.springframework.data.mongodb: DEBUG
+    org.springframework.data.mongodb: ${LOGGING_LEVEL}
