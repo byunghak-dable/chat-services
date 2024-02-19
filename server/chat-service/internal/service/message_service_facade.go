@@ -1,44 +1,53 @@
 package service
 
 import (
-	"github.com/widcraft/chat-service/internal/adapter/secondary/repository"
 	"github.com/widcraft/chat-service/internal/domain/dto"
 	"github.com/widcraft/chat-service/internal/infra"
 	"github.com/widcraft/chat-service/internal/port"
-	"github.com/widcraft/chat-service/internal/service/message"
 )
 
-type MessageServiceFacade struct {
-	logger           infra.Logger
-	storageService   *message.StorageService
-	messengerService *message.MessengerService
+type MessageService interface {
+	SaveMessage(message *dto.MessageDto) error
+	GetMessages(roomIdx uint) ([]dto.MessageDto, error)
 }
 
-func NewMessageServiceFacade(logger infra.Logger, messageRepo *repository.MessageRepository) *MessageServiceFacade {
-	return &MessageServiceFacade{
+type MessengerService interface {
+	Participate(client port.MessengerClient)
+	Quit(client port.MessengerClient)
+	SendMessage(message *dto.MessageDto) error
+}
+
+type ChatService struct {
+	logger           infra.Logger
+	messageService   MessageService
+	messengerService MessengerService
+}
+
+func NewChatService(logger infra.Logger, messageService MessageService, messengerService MessengerService) *ChatService {
+	return &ChatService{
 		logger:           logger,
-		storageService:   message.NewStorageService(logger, messageRepo),
-		messengerService: message.NewMessengerService(logger),
+		messageService:   messageService,
+		messengerService: messengerService,
 	}
 }
 
-func (facade *MessageServiceFacade) Join(client port.MessengerClient) {
-	facade.messengerService.Participate(client)
+func (c *ChatService) Join(client port.MessengerClient) {
+	c.messengerService.Participate(client)
 }
 
-func (facade *MessageServiceFacade) Leave(client port.MessengerClient) {
-	facade.messengerService.Quit(client)
+func (c *ChatService) Leave(client port.MessengerClient) {
+	c.messengerService.Quit(client)
 }
 
-func (facade *MessageServiceFacade) SendMessge(message *dto.MessageDto) error {
-	err := facade.messengerService.SendMessage(message)
+func (c *ChatService) SendMessage(message *dto.MessageDto) error {
+	err := c.messengerService.SendMessage(message)
 	if err != nil {
 		return err
 	}
 
-	return facade.storageService.SaveMessage(message)
+	return c.messageService.SaveMessage(message)
 }
 
-func (facade *MessageServiceFacade) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
+func (c *ChatService) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
 	return nil, nil
 }

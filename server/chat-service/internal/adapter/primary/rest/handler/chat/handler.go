@@ -84,7 +84,7 @@ func (h *Handler) handleMessage(client *client) {
 }
 
 func (h *Handler) sendMessge(client *client, msg *message) {
-	err := h.app.SendMessge(&dto.MessageDto{
+	err := h.app.SendMessage(&dto.MessageDto{
 		RoomIdx:  client.roomIdx,
 		UserIdx:  client.userIdx,
 		Name:     client.name,

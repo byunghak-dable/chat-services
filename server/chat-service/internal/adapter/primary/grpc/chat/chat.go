@@ -66,7 +66,7 @@ func (s *Server) handleMessage(client *client) error {
 }
 
 func (s *Server) sendMessage(client *client, payload *pb.MessageReq) {
-	err := s.app.SendMessge(&dto.MessageDto{
+	err := s.app.SendMessage(&dto.MessageDto{
 		RoomIdx:  client.roomIdx,
 		UserIdx:  client.userIdx,
 		Name:     client.name,

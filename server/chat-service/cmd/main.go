@@ -11,8 +11,9 @@ import (
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
 	"github.com/widcraft/chat-service/internal/adapter/secondary/repository"
-	"github.com/widcraft/chat-service/internal/adapter/secondary/repository/db"
+	"github.com/widcraft/chat-service/internal/infra/db"
 	"github.com/widcraft/chat-service/internal/service"
+	"github.com/widcraft/chat-service/internal/service/message"
 )
 
 var logger = log.New()
@@ -30,23 +31,22 @@ func init() {
 }
 
 func main() {
-	redisConfig := db.RedisConfig{
-		Host:     os.Getenv("REDIS_HOST"),
-		Port:     os.Getenv("REDIS_PORT"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		Db:       0,
-	}
-	redisDb, err := db.NewRedis(redisConfig)
-
-	defer shutdown(redisDb)
-
+	mongoDb, err := db.NewMongoDb(db.MongoDbConfig{
+		User:     os.Getenv("MONGODB_USER"),
+		Password: os.Getenv("MONGODB_PASSWORD"),
+		Host:     os.Getenv("MONGODB_HOST"),
+		Port:     os.Getenv("MONGODB_PORT"),
+	})
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	messageRepo := repository.NewMessageRepository(logger, redisDb)
-	messageServiceFacade := service.NewMessageServiceFacade(logger, messageRepo)
+	messageServiceFacade := service.NewChatService(
+		logger,
+		message.NewMessageService(logger, repository.NewMessageRepository(logger, mongoDb)),
+		message.NewMessengerService(logger),
+	)
 
 	restApp := rest.New(logger, messageServiceFacade)
 	grpcApp := grpc.New(logger, messageServiceFacade)

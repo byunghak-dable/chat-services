@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/widcraft/chat-service/pkg/logger"
+	"github.com/widcraft/chat-service/internal/infra/logger"
 )
 
 type ValidationHandler struct {
@@ -18,7 +18,6 @@ func NewValidationHandler(logger logger.Logger) *ValidationHandler {
 
 func (h *ValidationHandler) Register(router *gin.RouterGroup) {
 	router.Use(h.validateUser)
-
 }
 
 func (h *ValidationHandler) validateUser(c *gin.Context) {

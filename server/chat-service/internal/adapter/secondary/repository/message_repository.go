@@ -1,20 +1,20 @@
 package repository
 
 import (
-	"github.com/widcraft/chat-service/internal/adapter/secondary/repository/db"
 	"github.com/widcraft/chat-service/internal/domain/entity"
 	"github.com/widcraft/chat-service/internal/infra"
+	"github.com/widcraft/chat-service/internal/infra/db"
 )
 
 type MessageRepository struct {
-	logger infra.Logger
-	db     *db.Redis
+	logger  infra.Logger
+	mongoDb *db.MongoDb
 }
 
-func NewMessageRepository(logger infra.Logger, redis *db.Redis) *MessageRepository {
+func NewMessageRepository(logger infra.Logger, mongoDb *db.MongoDb) *MessageRepository {
 	return &MessageRepository{
-		logger: logger,
-		db:     redis,
+		logger:  logger,
+		mongoDb: mongoDb,
 	}
 }
 

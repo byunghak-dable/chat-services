@@ -7,19 +7,19 @@ import (
 	"github.com/widcraft/chat-service/internal/port"
 )
 
-type MessageStorageService struct {
+type messageService struct {
 	logger infra.Logger
 	repo   port.MessageRepository
 }
 
-func NewMessageStorageService(logger infra.Logger, repo port.MessageRepository) *MessageStorageService {
-	return &MessageStorageService{
+func NewMessageService(logger infra.Logger, repo port.MessageRepository) *messageService {
+	return &messageService{
 		logger: logger,
 		repo:   repo,
 	}
 }
 
-func (app *MessageStorageService) SaveMessage(message *dto.MessageDto) error {
+func (app *messageService) SaveMessage(message *dto.MessageDto) error {
 	err := app.repo.SaveMessage(&entity.Message{
 		RoomIdx:  message.RoomIdx,
 		UserIdx:  message.UserIdx,
@@ -34,6 +34,6 @@ func (app *MessageStorageService) SaveMessage(message *dto.MessageDto) error {
 	return nil
 }
 
-func (app *MessageStorageService) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
+func (app *messageService) GetMessages(roomIdx uint) ([]dto.MessageDto, error) {
 	return nil, nil
 }
