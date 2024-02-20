@@ -2,7 +2,7 @@ package chat
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/widcraft/chat-service/internal/domain/dto"
+	"github.com/widcraft/chat-service/internal/application/dto"
 )
 
 type client struct {

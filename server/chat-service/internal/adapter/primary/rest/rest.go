@@ -7,17 +7,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/widcraft/chat-service/internal/adapter/primary/rest/handler/chat"
-	"github.com/widcraft/chat-service/internal/infra"
-	"github.com/widcraft/chat-service/internal/port"
+	"github.com/widcraft/chat-service/internal/port/primary"
+	"github.com/widcraft/chat-service/internal/port/secondary"
 )
 
 type Rest struct {
-	logger  infra.Logger
+	logger  secondary.Logger
 	server  *http.Server
-	chatApp port.MessageService
+	chatApp primary.MessageService
 }
 
-func New(logger infra.Logger, chatApp port.MessageService) *Rest {
+func New(logger secondary.Logger, chatApp primary.MessageService) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 

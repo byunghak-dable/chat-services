@@ -10,10 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
-	"github.com/widcraft/chat-service/internal/adapter/secondary/repository"
-	"github.com/widcraft/chat-service/internal/infra/db"
-	"github.com/widcraft/chat-service/internal/service"
-	"github.com/widcraft/chat-service/internal/service/message"
+	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/db"
+	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/repository"
+	"github.com/widcraft/chat-service/internal/application"
+	"github.com/widcraft/chat-service/internal/application/message"
 )
 
 var logger = log.New()
@@ -42,7 +42,7 @@ func main() {
 		return
 	}
 
-	messageServiceFacade := service.NewChatService(
+	messageServiceFacade := application.NewChatService(
 		logger,
 		message.NewMessageService(logger, repository.NewMessageRepository(logger, mongoDb)),
 		message.NewMessengerService(logger),

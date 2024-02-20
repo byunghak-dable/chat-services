@@ -4,26 +4,26 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/widcraft/chat-service/internal/domain/dto"
-	"github.com/widcraft/chat-service/internal/infra"
-	"github.com/widcraft/chat-service/internal/port"
+	"github.com/widcraft/chat-service/internal/application/dto"
+	"github.com/widcraft/chat-service/internal/port/primary"
+	"github.com/widcraft/chat-service/internal/port/secondary"
 )
 
 type MessengerService struct {
-	logger infra.Logger
-	rooms  map[uint][]port.MessengerClient
+	logger secondary.Logger
+	rooms  map[uint][]primary.MessengerClient
 	mutex  *sync.RWMutex
 }
 
-func NewMessengerService(logger infra.Logger) *MessengerService {
+func NewMessengerService(logger secondary.Logger) *MessengerService {
 	return &MessengerService{
 		logger: logger,
-		rooms:  make(map[uint][]port.MessengerClient),
+		rooms:  make(map[uint][]primary.MessengerClient),
 		mutex:  new(sync.RWMutex),
 	}
 }
 
-func (service *MessengerService) Participate(client port.MessengerClient) {
+func (service *MessengerService) Participate(client primary.MessengerClient) {
 	service.mutex.Lock()
 	defer service.mutex.Unlock()
 
@@ -36,11 +36,11 @@ func (service *MessengerService) Participate(client port.MessengerClient) {
 		return
 	}
 
-	service.rooms[roomIdx] = []port.MessengerClient{client}
+	service.rooms[roomIdx] = []primary.MessengerClient{client}
 	service.logger.Infof("room id: %d added", roomIdx, len(room))
 }
 
-func (app *MessengerService) Quit(client port.MessengerClient) {
+func (app *MessengerService) Quit(client primary.MessengerClient) {
 	app.mutex.Lock()
 	defer app.mutex.Unlock()
 
