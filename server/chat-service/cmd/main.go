@@ -11,7 +11,6 @@ import (
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
 	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/client"
-	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/dao"
 	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/repository"
 	"github.com/widcraft/chat-service/internal/application"
 	"github.com/widcraft/chat-service/internal/application/message"
@@ -45,7 +44,7 @@ func main() {
 
 	messageServiceFacade := application.NewChatService(
 		logger,
-		message.NewMessageService(logger, repository.NewMessageRepository(logger, dao.NewMessageDao(mongoDb))),
+		message.NewMessageService(logger, repository.NewMessageRepository(mongoDb)),
 		message.NewMessengerService(logger),
 	)
 

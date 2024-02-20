@@ -1,8 +1,9 @@
 package repository
 
 import (
+	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/client"
 	"github.com/widcraft/chat-service/internal/domain/entity"
-	"github.com/widcraft/chat-service/internal/port/secondary"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type MessageDao interface {
@@ -12,14 +13,12 @@ type MessageDao interface {
 }
 
 type MessageRepository struct {
-	logger     secondary.Logger
-	messageDao MessageDao
+	messageCollection *mongo.Collection
 }
 
-func NewMessageRepository(logger secondary.Logger, messageDao MessageDao) *MessageRepository {
+func NewMessageRepository(mongoDb *client.MongoDb) *MessageRepository {
 	return &MessageRepository{
-		logger:     logger,
-		messageDao: messageDao,
+		messageCollection: mongoDb.Database("chat").Collection("message"),
 	}
 }
 
