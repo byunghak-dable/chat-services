@@ -10,8 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
+	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/client"
 	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/dao"
-	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/db"
 	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/repository"
 	"github.com/widcraft/chat-service/internal/application"
 	"github.com/widcraft/chat-service/internal/application/message"
@@ -32,7 +32,7 @@ func init() {
 }
 
 func main() {
-	mongoDb, err := db.NewMongoDb(db.MongoDbConfig{
+	mongoDb, err := client.NewMongoDb(client.MongoDbConfig{
 		User:     os.Getenv("MONGODB_USER"),
 		Password: os.Getenv("MONGODB_PASSWORD"),
 		Host:     os.Getenv("MONGODB_HOST"),

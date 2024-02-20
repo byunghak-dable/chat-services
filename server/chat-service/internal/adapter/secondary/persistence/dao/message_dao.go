@@ -3,7 +3,7 @@ package dao
 import (
 	"context"
 
-	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/db"
+	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/client"
 	"github.com/widcraft/chat-service/internal/domain/entity"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -12,7 +12,7 @@ type MessageDao struct {
 	collection *mongo.Collection
 }
 
-func NewMessageDao(mongoDb *db.MongoDb) *MessageDao {
+func NewMessageDao(mongoDb *client.MongoDb) *MessageDao {
 	return &MessageDao{
 		collection: mongoDb.Database("chat").Collection("message"),
 	}
