@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
+	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/dao"
 	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/db"
 	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/repository"
 	"github.com/widcraft/chat-service/internal/application"
@@ -44,7 +45,7 @@ func main() {
 
 	messageServiceFacade := application.NewChatService(
 		logger,
-		message.NewMessageService(logger, repository.NewMessageRepository(logger, mongoDb)),
+		message.NewMessageService(logger, repository.NewMessageRepository(logger, dao.NewMessageDao(mongoDb))),
 		message.NewMessengerService(logger),
 	)
 

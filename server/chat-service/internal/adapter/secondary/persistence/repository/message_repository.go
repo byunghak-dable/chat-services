@@ -1,20 +1,25 @@
 package repository
 
 import (
-	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/db"
 	"github.com/widcraft/chat-service/internal/domain/entity"
 	"github.com/widcraft/chat-service/internal/port/secondary"
 )
 
-type MessageRepository struct {
-	logger  secondary.Logger
-	mongoDb *db.MongoDb
+type MessageDao interface {
+	GetMessages(roomIdx string) ([]*entity.Message, error)
+
+	SaveMessage(msg *entity.Message) error
 }
 
-func NewMessageRepository(logger secondary.Logger, mongoDb *db.MongoDb) *MessageRepository {
+type MessageRepository struct {
+	logger     secondary.Logger
+	messageDao MessageDao
+}
+
+func NewMessageRepository(logger secondary.Logger, messageDao MessageDao) *MessageRepository {
 	return &MessageRepository{
-		logger:  logger,
-		mongoDb: mongoDb,
+		logger:     logger,
+		messageDao: messageDao,
 	}
 }
 

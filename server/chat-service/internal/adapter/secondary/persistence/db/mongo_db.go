@@ -16,7 +16,7 @@ type MongoDbConfig struct {
 }
 
 type MongoDb struct {
-	client *mongo.Client
+	*mongo.Client
 }
 
 func NewMongoDb(config MongoDbConfig) (*MongoDb, error) {
@@ -26,5 +26,5 @@ func NewMongoDb(config MongoDbConfig) (*MongoDb, error) {
 		return nil, err
 	}
 
-	return &MongoDb{client: client}, nil
+	return &MongoDb{client}, nil
 }
