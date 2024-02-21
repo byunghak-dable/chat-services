@@ -3,15 +3,15 @@ package message
 import (
 	"github.com/widcraft/chat-service/internal/application/dto"
 	"github.com/widcraft/chat-service/internal/domain/entity"
-	"github.com/widcraft/chat-service/internal/port/secondary"
+	"github.com/widcraft/chat-service/internal/port/driven"
 )
 
 type messageService struct {
-	logger secondary.Logger
-	repo   secondary.MessageRepository
+	logger driven.Logger
+	repo   driven.MessageRepository
 }
 
-func NewMessageService(logger secondary.Logger, repo secondary.MessageRepository) *messageService {
+func NewMessageService(logger driven.Logger, repo driven.MessageRepository) *messageService {
 	return &messageService{
 		logger: logger,
 		repo:   repo,

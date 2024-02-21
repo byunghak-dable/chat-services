@@ -1,4 +1,4 @@
-package secondary
+package driven
 
 type Logger interface {
 	Debugf(format string, args ...interface{})

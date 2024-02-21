@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/client"
+	"github.com/widcraft/chat-service/internal/adapter/driven/persistence/client"
 	"github.com/widcraft/chat-service/internal/domain/entity"
 	"go.mongodb.org/mongo-driver/mongo"
 )

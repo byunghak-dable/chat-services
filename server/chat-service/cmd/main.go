@@ -8,10 +8,10 @@ import (
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
-	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
-	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/client"
-	"github.com/widcraft/chat-service/internal/adapter/secondary/persistence/repository"
+	"github.com/widcraft/chat-service/internal/adapter/driven/persistence/client"
+	"github.com/widcraft/chat-service/internal/adapter/driven/persistence/repository"
+	"github.com/widcraft/chat-service/internal/adapter/driving/grpc"
+	"github.com/widcraft/chat-service/internal/adapter/driving/rest"
 	"github.com/widcraft/chat-service/internal/application"
 	"github.com/widcraft/chat-service/internal/application/message"
 )

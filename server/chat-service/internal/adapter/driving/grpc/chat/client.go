@@ -1,7 +1,7 @@
 package chat
 
 import (
-	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat/pb"
+	"github.com/widcraft/chat-service/internal/adapter/driving/grpc/chat/pb"
 	"github.com/widcraft/chat-service/internal/application/dto"
 )
 

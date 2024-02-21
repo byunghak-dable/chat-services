@@ -1,4 +1,4 @@
-package primary
+package driving
 
 import "github.com/widcraft/chat-service/internal/application/dto"
 

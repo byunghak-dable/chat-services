@@ -1,4 +1,4 @@
-package secondary
+package driven
 
 import "github.com/widcraft/chat-service/internal/domain/entity"
 

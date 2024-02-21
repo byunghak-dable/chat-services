@@ -3,20 +3,20 @@ package grpc
 import (
 	"net"
 
-	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat"
-	"github.com/widcraft/chat-service/internal/adapter/primary/grpc/chat/pb"
-	"github.com/widcraft/chat-service/internal/port/primary"
-	"github.com/widcraft/chat-service/internal/port/secondary"
+	"github.com/widcraft/chat-service/internal/adapter/driving/grpc/chat"
+	"github.com/widcraft/chat-service/internal/adapter/driving/grpc/chat/pb"
+	"github.com/widcraft/chat-service/internal/port/driven"
+	"github.com/widcraft/chat-service/internal/port/driving"
 	"google.golang.org/grpc"
 )
 
 type Grpc struct {
-	logger  secondary.Logger
+	logger  driven.Logger
 	server  *grpc.Server
-	chatApp primary.MessageService
+	chatApp driving.MessageService
 }
 
-func New(logger secondary.Logger, chatApp primary.MessageService) *Grpc {
+func New(logger driven.Logger, chatApp driving.MessageService) *Grpc {
 	server := grpc.NewServer()
 	pb.RegisterChatServer(server, chat.New(logger, chatApp))
 

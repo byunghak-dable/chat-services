@@ -2,8 +2,8 @@ package application
 
 import (
 	"github.com/widcraft/chat-service/internal/application/dto"
-	"github.com/widcraft/chat-service/internal/port/primary"
-	"github.com/widcraft/chat-service/internal/port/secondary"
+	"github.com/widcraft/chat-service/internal/port/driven"
+	"github.com/widcraft/chat-service/internal/port/driving"
 )
 
 type MessageService interface {
@@ -12,18 +12,18 @@ type MessageService interface {
 }
 
 type MessengerService interface {
-	Participate(client primary.MessengerClient)
-	Quit(client primary.MessengerClient)
+	Participate(client driving.MessengerClient)
+	Quit(client driving.MessengerClient)
 	SendMessage(message *dto.MessageDto) error
 }
 
 type ChatService struct {
-	logger           secondary.Logger
+	logger           driven.Logger
 	messageService   MessageService
 	messengerService MessengerService
 }
 
-func NewChatService(logger secondary.Logger, messageService MessageService, messengerService MessengerService) *ChatService {
+func NewChatService(logger driven.Logger, messageService MessageService, messengerService MessengerService) *ChatService {
 	return &ChatService{
 		logger:           logger,
 		messageService:   messageService,
@@ -31,11 +31,11 @@ func NewChatService(logger secondary.Logger, messageService MessageService, mess
 	}
 }
 
-func (c *ChatService) Join(client primary.MessengerClient) {
+func (c *ChatService) Join(client driving.MessengerClient) {
 	c.messengerService.Participate(client)
 }
 
-func (c *ChatService) Leave(client primary.MessengerClient) {
+func (c *ChatService) Leave(client driving.MessengerClient) {
 	c.messengerService.Quit(client)
 }
 
