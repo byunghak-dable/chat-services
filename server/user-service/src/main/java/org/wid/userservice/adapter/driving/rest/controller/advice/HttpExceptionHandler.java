@@ -1,4 +1,4 @@
-package org.wid.userservice.adapter.driving.rest.exception.handler;
+package org.wid.userservice.adapter.driving.rest.controller.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.wid.userservice.adapter.driving.rest.controller.AuthController;
 import org.wid.userservice.adapter.driving.rest.controller.UserController;
-import org.wid.userservice.adapter.driving.rest.exception.BadRequestException;
 import org.wid.userservice.application.dto.ErrorResponseDto;
+import org.wid.userservice.application.exception.BadRequestException;
 
 import reactor.core.publisher.Mono;
 
