@@ -12,8 +12,8 @@ import (
 	"github.com/widcraft/chat-service/internal/adapter/driven/persistence/repository"
 	"github.com/widcraft/chat-service/internal/adapter/driving/grpc"
 	"github.com/widcraft/chat-service/internal/adapter/driving/rest"
-	"github.com/widcraft/chat-service/internal/application"
-	"github.com/widcraft/chat-service/internal/application/message"
+	"github.com/widcraft/chat-service/internal/application/service"
+	"github.com/widcraft/chat-service/internal/application/service/message"
 )
 
 var logger = log.New()
@@ -42,14 +42,14 @@ func main() {
 		return
 	}
 
-	messageServiceFacade := application.NewChatService(
+	chatService := service.NewChatService(
 		logger,
 		message.NewMessageService(logger, repository.NewMessageRepository(mongoDb)),
 		message.NewMessengerService(logger),
 	)
 
-	restApp := rest.New(logger, messageServiceFacade)
-	grpcApp := grpc.New(logger, messageServiceFacade)
+	restApp := rest.New(logger, chatService)
+	grpcApp := grpc.New(logger, chatService)
 
 	defer shutdown(restApp, grpcApp)
 
