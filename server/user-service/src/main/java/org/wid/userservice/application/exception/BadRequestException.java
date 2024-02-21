@@ -1,4 +1,4 @@
-package org.wid.userservice.adapter.driving.rest.exception;
+package org.wid.userservice.application.exception;
 
 public class BadRequestException extends RuntimeException {
 
