@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.adapter.driven.config.Oauth2ClientConfig.OAuth2ClientProperties;
+import org.wid.userservice.application.abstraction.Oauth2Service;
 import org.wid.userservice.application.dto.oauth2.resource.GithubUserDto;
 import org.wid.userservice.application.dto.oauth2.token.GithubTokenRequestDto;
 import org.wid.userservice.application.dto.oauth2.token.TokenResponseDto;

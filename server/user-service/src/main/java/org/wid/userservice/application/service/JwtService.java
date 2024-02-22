@@ -4,17 +4,12 @@ import java.time.Instant;
 import java.util.Date;
 
 import org.springframework.stereotype.Service;
+import org.wid.userservice.application.abstraction.TokenService;
 import org.wid.userservice.application.dto.auth.AccessTokenDto;
 import org.wid.userservice.application.dto.auth.AuthenticationTokensDto;
 import org.wid.userservice.application.dto.user.UserDto;
 
 import io.jsonwebtoken.Jwts;
-
-interface TokenService {
-  AuthenticationTokensDto generateTokens(UserDto userDto);
-
-  AccessTokenDto generateAccessToken(String refreshToken);
-}
 
 @Service
 public class JwtService implements TokenService {

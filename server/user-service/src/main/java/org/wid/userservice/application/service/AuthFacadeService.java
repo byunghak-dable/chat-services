@@ -4,10 +4,11 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.wid.userservice.application.abstraction.Oauth2Service;
+import org.wid.userservice.application.abstraction.TokenService;
 import org.wid.userservice.application.dto.auth.AccessTokenDto;
 import org.wid.userservice.application.dto.auth.AuthenticationTokensDto;
 import org.wid.userservice.application.dto.auth.Oauth2LoginRequestDto;
-import org.wid.userservice.application.service.oauth2.Oauth2Service;
 import org.wid.userservice.domain.entity.User.LoginType;
 import org.wid.userservice.port.driving.AuthServicePort;
 import org.wid.userservice.port.driving.UserServicePort;
