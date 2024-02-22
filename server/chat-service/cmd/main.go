@@ -8,11 +8,12 @@ import (
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/chat-service/internal/adapter/primary/grpc"
-	"github.com/widcraft/chat-service/internal/adapter/primary/rest"
-	"github.com/widcraft/chat-service/internal/adapter/secondary/repository"
-	"github.com/widcraft/chat-service/internal/adapter/secondary/repository/db"
-	"github.com/widcraft/chat-service/internal/service"
+	"github.com/widcraft/chat-service/internal/adapter/driven/persistence/client"
+	"github.com/widcraft/chat-service/internal/adapter/driven/persistence/repository"
+	"github.com/widcraft/chat-service/internal/adapter/driving/grpc"
+	"github.com/widcraft/chat-service/internal/adapter/driving/rest"
+	"github.com/widcraft/chat-service/internal/application/service"
+	"github.com/widcraft/chat-service/internal/application/service/message"
 )
 
 var logger = log.New()
@@ -30,26 +31,25 @@ func init() {
 }
 
 func main() {
-	redisConfig := db.RedisConfig{
-		Host:     os.Getenv("REDIS_HOST"),
-		Port:     os.Getenv("REDIS_PORT"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		Db:       0,
-	}
-	redisDb, err := db.NewRedis(redisConfig)
-
-	defer shutdown(redisDb)
-
+	mongoDb, err := client.NewMongoDb(client.MongoDbConfig{
+		User:     os.Getenv("MONGODB_USER"),
+		Password: os.Getenv("MONGODB_PASSWORD"),
+		Host:     os.Getenv("MONGODB_HOST"),
+		Port:     os.Getenv("MONGODB_PORT"),
+	})
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	messageRepo := repository.NewMessageRepository(logger, redisDb)
-	messageServiceFacade := service.NewMessageServiceFacade(logger, messageRepo)
+	chatService := service.NewChatService(
+		logger,
+		message.NewMessageService(logger, repository.NewMessageRepository(mongoDb)),
+		message.NewMessengerService(logger),
+	)
 
-	restApp := rest.New(logger, messageServiceFacade)
-	grpcApp := grpc.New(logger, messageServiceFacade)
+	restApp := rest.New(logger, chatService)
+	grpcApp := grpc.New(logger, chatService)
 
 	defer shutdown(restApp, grpcApp)
 
