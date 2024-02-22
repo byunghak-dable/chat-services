@@ -14,10 +14,10 @@ import (
 type Rest struct {
 	logger  driven.Logger
 	server  *http.Server
-	chatApp driving.MessageService
+	chatApp driving.ChatService
 }
 
-func New(logger driven.Logger, chatApp driving.MessageService) *Rest {
+func New(logger driven.Logger, chatApp driving.ChatService) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 

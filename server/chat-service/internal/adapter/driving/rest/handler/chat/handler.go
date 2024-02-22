@@ -12,11 +12,11 @@ import (
 
 type Handler struct {
 	logger   driven.Logger
-	app      driving.MessageService
+	app      driving.ChatService
 	upgrader *websocket.Upgrader
 }
 
-func New(logger driven.Logger, app driving.MessageService) *Handler {
+func New(logger driven.Logger, app driving.ChatService) *Handler {
 	return &Handler{
 		logger: logger,
 		app:    app,

@@ -2,7 +2,7 @@ package driving
 
 import "github.com/widcraft/chat-service/internal/application/dto"
 
-type MessageService interface {
+type ChatService interface {
 	Join(client MessengerClient)
 	Leave(client MessengerClient)
 	SendMessage(messageDto *dto.MessageDto) error
