@@ -2,15 +2,15 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/widcraft/chat-service/internal/infra/logger"
+	"github.com/widcraft/chat-service/internal/port/driven"
 )
 
 type ValidationHandler struct {
-	logger logger.Logger
+	logger driven.Logger
 	// TODO: need grpc client
 }
 
-func NewValidationHandler(logger logger.Logger) *ValidationHandler {
+func NewValidationHandler(logger driven.Logger) *ValidationHandler {
 	return &ValidationHandler{
 		logger: logger,
 	}
