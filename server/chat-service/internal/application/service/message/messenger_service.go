@@ -79,6 +79,7 @@ func (service *MessengerService) SendMessage(message *dto.MessageDto) error {
 		}
 	}
 
+	// TODO: need better error handling
 	if len(sendErrors) > 0 {
 		return fmt.Errorf("send message errors, %v", sendErrors)
 	}
