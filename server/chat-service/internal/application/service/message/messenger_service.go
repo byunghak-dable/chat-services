@@ -40,25 +40,24 @@ func (service *MessengerService) Participate(client driving.MessengerClient) {
 	service.logger.Infof("room id: %d added", roomIdx, len(room))
 }
 
-func (app *MessengerService) Quit(client driving.MessengerClient) {
-	app.mutex.Lock()
-	defer app.mutex.Unlock()
+func (service *MessengerService) Quit(client driving.MessengerClient) {
+	service.mutex.Lock()
+	defer service.mutex.Unlock()
 
 	roomIdx := client.GetRoomIdx()
-	room, ok := app.rooms[roomIdx]
+	room, ok := service.rooms[roomIdx]
 
 	if !ok {
-		app.logger.Error("no existing chat room roomIdx")
+		service.logger.Error("no existing chat room roomIdx")
 		return
 	}
 
 	for i, participant := range room {
 		if client == participant {
-			app.rooms[roomIdx] = append(room[:i], room[i+1:]...)
+			service.rooms[roomIdx] = append(room[:i], room[i+1:]...)
+			return
 		}
 	}
-
-	app.logger.Error("no client in chat room")
 }
 
 func (service *MessengerService) SendMessage(message *dto.MessageDto) error {

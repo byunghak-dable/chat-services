@@ -1,29 +1,23 @@
 package service
 
 import (
+	"github.com/widcraft/chat-service/internal/application/abstraction"
 	"github.com/widcraft/chat-service/internal/application/dto"
 	"github.com/widcraft/chat-service/internal/port/driven"
 	"github.com/widcraft/chat-service/internal/port/driving"
 )
 
-type MessageService interface {
-	SaveMessage(message *dto.MessageDto) error
-	GetMessages(roomIdx uint) ([]dto.MessageDto, error)
-}
-
-type MessengerService interface {
-	Participate(client driving.MessengerClient)
-	Quit(client driving.MessengerClient)
-	SendMessage(message *dto.MessageDto) error
-}
-
 type ChatService struct {
 	logger           driven.Logger
-	messageService   MessageService
-	messengerService MessengerService
+	messageService   abstraction.MessageService
+	messengerService abstraction.MessengerService
 }
 
-func NewChatService(logger driven.Logger, messageService MessageService, messengerService MessengerService) *ChatService {
+func NewChatService(
+	logger driven.Logger,
+	messageService abstraction.MessageService,
+	messengerService abstraction.MessengerService,
+) *ChatService {
 	return &ChatService{
 		logger:           logger,
 		messageService:   messageService,
