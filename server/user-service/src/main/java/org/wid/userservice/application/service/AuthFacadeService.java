@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.wid.userservice.application.dto.auth.AccessTokenDto;
 import org.wid.userservice.application.dto.auth.AuthenticationTokensDto;
 import org.wid.userservice.application.dto.auth.Oauth2LoginRequestDto;
 import org.wid.userservice.application.service.oauth2.Oauth2Service;
@@ -14,13 +15,13 @@ import org.wid.userservice.port.driving.UserServicePort;
 import reactor.core.publisher.Mono;
 
 @Service
-public class AuthService implements AuthServicePort {
+public class AuthFacadeService implements AuthServicePort {
 
   private final UserServicePort userService;
   private final TokenService jwtService;
   private final Map<LoginType, Oauth2Service> oauth2ServiceMap;
 
-  public AuthService(
+  public AuthFacadeService(
       UserServicePort userService,
       TokenService jwtService,
       @Qualifier("GoogleOauth2Service") Oauth2Service googleOauth2Service,
@@ -44,7 +45,7 @@ public class AuthService implements AuthServicePort {
   }
 
   @Override
-  public AuthenticationTokensDto generateAccessToken(String refreshToken) {
+  public AccessTokenDto generateAccessToken(String refreshToken) {
     return jwtService.generateAccessToken(refreshToken);
   }
 }
