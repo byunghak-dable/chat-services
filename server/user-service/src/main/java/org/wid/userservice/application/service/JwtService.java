@@ -4,26 +4,32 @@ import java.time.Instant;
 import java.util.Date;
 
 import org.springframework.stereotype.Service;
-import org.wid.userservice.application.dto.auth.JwtDto;
+import org.wid.userservice.application.dto.auth.AccessTokenDto;
+import org.wid.userservice.application.dto.auth.AuthenticationTokensDto;
 import org.wid.userservice.application.dto.user.UserDto;
-import org.wid.userservice.port.driving.JwtServicePort;
 
 import io.jsonwebtoken.Jwts;
 
+interface TokenService {
+  AuthenticationTokensDto generateTokens(UserDto userDto);
+
+  AccessTokenDto generateAccessToken(String refreshToken);
+}
+
 @Service
-public class JwtService implements JwtServicePort {
+public class JwtService implements TokenService {
 
   @Override
-  public JwtDto generateTokens(UserDto userDto) {
-    return new JwtDto(
+  public AuthenticationTokensDto generateTokens(UserDto userDto) {
+    return new AuthenticationTokensDto(
         generateAccessToken(userDto),
         generateRefreshToken(userDto));
   }
 
   @Override
-  public JwtDto refresh(String refreshToken) {
+  public AccessTokenDto generateAccessToken(String refreshToken) {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'refresh'");
+    throw new UnsupportedOperationException("Unimplemented method 'generateAccessToken'");
   }
 
   private String generateAccessToken(UserDto userDto) {
