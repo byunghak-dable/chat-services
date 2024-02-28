@@ -2,13 +2,13 @@ package rest
 
 import (
 	"context"
+	"messenger-service/internal/adapter/driving/rest/handler/chat"
+	"messenger-service/internal/port/driven"
+	"messenger-service/internal/port/driving"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/widcraft/messenger-service/internal/adapter/driving/rest/handler/chat"
-	"github.com/widcraft/messenger-service/internal/port/driven"
-	"github.com/widcraft/messenger-service/internal/port/driving"
 )
 
 type Rest struct {

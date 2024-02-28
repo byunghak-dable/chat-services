@@ -2,11 +2,10 @@ package chat
 
 import (
 	"errors"
-
-	"github.com/widcraft/messenger-service/internal/adapter/driving/grpc/chat/pb"
-	"github.com/widcraft/messenger-service/internal/application/dto"
-	"github.com/widcraft/messenger-service/internal/port/driven"
-	"github.com/widcraft/messenger-service/internal/port/driving"
+	"messenger-service/internal/adapter/driving/grpc/chat/pb"
+	"messenger-service/internal/application/dto"
+	"messenger-service/internal/port/driven"
+	"messenger-service/internal/port/driving"
 )
 
 type Server struct {

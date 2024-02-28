@@ -1,13 +1,13 @@
 package chat
 
 import (
+	"messenger-service/internal/application/dto"
+	"messenger-service/internal/port/driven"
+	"messenger-service/internal/port/driving"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/widcraft/messenger-service/internal/application/dto"
-	"github.com/widcraft/messenger-service/internal/port/driven"
-	"github.com/widcraft/messenger-service/internal/port/driving"
 )
 
 type Handler struct {

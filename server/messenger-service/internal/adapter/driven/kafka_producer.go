@@ -3,10 +3,10 @@ package driven
 import (
 	"encoding/json"
 	"fmt"
+	"messenger-service/internal/application/dto"
 	"strings"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"github.com/widcraft/messenger-service/internal/application/dto"
 )
 
 const (

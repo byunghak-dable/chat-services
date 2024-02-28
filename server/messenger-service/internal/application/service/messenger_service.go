@@ -2,11 +2,10 @@ package service
 
 import (
 	"fmt"
+	"messenger-service/internal/application/dto"
+	"messenger-service/internal/port/driven"
+	"messenger-service/internal/port/driving"
 	"sync"
-
-	"github.com/widcraft/messenger-service/internal/application/dto"
-	"github.com/widcraft/messenger-service/internal/port/driven"
-	"github.com/widcraft/messenger-service/internal/port/driving"
 )
 
 type MessengerService struct {

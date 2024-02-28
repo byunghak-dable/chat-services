@@ -1,6 +1,10 @@
 package main
 
 import (
+	"messenger-service/internal/adapter/driven"
+	"messenger-service/internal/adapter/driving/grpc"
+	"messenger-service/internal/adapter/driving/rest"
+	"messenger-service/internal/application/service"
 	"os"
 	"os/signal"
 	"reflect"
@@ -8,10 +12,6 @@ import (
 
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
-	"github.com/widcraft/messenger-service/internal/adapter/driven"
-	"github.com/widcraft/messenger-service/internal/adapter/driving/grpc"
-	"github.com/widcraft/messenger-service/internal/adapter/driving/rest"
-	"github.com/widcraft/messenger-service/internal/application/service"
 )
 
 var logger = log.New()
