@@ -1,12 +1,12 @@
 package grpc
 
 import (
+	"messenger-service/internal/adapter/driving/grpc/chat"
+	"messenger-service/internal/adapter/driving/grpc/chat/pb"
+	"messenger-service/internal/port/driven"
+	"messenger-service/internal/port/driving"
 	"net"
 
-	"github.com/widcraft/messenger-service/internal/adapter/driving/grpc/chat"
-	"github.com/widcraft/messenger-service/internal/adapter/driving/grpc/chat/pb"
-	"github.com/widcraft/messenger-service/internal/port/driven"
-	"github.com/widcraft/messenger-service/internal/port/driving"
 	"google.golang.org/grpc"
 )
 
@@ -38,7 +38,7 @@ func (g *Grpc) Run(port string) {
 	}
 }
 
-func (g *Grpc) OnExit() error {
+func (g *Grpc) Close() error {
 	g.server.GracefulStop()
 	return nil
 }

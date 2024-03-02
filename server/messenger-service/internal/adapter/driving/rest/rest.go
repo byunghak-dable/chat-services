@@ -2,13 +2,14 @@ package rest
 
 import (
 	"context"
+	"errors"
+	"messenger-service/internal/adapter/driving/rest/handler/chat"
+	"messenger-service/internal/port/driven"
+	"messenger-service/internal/port/driving"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/widcraft/messenger-service/internal/adapter/driving/rest/handler/chat"
-	"github.com/widcraft/messenger-service/internal/port/driven"
-	"github.com/widcraft/messenger-service/internal/port/driving"
 )
 
 type Rest struct {
@@ -17,15 +18,15 @@ type Rest struct {
 	messengerService driving.MessengerServicePort
 }
 
-func New(logger driven.LoggerPort, messaengerService driving.MessengerServicePort) *Rest {
+func New(logger driven.LoggerPort, messengerService driving.MessengerServicePort) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 
-	chat.New(logger, messaengerService).Register(group)
+	chat.New(logger, messengerService).Register(group)
 
 	return &Rest{
 		logger:           logger,
-		messengerService: messaengerService,
+		messengerService: messengerService,
 		server: &http.Server{
 			Handler:      router,
 			ReadTimeout:  5 * time.Second,
@@ -39,12 +40,12 @@ func (rest *Rest) Run(port string) {
 	rest.server.Addr = ":" + port
 	err := rest.server.ListenAndServe()
 
-	if err != nil && err != http.ErrServerClosed {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		rest.logger.Errorf("websocket server error: %s", err)
 	}
 }
 
-func (rest *Rest) OnExit() error {
+func (rest *Rest) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	return rest.server.Shutdown(ctx)

@@ -1,8 +1,9 @@
 package middleware
 
 import (
+	"messenger-service/internal/port/driven"
+
 	"github.com/gin-gonic/gin"
-	"github.com/widcraft/messenger-service/internal/port/driven"
 )
 
 type ValidationHandler struct {

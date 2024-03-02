@@ -1,8 +1,8 @@
 package chat
 
 import (
-	"github.com/widcraft/messenger-service/internal/adapter/driving/grpc/chat/pb"
-	"github.com/widcraft/messenger-service/internal/application/dto"
+	"messenger-service/internal/adapter/driving/grpc/chat/pb"
+	"messenger-service/internal/application/dto"
 )
 
 type client struct {
@@ -29,4 +29,8 @@ func (c *client) GetRoomIdx() uint {
 
 func (c *client) GetUserIdx() uint {
 	return c.userIdx
+}
+
+func (c *client) Close() error {
+	return nil
 }

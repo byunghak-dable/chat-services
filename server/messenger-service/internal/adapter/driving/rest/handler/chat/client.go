@@ -1,8 +1,9 @@
 package chat
 
 import (
+	"messenger-service/internal/application/dto"
+
 	"github.com/gorilla/websocket"
-	"github.com/widcraft/messenger-service/internal/application/dto"
 )
 
 type client struct {
