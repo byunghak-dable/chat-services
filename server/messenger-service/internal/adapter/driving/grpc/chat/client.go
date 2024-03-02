@@ -30,3 +30,7 @@ func (c *client) GetRoomIdx() uint {
 func (c *client) GetUserIdx() uint {
 	return c.userIdx
 }
+
+func (c *client) Close() error {
+	return nil
+}

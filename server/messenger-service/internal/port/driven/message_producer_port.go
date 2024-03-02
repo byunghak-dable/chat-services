@@ -3,5 +3,5 @@ package driven
 import "messenger-service/internal/application/dto"
 
 type MessageProducerPort interface {
-	ProduceMessage(message *dto.MessageDto) error
+	Produce(topic string, message *dto.MessageDto) error
 }

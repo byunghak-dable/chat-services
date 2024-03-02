@@ -38,59 +38,87 @@ func (h *Handler) Register(router *gin.RouterGroup) {
 func (h *Handler) chat(ctx *gin.Context) {
 	var param connection
 	err := ctx.ShouldBindQuery(&param)
+
 	if err != nil {
 		h.logger.Error(err)
+		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	conn, err := h.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-	if err != nil {
-		h.logger.Errorf("socket failed: %s", err)
+	conn, upgradeErr := h.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+
+	if upgradeErr != nil {
+		h.logger.Errorf("webSocket upgrade failed: %s", upgradeErr)
+		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	defer conn.Close()
 
-	h.handleConnection(conn, param)
+	defer func() {
+		if err := conn.Close(); err != nil {
+			h.logger.Errorf("webSocket close failed: %v", err)
+		}
+	}()
+
+	connectionErr := h.handleConnection(conn, &param)
+
+	if connectionErr != nil {
+		h.logger.Errorf("webSocket connection handling failed: %s", connectionErr)
+		ctx.Status(http.StatusInternalServerError)
+	}
 }
 
-func (h *Handler) handleConnection(conn *websocket.Conn, param connection) {
+func (h *Handler) handleConnection(conn *websocket.Conn, param *connection) error {
 	client := &client{
 		websocketConn: conn,
 		roomIdx:       param.RoomIdx,
 		userIdx:       param.UserIdx,
 	}
 
-	h.messengerService.Join(client)
-	defer h.messengerService.Leave(client)
+	err := h.messengerService.Join(client)
 
-	h.handleMessage(client)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		err := h.messengerService.Leave(client)
+
+		if err != nil {
+			h.logger.Errorf("messenger leave failed: %v", err)
+		}
+	}()
+
+	return h.handleMessage(client)
 }
 
-func (h *Handler) handleMessage(client *client) {
+func (h *Handler) handleMessage(client *client) error {
 	for {
-		var msg *message
-		err := client.websocketConn.ReadJSON(msg)
+		var msg message
+		err := client.websocketConn.ReadJSON(&msg)
 
 		if websocket.IsCloseError(err) || websocket.IsUnexpectedCloseError(err) {
-			return
+			return err
 		}
 
 		if err != nil {
 			h.logger.Errorf("read message failed: %s", err)
+			continue
 		}
 
-		h.sendMessge(client, msg)
+		h.sendMessage(client, &msg)
 	}
 }
 
-func (h *Handler) sendMessge(client *client, msg *message) {
-	err := h.messengerService.SendMessage(&dto.MessageDto{
+func (h *Handler) sendMessage(client *client, msg *message) {
+	message := &dto.MessageDto{
 		RoomIdx:  client.roomIdx,
 		UserIdx:  client.userIdx,
 		Name:     client.name,
 		ImageUrl: client.imageUrl,
 		Message:  msg.Message,
-	})
+	}
+	err := h.messengerService.SendMessage(message)
+
 	if err != nil {
 		h.logger.Errorf("send message failed: %s", err)
 	}

@@ -99,11 +99,9 @@ services:
       - kafka_network
 
 networks:
-  mongo_network:
   kafka_network:
 
 volumes:
-  mongodb-data:
   Kafka00:
   Kafka01:
   Kafka02:
