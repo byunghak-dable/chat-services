@@ -1,94 +1,37 @@
 package service
 
 import (
-	"fmt"
-	"sync"
-
-	"github.com/widcraft/messenger-service/internal/application/dto"
-	"github.com/widcraft/messenger-service/internal/port/driven"
-	"github.com/widcraft/messenger-service/internal/port/driving"
+	"messenger-service/internal/application/dto"
+	"messenger-service/internal/port/driven"
+	"messenger-service/internal/port/driving"
 )
 
 type MessengerService struct {
-	rooms    map[uint][]driving.MessengerClientPort
-	mutex    *sync.RWMutex
-	logger   driven.LoggerPort
-	producer driven.MessageProducerPort
+	logger      driven.LoggerPort
+	producer    driven.MessageProducerPort
+	roomService *RoomService
 }
 
-func NewMessengerService(logger driven.LoggerPort, producer driven.MessageProducerPort) *MessengerService {
+func NewMessengerService(logger driven.LoggerPort, producer driven.MessageProducerPort, roomService *RoomService) *MessengerService {
 	return &MessengerService{
-		rooms:    make(map[uint][]driving.MessengerClientPort),
-		mutex:    new(sync.RWMutex),
-		logger:   logger,
-		producer: producer,
+		logger:      logger,
+		producer:    producer,
+		roomService: roomService,
 	}
 }
 
-func (service *MessengerService) Join(client driving.MessengerClientPort) {
-	service.mutex.Lock()
-	defer service.mutex.Unlock()
-
-	roomIdx := client.GetRoomIdx()
-	room, ok := service.rooms[roomIdx]
-
-	if ok {
-		service.rooms[roomIdx] = append(room, client)
-		service.logger.Infof("room id: %d, count: %d", roomIdx, len(room))
-		return
-	}
-
-	service.rooms[roomIdx] = []driving.MessengerClientPort{client}
-	service.logger.Infof("room id: %d added", roomIdx, len(room))
+func (service *MessengerService) Join(client driving.MessengerClientPort) error {
+	return service.roomService.Join(client)
 }
 
-func (service *MessengerService) Leave(client driving.MessengerClientPort) {
-	service.mutex.Lock()
-	defer service.mutex.Unlock()
+func (service *MessengerService) Leave(client driving.MessengerClientPort) error {
+	return service.roomService.Leave(client)
+}
 
-	roomIdx := client.GetRoomIdx()
-	room, ok := service.rooms[roomIdx]
-
-	if !ok {
-		service.logger.Error("no existing chat room roomIdx")
-		return
-	}
-
-	for i, participant := range room {
-		if client == participant {
-			service.rooms[roomIdx] = append(room[:i], room[i+1:]...)
-			return
-		}
-	}
+func (service *MessengerService) Broadcast(message *dto.MessageDto) error {
+	return service.roomService.Broadcast(message)
 }
 
 func (service *MessengerService) SendMessage(message *dto.MessageDto) error {
-	service.mutex.RLock()
-	defer service.mutex.RUnlock()
-
-	room, ok := service.rooms[message.RoomIdx]
-
-	if !ok {
-		return fmt.Errorf("no existing chat room roomIdx")
-	}
-
-	sendErrors := []error{}
-
-	for _, client := range room {
-		err := client.SendMessage(message)
-		if err != nil {
-			sendErrors = append(sendErrors, err)
-		}
-	}
-
-	// TODO: need better error handling
-	if len(sendErrors) > 0 {
-		return fmt.Errorf("send message errors, %v", sendErrors)
-	}
-
-	return nil
-}
-
-func (service *MessengerService) ProduceMessage(message *dto.MessageDto) error {
-	return service.producer.ProduceMessage(message)
+	return service.producer.Produce(message)
 }

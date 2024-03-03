@@ -1,5 +1,5 @@
 # build
-FROM golang:1.19.3-alpine3.16  AS builder
+FROM golang:1.22.0-alpine3.19  AS builder
 
 WORKDIR /app
 
@@ -14,6 +14,6 @@ FROM alpine:3.16
 
 WORKDIR /
 
-COPY --from=build /app/main /main
+COPY --from=builder /app/main /main
 
 ENTRYPOINT ["main"]

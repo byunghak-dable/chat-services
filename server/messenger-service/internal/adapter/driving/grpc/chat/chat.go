@@ -2,11 +2,10 @@ package chat
 
 import (
 	"errors"
-
-	"github.com/widcraft/messenger-service/internal/adapter/driving/grpc/chat/pb"
-	"github.com/widcraft/messenger-service/internal/application/dto"
-	"github.com/widcraft/messenger-service/internal/port/driven"
-	"github.com/widcraft/messenger-service/internal/port/driving"
+	"messenger-service/internal/adapter/driving/grpc/chat/pb"
+	"messenger-service/internal/application/dto"
+	"messenger-service/internal/port/driven"
+	"messenger-service/internal/port/driving"
 )
 
 type Server struct {
@@ -33,18 +32,25 @@ func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
 		return errors.New("should join before other request")
 	}
 
-	return s.handleConnetcion(stream, joinReq.Join)
+	return s.handleConnection(stream, joinReq.Join)
 }
 
-func (s *Server) handleConnetcion(stream pb.Chat_ConnectServer, joinReq *pb.JoinReq) error {
+func (s *Server) handleConnection(stream pb.Chat_ConnectServer, joinReq *pb.JoinReq) error {
 	client := &client{
 		stream:  stream,
 		roomIdx: uint(joinReq.UserIdx),
 		userIdx: uint(joinReq.RoomIdx),
 	}
 
-	s.messengerService.Join(client)
-	defer s.messengerService.Leave(client)
+	if err := s.messengerService.Join(client); err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := s.messengerService.Leave(client); err != nil {
+			s.logger.Errorf("rest chat leave error: %v", err)
+		}
+	}()
 
 	return s.handleMessage(client)
 }
@@ -66,14 +72,15 @@ func (s *Server) handleMessage(client *client) error {
 }
 
 func (s *Server) sendMessage(client *client, payload *pb.MessageReq) {
-	err := s.messengerService.SendMessage(&dto.MessageDto{
+	message := &dto.MessageDto{
 		RoomIdx:  client.roomIdx,
 		UserIdx:  client.userIdx,
 		Name:     client.name,
 		ImageUrl: client.imageUrl,
 		Message:  payload.GetMessage(),
-	})
-	if err != nil {
+	}
+
+	if err := s.messengerService.SendMessage(message); err != nil {
 		s.logger.Errorf("send message failed: %s", err)
 	}
 }
