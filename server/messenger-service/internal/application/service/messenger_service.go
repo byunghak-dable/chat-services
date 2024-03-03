@@ -9,14 +9,12 @@ import (
 type MessengerService struct {
 	logger      driven.LoggerPort
 	producer    driven.MessageProducerPort
-	topic       string
 	roomService *RoomService
 }
 
 func NewMessengerService(logger driven.LoggerPort, producer driven.MessageProducerPort, roomService *RoomService) *MessengerService {
 	return &MessengerService{
 		logger:      logger,
-		topic:       "TEST_TOPIC",
 		producer:    producer,
 		roomService: roomService,
 	}
@@ -35,5 +33,5 @@ func (service *MessengerService) Broadcast(message *dto.MessageDto) error {
 }
 
 func (service *MessengerService) SendMessage(message *dto.MessageDto) error {
-	return service.producer.Produce(service.topic, message)
+	return service.producer.Produce(message)
 }

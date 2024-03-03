@@ -31,7 +31,7 @@ func NewHandler(logger driven.LoggerPort, messengerService driving.MessengerServ
 }
 
 func (h *Handler) Register(router *gin.RouterGroup) {
-	router.GET("chat", h.chat)
+	router.GET("/chat", h.chat)
 }
 
 func (h *Handler) chat(ctx *gin.Context) {
@@ -39,6 +39,7 @@ func (h *Handler) chat(ctx *gin.Context) {
 	bindErr := ctx.ShouldBindQuery(&param)
 
 	if bindErr != nil {
+		h.logger.Errorf("connection params binding failed: %s", bindErr)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, bindErr)
 		return
 	}
@@ -46,6 +47,7 @@ func (h *Handler) chat(ctx *gin.Context) {
 	conn, upgradeErr := h.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 
 	if upgradeErr != nil {
+		h.logger.Errorf("upgrade connections failed: %s", upgradeErr)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, upgradeErr)
 		return
 	}

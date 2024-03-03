@@ -9,19 +9,20 @@ import (
 
 type KafkaProducer struct {
 	*kafka.Producer
+	topic string
 }
 
-func NewKafkaProducer(config *kafka.ConfigMap) (*KafkaProducer, error) {
+func NewKafkaProducer(config *kafka.ConfigMap, topic string) (*KafkaProducer, error) {
 	producer, err := kafka.NewProducer(config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &KafkaProducer{producer}, nil
+	return &KafkaProducer{producer, topic}, nil
 }
 
-func (producer *KafkaProducer) Produce(topic string, message *dto.MessageDto) error {
-	kafkaMessage, err := producer.makeMessage(&topic, message)
+func (producer *KafkaProducer) Produce(message *dto.MessageDto) error {
+	kafkaMessage, err := producer.makeMessage(message)
 	if err != nil {
 		return fmt.Errorf("failed to produce message: %v", err)
 	}
@@ -43,14 +44,14 @@ func (producer *KafkaProducer) Produce(topic string, message *dto.MessageDto) er
 	return nil
 }
 
-func (producer *KafkaProducer) makeMessage(topic *string, message *dto.MessageDto) (*kafka.Message, error) {
+func (producer *KafkaProducer) makeMessage(message *dto.MessageDto) (*kafka.Message, error) {
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
 		return nil, err
 	}
 
 	return &kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: topic, Partition: kafka.PartitionAny},
+		TopicPartition: kafka.TopicPartition{Topic: &producer.topic, Partition: kafka.PartitionAny},
 		Value:          jsonMessage,
 	}, nil
 }

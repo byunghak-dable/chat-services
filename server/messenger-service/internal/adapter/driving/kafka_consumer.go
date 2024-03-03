@@ -1,8 +1,9 @@
 package driving
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+	"messenger-service/internal/application/dto"
 	"messenger-service/internal/port/driven"
 	"messenger-service/internal/port/driving"
 )
@@ -24,7 +25,6 @@ func NewKafkaConsumer(logger driven.LoggerPort, config *kafka.ConfigMap, broadca
 }
 
 func (consumer *KafkaConsumer) Run() error {
-	//consumer.broadcaster.Broadcast()
 	err := consumer.SubscribeTopics(consumer.topics, nil)
 
 	if err != nil {
@@ -32,17 +32,27 @@ func (consumer *KafkaConsumer) Run() error {
 	}
 
 	for {
-		event := consumer.Poll(100)
+		message, err := consumer.ReadMessage(-1)
 
-		switch e := event.(type) {
-		case *kafka.Message:
-			consumer.logger.Printf("event: %v", e)
-		case kafka.Error:
-			return e
-		default:
-			fmt.Printf("Ignored %v\n", e)
+		if err != nil {
+			consumer.logger.Errorf("kafka consumer read message failed: %s", err)
+			continue
+		}
+
+		if err := consumer.broadcast(message.Value); err != nil {
+			consumer.logger.Errorf("kafka consumer broadcast message failed: %s", err)
 		}
 	}
+}
+
+func (consumer *KafkaConsumer) broadcast(bytes []byte) error {
+	var message dto.MessageDto
+
+	if err := json.Unmarshal(bytes, &message); err != nil {
+		return err
+	}
+
+	return consumer.broadcaster.Broadcast(&message)
 }
 
 func (consumer *KafkaConsumer) Close() error {

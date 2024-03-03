@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"messenger-service/internal/adapter/driven"
 	"messenger-service/internal/adapter/driving"
 	"messenger-service/internal/adapter/driving/grpc"
@@ -15,9 +14,19 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
+
+type Runnable interface {
+	Run() error
+}
+
+type Closable interface {
+	Close() error
+}
 
 var logger = log.New()
 
@@ -30,7 +39,8 @@ func init() {
 }
 
 func main() {
-	kafkaProducer, producerErr := driven.NewKafkaProducer(getKafkaProducerConfig())
+	topic := "CHAT"
+	kafkaProducer, producerErr := driven.NewKafkaProducer(getKafkaProducerConfig(), topic)
 
 	defer quit(kafkaProducer)
 
@@ -41,7 +51,7 @@ func main() {
 
 	messengerService := service.NewMessengerService(logger, kafkaProducer, service.NewRoomService())
 
-	kafkaConsumer, consumerErr := driving.NewKafkaConsumer(logger, getKafkaConsumerConfig(), messengerService, []string{"topic1"})
+	kafkaConsumer, consumerErr := driving.NewKafkaConsumer(logger, getKafkaConsumerConfig(), messengerService, []string{topic})
 	restApp := rest.New(logger, messengerService, os.Getenv("REST_PORT"))
 	grpcApp := grpc.New(logger, messengerService, os.Getenv("GRPC_PORT"))
 
@@ -54,7 +64,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	run(cancel, restApp, grpcApp, kafkaConsumer)
+	run(cancel, kafkaConsumer, restApp, grpcApp)
 	handleTermination(ctx)
 }
 
@@ -84,21 +94,19 @@ func getKafkaServers() string {
 	return strings.Join(servers, ",")
 }
 
-func run(cancel context.CancelFunc, runnables ...interface{ Run() error }) {
+func run(cancel context.CancelFunc, runnables ...Runnable) {
 	for _, runnable := range runnables {
-		go func() {
+		go func(runnable Runnable) {
 			err := runnable.Run()
-
 			if err != nil {
 				logger.Errorf("%s failed: %s", reflect.TypeOf(runnable), err)
 				cancel()
 			}
-		}()
+		}(runnable)
 	}
-
 }
 
-func quit(closables ...interface{ Close() error }) {
+func quit(closables ...Closable) {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue
@@ -113,7 +121,7 @@ func quit(closables ...interface{ Close() error }) {
 
 func handleTermination(ctx context.Context) {
 	terminationChan := make(chan os.Signal, 1)
-	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 
 	select {
 	case <-ctx.Done():
