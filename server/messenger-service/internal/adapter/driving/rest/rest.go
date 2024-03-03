@@ -3,7 +3,7 @@ package rest
 import (
 	"context"
 	"errors"
-	"messenger-service/internal/adapter/driving/rest/handler/chat"
+	"messenger-service/internal/adapter/driving/rest/chat"
 	"messenger-service/internal/port/driven"
 	"messenger-service/internal/port/driving"
 	"net/http"
@@ -22,7 +22,7 @@ func New(logger driven.LoggerPort, messengerService driving.MessengerServicePort
 	router := gin.Default()
 	group := router.Group("/api/v1")
 
-	chat.New(logger, messengerService).Register(group)
+	chat.NewHandler(logger, messengerService).Register(group)
 
 	return &Rest{
 		logger:           logger,

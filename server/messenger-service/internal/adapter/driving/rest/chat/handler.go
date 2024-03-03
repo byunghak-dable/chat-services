@@ -16,7 +16,7 @@ type Handler struct {
 	upgrader         *websocket.Upgrader
 }
 
-func New(logger driven.LoggerPort, messengerService driving.MessengerServicePort) *Handler {
+func NewHandler(logger driven.LoggerPort, messengerService driving.MessengerServicePort) *Handler {
 	return &Handler{
 		logger:           logger,
 		messengerService: messengerService,
@@ -24,7 +24,6 @@ func New(logger driven.LoggerPort, messengerService driving.MessengerServicePort
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 			CheckOrigin: func(request *http.Request) bool {
-				logger.Info("checking origin ", request)
 				return true
 			},
 		},
@@ -37,19 +36,17 @@ func (h *Handler) Register(router *gin.RouterGroup) {
 
 func (h *Handler) chat(ctx *gin.Context) {
 	var param connection
-	err := ctx.ShouldBindQuery(&param)
+	bindErr := ctx.ShouldBindQuery(&param)
 
-	if err != nil {
-		h.logger.Error(err)
-		ctx.Status(http.StatusBadRequest)
+	if bindErr != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, bindErr)
 		return
 	}
 
 	conn, upgradeErr := h.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 
 	if upgradeErr != nil {
-		h.logger.Errorf("webSocket upgrade failed: %s", upgradeErr)
-		ctx.Status(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, upgradeErr)
 		return
 	}
 
@@ -62,8 +59,7 @@ func (h *Handler) chat(ctx *gin.Context) {
 	connectionErr := h.handleConnection(conn, &param)
 
 	if connectionErr != nil {
-		h.logger.Errorf("webSocket connection handling failed: %s", connectionErr)
-		ctx.Status(http.StatusInternalServerError)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, connectionErr)
 	}
 }
 
