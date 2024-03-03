@@ -18,35 +18,38 @@ type Rest struct {
 	messengerService driving.MessengerServicePort
 }
 
-func New(logger driven.LoggerPort, messengerService driving.MessengerServicePort) *Rest {
+func New(logger driven.LoggerPort, messenger driving.MessengerServicePort, port string) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 
-	chat.NewHandler(logger, messengerService).Register(group)
+	chat.NewHandler(logger, messenger).Register(group)
 
 	return &Rest{
 		logger:           logger,
-		messengerService: messengerService,
+		messengerService: messenger,
 		server: &http.Server{
 			Handler:      router,
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
 			IdleTimeout:  120 * time.Second,
+			Addr:         ":" + port,
 		},
 	}
 }
 
-func (rest *Rest) Run(port string) {
-	rest.server.Addr = ":" + port
+func (rest *Rest) Run() error {
 	err := rest.server.ListenAndServe()
 
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		rest.logger.Errorf("websocket server error: %s", err)
+	if errors.Is(err, http.ErrServerClosed) {
+		return nil
 	}
+
+	return err
 }
 
 func (rest *Rest) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	return rest.server.Shutdown(ctx)
 }

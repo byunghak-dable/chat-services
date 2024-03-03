@@ -14,28 +14,29 @@ type Grpc struct {
 	logger       driven.LoggerPort
 	server       *grpc.Server
 	messengerApp driving.MessengerServicePort
+	port         string
 }
 
-func New(logger driven.LoggerPort, chatApp driving.MessengerServicePort) *Grpc {
+func New(logger driven.LoggerPort, messenger driving.MessengerServicePort, port string) *Grpc {
 	server := grpc.NewServer()
-	pb.RegisterChatServer(server, chat.New(logger, chatApp))
+	pb.RegisterChatServer(server, chat.New(logger, messenger))
 
 	return &Grpc{
 		logger:       logger,
-		messengerApp: chatApp,
+		messengerApp: messenger,
 		server:       server,
+		port:         port,
 	}
 }
 
-func (g *Grpc) Run(port string) {
-	listener, err := net.Listen("tcp", ":"+port)
+func (g *Grpc) Run() error {
+	listener, err := net.Listen("tcp", ":"+g.port)
+
 	if err != nil {
-		g.logger.Errorf("failed to listen on port %s", port)
+		return err
 	}
 
-	if err = g.server.Serve(listener); err != nil {
-		g.logger.Errorf("serve grpc error: %s", err)
-	}
+	return g.server.Serve(listener)
 }
 
 func (g *Grpc) Close() error {

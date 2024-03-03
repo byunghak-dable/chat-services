@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"messenger-service/internal/adapter/driven"
@@ -20,10 +21,6 @@ import (
 
 var logger = log.New()
 
-type Closable interface {
-	Close() error
-}
-
 // env
 func init() {
 	err := godotenv.Load()
@@ -33,11 +30,7 @@ func init() {
 }
 
 func main() {
-	kafkaProducer, producerErr := driven.NewKafkaProducer(&kafka.ConfigMap{
-		"bootstrap.servers": getKafkaServers(),
-		"client.id":         "TEST_CLIENT_ID",
-		"acks":              "all",
-	})
+	kafkaProducer, producerErr := driven.NewKafkaProducer(getKafkaProducerConfig())
 
 	defer quit(kafkaProducer)
 
@@ -48,12 +41,9 @@ func main() {
 
 	messengerService := service.NewMessengerService(logger, kafkaProducer, service.NewRoomService())
 
-	restApp := rest.New(logger, messengerService)
-	grpcApp := grpc.New(logger, messengerService)
-	kafkaConsumer, consumerErr := driving.NewKafkaConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": getKafkaServers(),
-		"auto.offset.reset": "smallest",
-	}, messengerService)
+	kafkaConsumer, consumerErr := driving.NewKafkaConsumer(logger, getKafkaConsumerConfig(), messengerService, []string{"topic1"})
+	restApp := rest.New(logger, messengerService, os.Getenv("REST_PORT"))
+	grpcApp := grpc.New(logger, messengerService, os.Getenv("GRPC_PORT"))
 
 	defer quit(restApp, grpcApp, kafkaProducer)
 
@@ -62,13 +52,26 @@ func main() {
 		return
 	}
 
-	go restApp.Run(os.Getenv("REST_PORT"))
-	go grpcApp.Run(os.Getenv("GRPC_PORT"))
-	kafkaConsumer.Run()
+	ctx, cancel := context.WithCancel(context.Background())
 
-	terminationChan := make(chan os.Signal, 1)
-	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
-	<-terminationChan
+	run(cancel, restApp, grpcApp, kafkaConsumer)
+	handleTermination(ctx)
+}
+
+func getKafkaProducerConfig() *kafka.ConfigMap {
+	return &kafka.ConfigMap{
+		"bootstrap.servers": getKafkaServers(),
+		"client.id":         "TEST_CLIENT_ID",
+		"acks":              "all",
+	}
+}
+
+func getKafkaConsumerConfig() *kafka.ConfigMap {
+	return &kafka.ConfigMap{
+		"bootstrap.servers": getKafkaServers(),
+		"group.id":          "TEST_GROUP_ID",
+		"auto.offset.reset": "smallest",
+	}
 }
 
 func getKafkaServers() string {
@@ -81,7 +84,21 @@ func getKafkaServers() string {
 	return strings.Join(servers, ",")
 }
 
-func quit(closables ...Closable) {
+func run(cancel context.CancelFunc, runnables ...interface{ Run() error }) {
+	for _, runnable := range runnables {
+		go func() {
+			err := runnable.Run()
+
+			if err != nil {
+				logger.Errorf("%s failed: %s", reflect.TypeOf(runnable), err)
+				cancel()
+			}
+		}()
+	}
+
+}
+
+func quit(closables ...interface{ Close() error }) {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue
@@ -91,5 +108,17 @@ func quit(closables ...Closable) {
 		if err != nil {
 			logger.Errorf("%s exiting failed: %s", reflect.TypeOf(closable), err)
 		}
+	}
+}
+
+func handleTermination(ctx context.Context) {
+	terminationChan := make(chan os.Signal, 1)
+	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+
+	select {
+	case <-ctx.Done():
+		fmt.Println("Received context done")
+	case s := <-terminationChan:
+		fmt.Println("Received signal:", s)
 	}
 }
