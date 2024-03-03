@@ -97,8 +97,7 @@ func getKafkaServers() string {
 func run(cancel context.CancelFunc, runnables ...Runnable) {
 	for _, runnable := range runnables {
 		go func(runnable Runnable) {
-			err := runnable.Run()
-			if err != nil {
+			if err := runnable.Run(); err != nil {
 				logger.Errorf("%s failed: %s", reflect.TypeOf(runnable), err)
 				cancel()
 			}

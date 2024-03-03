@@ -42,9 +42,7 @@ func (s *Server) handleConnection(stream pb.Chat_ConnectServer, joinReq *pb.Join
 		userIdx: uint(joinReq.RoomIdx),
 	}
 
-	err := s.messengerService.Join(client)
-
-	if err != nil {
+	if err := s.messengerService.Join(client); err != nil {
 		return err
 	}
 
@@ -74,15 +72,15 @@ func (s *Server) handleMessage(client *client) error {
 }
 
 func (s *Server) sendMessage(client *client, payload *pb.MessageReq) {
-	err := s.messengerService.SendMessage(&dto.MessageDto{
+	message := &dto.MessageDto{
 		RoomIdx:  client.roomIdx,
 		UserIdx:  client.userIdx,
 		Name:     client.name,
 		ImageUrl: client.imageUrl,
 		Message:  payload.GetMessage(),
-	})
+	}
 
-	if err != nil {
+	if err := s.messengerService.SendMessage(message); err != nil {
 		s.logger.Errorf("send message failed: %s", err)
 	}
 }

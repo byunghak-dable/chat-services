@@ -56,13 +56,12 @@ func (service *RoomService) Leave(client driving.MessengerClientPort) error {
 
 func (service *RoomService) Broadcast(message *dto.MessageDto) error {
 	roomIdx := message.RoomIdx
+
 	return service.withRLock(roomIdx, func() error {
 		var errs []error
 
 		for _, participant := range service.roomMap[roomIdx] {
-			err := participant.SendMessage(message)
-
-			if err != nil {
+			if err := participant.SendMessage(message); err != nil {
 				errs = append(errs, err)
 			}
 		}

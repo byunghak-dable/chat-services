@@ -25,9 +25,7 @@ func NewKafkaConsumer(logger driven.LoggerPort, config *kafka.ConfigMap, broadca
 }
 
 func (consumer *KafkaConsumer) Run() error {
-	err := consumer.SubscribeTopics(consumer.topics, nil)
-
-	if err != nil {
+	if err := consumer.SubscribeTopics(consumer.topics, nil); err != nil {
 		return err
 	}
 

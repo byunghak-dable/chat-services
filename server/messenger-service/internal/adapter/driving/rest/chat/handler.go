@@ -36,19 +36,18 @@ func (h *Handler) Register(router *gin.RouterGroup) {
 
 func (h *Handler) chat(ctx *gin.Context) {
 	var param connection
-	bindErr := ctx.ShouldBindQuery(&param)
 
-	if bindErr != nil {
-		h.logger.Errorf("connection params binding failed: %s", bindErr)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, bindErr)
+	if err := ctx.ShouldBindQuery(&param); err != nil {
+		h.logger.Errorf("connection params binding failed: %s", err)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, err)
 		return
 	}
 
-	conn, upgradeErr := h.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	conn, err := h.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 
-	if upgradeErr != nil {
-		h.logger.Errorf("upgrade connections failed: %s", upgradeErr)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, upgradeErr)
+	if err != nil {
+		h.logger.Errorf("upgrade connections failed: %s", err)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, err)
 		return
 	}
 
@@ -58,10 +57,8 @@ func (h *Handler) chat(ctx *gin.Context) {
 		}
 	}()
 
-	connectionErr := h.handleConnection(conn, &param)
-
-	if connectionErr != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, connectionErr)
+	if err := h.handleConnection(conn, &param); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err)
 	}
 }
 
@@ -72,16 +69,12 @@ func (h *Handler) handleConnection(conn *websocket.Conn, param *connection) erro
 		userIdx:       param.UserIdx,
 	}
 
-	err := h.messengerService.Join(client)
-
-	if err != nil {
+	if err := h.messengerService.Join(client); err != nil {
 		return err
 	}
 
 	defer func() {
-		err := h.messengerService.Leave(client)
-
-		if err != nil {
+		if err := h.messengerService.Leave(client); err != nil {
 			h.logger.Errorf("messenger leave failed: %v", err)
 		}
 	}()
@@ -115,9 +108,8 @@ func (h *Handler) sendMessage(client *client, msg *message) {
 		ImageUrl: client.imageUrl,
 		Message:  msg.Message,
 	}
-	err := h.messengerService.SendMessage(message)
 
-	if err != nil {
+	if err := h.messengerService.SendMessage(message); err != nil {
 		h.logger.Errorf("send message failed: %s", err)
 	}
 }
