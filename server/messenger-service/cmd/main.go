@@ -39,7 +39,7 @@ func init() {
 }
 
 func main() {
-	topic := "CHAT"
+	topic := os.Getenv("KAFKA_CHAT_TOPIC")
 	kafkaProducer, producerErr := driven.NewKafkaProducer(getKafkaProducerConfig(), topic)
 
 	defer quit(kafkaProducer)
@@ -71,7 +71,7 @@ func main() {
 func getKafkaProducerConfig() *kafka.ConfigMap {
 	return &kafka.ConfigMap{
 		"bootstrap.servers": getKafkaServers(),
-		"client.id":         "TEST_CLIENT_ID",
+		"client.id":         os.Getenv("KAFKA_CLIENT_ID"),
 		"acks":              "all",
 	}
 }
@@ -79,7 +79,7 @@ func getKafkaProducerConfig() *kafka.ConfigMap {
 func getKafkaConsumerConfig() *kafka.ConfigMap {
 	return &kafka.ConfigMap{
 		"bootstrap.servers": getKafkaServers(),
-		"group.id":          "TEST_GROUP_ID",
+		"group.id":          os.Getenv("KAFKA_GROUP_ID"), // TODO: need to add suffix for scale out
 		"auto.offset.reset": "smallest",
 	}
 }
