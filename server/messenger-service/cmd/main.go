@@ -11,12 +11,8 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
-	"strings"
 	"syscall"
 
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-
-	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,17 +26,15 @@ type Closable interface {
 
 var logger = log.New()
 
-// env
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		panic(err)
-	}
-}
-
 func main() {
-	topic := os.Getenv("KAFKA_CHAT_TOPIC")
-	kafkaProducer, producerErr := driven.NewKafkaProducer(getKafkaProducerConfig(), topic)
+	configStore, err := driven.NewConfigStore()
+
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	kafkaProducer, producerErr := driven.NewKafkaProducer(configStore)
 
 	defer quit(kafkaProducer)
 
@@ -49,11 +43,11 @@ func main() {
 		return
 	}
 
-	messengerService := service.NewMessengerService(logger, kafkaProducer, service.NewRoomService())
+	messengerService := service.NewMessengerService(logger, kafkaProducer)
 
-	kafkaConsumer, consumerErr := driving.NewKafkaConsumer(logger, getKafkaConsumerConfig(), messengerService, []string{topic})
-	restApp := rest.New(logger, messengerService, os.Getenv("REST_PORT"))
-	grpcApp := grpc.New(logger, messengerService, os.Getenv("GRPC_PORT"))
+	kafkaConsumer, consumerErr := driving.NewKafkaConsumer(configStore, logger, messengerService)
+	restApp := rest.New(configStore, logger, messengerService)
+	grpcApp := grpc.New(configStore, logger, messengerService)
 
 	defer quit(restApp, grpcApp, kafkaProducer)
 
@@ -66,32 +60,6 @@ func main() {
 
 	run(cancel, kafkaConsumer, restApp, grpcApp)
 	handleTermination(ctx)
-}
-
-func getKafkaProducerConfig() *kafka.ConfigMap {
-	return &kafka.ConfigMap{
-		"bootstrap.servers": getKafkaServers(),
-		"client.id":         os.Getenv("KAFKA_CLIENT_ID"),
-		"acks":              "all",
-	}
-}
-
-func getKafkaConsumerConfig() *kafka.ConfigMap {
-	return &kafka.ConfigMap{
-		"bootstrap.servers": getKafkaServers(),
-		"group.id":          os.Getenv("KAFKA_GROUP_ID"), // TODO: need to add suffix for scale out
-		"auto.offset.reset": "smallest",
-	}
-}
-
-func getKafkaServers() string {
-	servers := []string{
-		fmt.Sprintf("%s:%s", os.Getenv("KAFKA_1_HOST"), os.Getenv("KAFKA_1_PORT")),
-		fmt.Sprintf("%s:%s", os.Getenv("KAFKA_2_HOST"), os.Getenv("KAFKA_2_PORT")),
-		fmt.Sprintf("%s:%s", os.Getenv("KAFKA_3_HOST"), os.Getenv("KAFKA_3_PORT")),
-	}
-
-	return strings.Join(servers, ",")
 }
 
 func run(cancel context.CancelFunc, runnables ...Runnable) {

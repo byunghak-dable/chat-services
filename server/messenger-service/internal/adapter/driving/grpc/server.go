@@ -17,7 +17,7 @@ type Grpc struct {
 	port         string
 }
 
-func New(logger driven.LoggerPort, messenger driving.MessengerServicePort, port string) *Grpc {
+func New(configStore driven.ConfigStore, logger driven.LoggerPort, messenger driving.MessengerServicePort) *Grpc {
 	server := grpc.NewServer()
 	pb.RegisterChatServer(server, chat.New(logger, messenger))
 
@@ -25,7 +25,7 @@ func New(logger driven.LoggerPort, messenger driving.MessengerServicePort, port 
 		logger:       logger,
 		messengerApp: messenger,
 		server:       server,
-		port:         port,
+		port:         configStore.GetGrpcPort(),
 	}
 }
 

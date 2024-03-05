@@ -14,13 +14,15 @@ type client struct {
 }
 
 func (c *client) SendMessage(message *dto.MessageDto) error {
-	return c.stream.Send(&pb.MessageRes{
+	messageRes := pb.MessageRes{
 		RoomIdx:  uint32(message.RoomIdx),
 		UserIdx:  uint32(message.UserIdx),
 		Message:  message.Message,
 		Name:     message.Name,
 		ImageUrl: message.ImageUrl,
-	})
+	}
+
+	return c.stream.Send(&messageRes)
 }
 
 func (c *client) GetRoomIdx() uint {

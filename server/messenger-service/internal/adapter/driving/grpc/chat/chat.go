@@ -72,7 +72,7 @@ func (s *Server) handleMessage(client *client) error {
 }
 
 func (s *Server) sendMessage(client *client, payload *pb.MessageReq) {
-	message := &dto.MessageDto{
+	message := dto.MessageDto{
 		RoomIdx:  client.roomIdx,
 		UserIdx:  client.userIdx,
 		Name:     client.name,
@@ -80,7 +80,7 @@ func (s *Server) sendMessage(client *client, payload *pb.MessageReq) {
 		Message:  payload.GetMessage(),
 	}
 
-	if err := s.messengerService.SendMessage(message); err != nil {
+	if err := s.messengerService.SendMessage(&message); err != nil {
 		s.logger.Errorf("send message failed: %s", err)
 	}
 }

@@ -18,7 +18,7 @@ type Rest struct {
 	messengerService driving.MessengerServicePort
 }
 
-func New(logger driven.LoggerPort, messenger driving.MessengerServicePort, port string) *Rest {
+func New(configStore driven.ConfigStore, logger driven.LoggerPort, messenger driving.MessengerServicePort) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 
@@ -32,7 +32,7 @@ func New(logger driven.LoggerPort, messenger driving.MessengerServicePort, port 
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
 			IdleTimeout:  120 * time.Second,
-			Addr:         ":" + port,
+			Addr:         ":" + configStore.GetRestPort(),
 		},
 	}
 }

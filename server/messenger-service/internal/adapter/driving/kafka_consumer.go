@@ -15,13 +15,17 @@ type KafkaConsumer struct {
 	topics      []string
 }
 
-func NewKafkaConsumer(logger driven.LoggerPort, config *kafka.ConfigMap, broadcaster driving.BroadcastServicePort, topics []string) (*KafkaConsumer, error) {
-	consumer, err := kafka.NewConsumer(config)
+func NewKafkaConsumer(configStore driven.ConfigStore, logger driven.LoggerPort, broadcaster driving.BroadcastServicePort) (*KafkaConsumer, error) {
+	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
+		"bootstrap.servers": configStore.GetKafkaServers(),
+		"group.id":          configStore.GetKafkaGroupId(), // TODO: need to add suffix for scale out
+		"auto.offset.reset": "smallest",
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &KafkaConsumer{logger, consumer, broadcaster, topics}, nil
+	return &KafkaConsumer{logger, consumer, broadcaster, []string{configStore.GetKafkaChatTopic()}}, nil
 }
 
 func (consumer *KafkaConsumer) Run() error {

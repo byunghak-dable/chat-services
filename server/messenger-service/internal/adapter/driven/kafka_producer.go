@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"messenger-service/internal/application/dto"
+	"messenger-service/internal/port/driven"
 )
 
 type KafkaProducer struct {
@@ -12,13 +13,17 @@ type KafkaProducer struct {
 	topic string
 }
 
-func NewKafkaProducer(config *kafka.ConfigMap, topic string) (*KafkaProducer, error) {
-	producer, err := kafka.NewProducer(config)
+func NewKafkaProducer(configStore driven.ConfigStore) (*KafkaProducer, error) {
+	producer, err := kafka.NewProducer(&kafka.ConfigMap{
+		"bootstrap.servers": configStore.GetKafkaServers(),
+		"client.id":         configStore.GetKafkaClientId(),
+		"acks":              "all",
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &KafkaProducer{producer, topic}, nil
+	return &KafkaProducer{producer, configStore.GetKafkaChatTopic()}, nil
 }
 
 func (producer *KafkaProducer) Produce(message *dto.MessageDto) error {

@@ -12,11 +12,11 @@ type MessengerService struct {
 	roomService *RoomService
 }
 
-func NewMessengerService(logger driven.LoggerPort, producer driven.MessageProducerPort, roomService *RoomService) *MessengerService {
+func NewMessengerService(logger driven.LoggerPort, producer driven.MessageProducerPort) *MessengerService {
 	return &MessengerService{
 		logger:      logger,
 		producer:    producer,
-		roomService: roomService,
+		roomService: NewRoomService(),
 	}
 }
 
