@@ -8,14 +8,14 @@ import (
 	"messenger-service/internal/port/driving"
 )
 
-type KafkaConsumer struct {
-	logger driven.LoggerPort
+type MessageBroadcaster struct {
+	logger driven.Logger
 	*kafka.Consumer
-	broadcaster driving.BroadcastServicePort
+	broadcaster driving.MessageBroadcaster
 	topics      []string
 }
 
-func NewKafkaConsumer(configStore driven.ConfigStore, logger driven.LoggerPort, broadcaster driving.BroadcastServicePort) (*KafkaConsumer, error) {
+func NewMessageBroadcaster(configStore driven.ConfigStore, logger driven.Logger, broadcaster driving.MessageBroadcaster) (*MessageBroadcaster, error) {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": configStore.GetKafkaServers(),
 		"group.id":          configStore.GetKafkaGroupId(), // TODO: need to add suffix for scale out
@@ -25,10 +25,10 @@ func NewKafkaConsumer(configStore driven.ConfigStore, logger driven.LoggerPort, 
 		return nil, err
 	}
 
-	return &KafkaConsumer{logger, consumer, broadcaster, []string{configStore.GetKafkaChatTopic()}}, nil
+	return &MessageBroadcaster{logger, consumer, broadcaster, []string{configStore.GetKafkaChatTopic()}}, nil
 }
 
-func (consumer *KafkaConsumer) Run() error {
+func (consumer *MessageBroadcaster) Run() error {
 	if err := consumer.SubscribeTopics(consumer.topics, nil); err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (consumer *KafkaConsumer) Run() error {
 	}
 }
 
-func (consumer *KafkaConsumer) broadcast(bytes []byte) error {
+func (consumer *MessageBroadcaster) broadcast(bytes []byte) error {
 	var message dto.MessageDto
 
 	if err := json.Unmarshal(bytes, &message); err != nil {
@@ -57,6 +57,6 @@ func (consumer *KafkaConsumer) broadcast(bytes []byte) error {
 	return consumer.broadcaster.Broadcast(&message)
 }
 
-func (consumer *KafkaConsumer) Close() error {
+func (consumer *MessageBroadcaster) Close() error {
 	return consumer.Close()
 }

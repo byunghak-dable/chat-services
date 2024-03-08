@@ -27,6 +27,7 @@ func (config *ConfigStore) GetKafkaServers() string {
 
 	return strings.Join(servers, ",")
 }
+
 func (config *ConfigStore) GetKafkaGroupId() string {
 	return os.Getenv("KAFKA_GROUP_ID")
 }

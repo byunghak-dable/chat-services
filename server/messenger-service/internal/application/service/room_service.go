@@ -10,17 +10,17 @@ import (
 
 type RoomService struct {
 	lockMap *sync.Map
-	roomMap map[uint][]driving.MessengerClientPort
+	roomMap map[uint][]driving.MessengerClient
 }
 
 func NewRoomService() *RoomService {
 	return &RoomService{
 		lockMap: new(sync.Map),
-		roomMap: make(map[uint][]driving.MessengerClientPort),
+		roomMap: make(map[uint][]driving.MessengerClient),
 	}
 }
 
-func (service *RoomService) Join(client driving.MessengerClientPort) error {
+func (service *RoomService) Join(client driving.MessengerClient) error {
 	roomIdx := client.GetRoomIdx()
 
 	return service.withLock(roomIdx, func() error {
@@ -29,7 +29,7 @@ func (service *RoomService) Join(client driving.MessengerClientPort) error {
 	})
 }
 
-func (service *RoomService) Leave(client driving.MessengerClientPort) error {
+func (service *RoomService) Leave(client driving.MessengerClient) error {
 	roomIdx := client.GetRoomIdx()
 
 	return service.withLock(roomIdx, func() error {

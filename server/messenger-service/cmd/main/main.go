@@ -34,7 +34,7 @@ func main() {
 		return
 	}
 
-	kafkaProducer, producerErr := driven.NewKafkaProducer(configStore)
+	kafkaProducer, producerErr := driven.NewMessageProducer(configStore)
 
 	defer quit(kafkaProducer)
 
@@ -45,7 +45,7 @@ func main() {
 
 	messengerService := service.NewMessengerService(logger, kafkaProducer)
 
-	kafkaConsumer, consumerErr := driving.NewKafkaConsumer(configStore, logger, messengerService)
+	kafkaConsumer, consumerErr := driving.NewMessageBroadcaster(configStore, logger, messengerService)
 	restApp := rest.New(configStore, logger, messengerService)
 	grpcApp := grpc.New(configStore, logger, messengerService)
 

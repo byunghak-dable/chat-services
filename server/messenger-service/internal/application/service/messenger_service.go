@@ -7,12 +7,12 @@ import (
 )
 
 type MessengerService struct {
-	logger      driven.LoggerPort
-	producer    driven.MessageProducerPort
+	logger      driven.Logger
+	producer    driven.MessageProducer
 	roomService *RoomService
 }
 
-func NewMessengerService(logger driven.LoggerPort, producer driven.MessageProducerPort) *MessengerService {
+func NewMessengerService(logger driven.Logger, producer driven.MessageProducer) *MessengerService {
 	return &MessengerService{
 		logger:      logger,
 		producer:    producer,
@@ -20,11 +20,11 @@ func NewMessengerService(logger driven.LoggerPort, producer driven.MessageProduc
 	}
 }
 
-func (service *MessengerService) Join(client driving.MessengerClientPort) error {
+func (service *MessengerService) Join(client driving.MessengerClient) error {
 	return service.roomService.Join(client)
 }
 
-func (service *MessengerService) Leave(client driving.MessengerClientPort) error {
+func (service *MessengerService) Leave(client driving.MessengerClient) error {
 	return service.roomService.Leave(client)
 }
 

@@ -11,12 +11,12 @@ import (
 )
 
 type Handler struct {
-	logger           driven.LoggerPort
-	messengerService driving.MessengerServicePort
+	logger           driven.Logger
+	messengerService driving.Messenger
 	upgrader         *websocket.Upgrader
 }
 
-func NewHandler(logger driven.LoggerPort, messengerService driving.MessengerServicePort) *Handler {
+func NewHandler(logger driven.Logger, messengerService driving.Messenger) *Handler {
 	return &Handler{
 		logger:           logger,
 		messengerService: messengerService,

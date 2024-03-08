@@ -13,12 +13,12 @@ import (
 )
 
 type Rest struct {
-	logger           driven.LoggerPort
+	logger           driven.Logger
 	server           *http.Server
-	messengerService driving.MessengerServicePort
+	messengerService driving.Messenger
 }
 
-func New(configStore driven.ConfigStore, logger driven.LoggerPort, messenger driving.MessengerServicePort) *Rest {
+func New(configStore driven.ConfigStore, logger driven.Logger, messenger driving.Messenger) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 

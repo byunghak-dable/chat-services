@@ -10,11 +10,11 @@ import (
 
 type Server struct {
 	pb.UnimplementedChatServer
-	logger           driven.LoggerPort
-	messengerService driving.MessengerServicePort
+	logger           driven.Logger
+	messengerService driving.Messenger
 }
 
-func New(logger driven.LoggerPort, app driving.MessengerServicePort) *Server {
+func New(logger driven.Logger, app driving.Messenger) *Server {
 	return &Server{
 		logger:           logger,
 		messengerService: app,

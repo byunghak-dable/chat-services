@@ -8,12 +8,12 @@ import (
 	"messenger-service/internal/port/driven"
 )
 
-type KafkaProducer struct {
+type MessageProducer struct {
 	*kafka.Producer
 	topic string
 }
 
-func NewKafkaProducer(configStore driven.ConfigStore) (*KafkaProducer, error) {
+func NewMessageProducer(configStore driven.ConfigStore) (*MessageProducer, error) {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": configStore.GetKafkaServers(),
 		"client.id":         configStore.GetKafkaClientId(),
@@ -23,10 +23,10 @@ func NewKafkaProducer(configStore driven.ConfigStore) (*KafkaProducer, error) {
 		return nil, err
 	}
 
-	return &KafkaProducer{producer, configStore.GetKafkaChatTopic()}, nil
+	return &MessageProducer{producer, configStore.GetKafkaChatTopic()}, nil
 }
 
-func (producer *KafkaProducer) Produce(message *dto.MessageDto) error {
+func (producer *MessageProducer) Produce(message *dto.MessageDto) error {
 	kafkaMessage, err := producer.makeMessage(message)
 	if err != nil {
 		return fmt.Errorf("failed to produce message: %v", err)
@@ -49,7 +49,7 @@ func (producer *KafkaProducer) Produce(message *dto.MessageDto) error {
 	return nil
 }
 
-func (producer *KafkaProducer) makeMessage(message *dto.MessageDto) (*kafka.Message, error) {
+func (producer *MessageProducer) makeMessage(message *dto.MessageDto) (*kafka.Message, error) {
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (producer *KafkaProducer) makeMessage(message *dto.MessageDto) (*kafka.Mess
 	}, nil
 }
 
-func (producer *KafkaProducer) Close() error {
+func (producer *MessageProducer) Close() error {
 	producer.Producer.Close()
 	return nil
 }

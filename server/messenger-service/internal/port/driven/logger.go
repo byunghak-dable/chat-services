@@ -1,6 +1,6 @@
 package driven
 
-type LoggerPort interface {
+type Logger interface {
 	Debugf(format string, args ...interface{})
 	Infof(format string, args ...interface{})
 	Printf(format string, args ...interface{})
