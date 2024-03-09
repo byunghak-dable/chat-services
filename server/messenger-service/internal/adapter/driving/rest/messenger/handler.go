@@ -1,4 +1,4 @@
-package chat
+package messenger
 
 import (
 	"messenger-service/internal/application/dto"
@@ -11,16 +11,16 @@ import (
 )
 
 type Handler struct {
-	logger           driven.Logger
-	messengerService driving.Messenger
-	upgrader         *websocket.Upgrader
+	logger   driven.Logger
+	app      driving.Messenger
+	upgrader *websocket.Upgrader
 }
 
-func NewHandler(logger driven.Logger, messengerService driving.Messenger) *Handler {
+func NewHandler(logger driven.Logger, app driving.Messenger) *Handler {
 	return &Handler{
-		logger:           logger,
-		messengerService: messengerService,
-		upgrader: &websocket.Upgrader{
+		logger,
+		app,
+		&websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 			CheckOrigin: func(request *http.Request) bool {
@@ -69,13 +69,13 @@ func (h *Handler) handleConnection(conn *websocket.Conn, param *connection) erro
 		userIdx:       param.UserIdx,
 	}
 
-	if err := h.messengerService.Join(client); err != nil {
+	if err := h.app.Join(client); err != nil {
 		return err
 	}
 
 	defer func() {
-		if err := h.messengerService.Leave(client); err != nil {
-			h.logger.Errorf("messenger leave failed: %v", err)
+		if err := h.app.Leave(client); err != nil {
+			h.logger.Errorf("app leave failed: %v", err)
 		}
 	}()
 
@@ -102,14 +102,12 @@ func (h *Handler) handleMessage(client *client) error {
 
 func (h *Handler) sendMessage(client *client, msg *message) {
 	message := &dto.Message{
-		RoomIdx:  client.roomIdx,
-		UserIdx:  client.userIdx,
-		Name:     client.name,
-		ImageUrl: client.imageUrl,
-		Message:  msg.Message,
+		RoomIdx: client.roomIdx,
+		UserIdx: client.userIdx,
+		Message: msg.Message,
 	}
 
-	if err := h.messengerService.SendMessage(message); err != nil {
+	if err := h.app.SendMessage(message); err != nil {
 		h.logger.Errorf("send message failed: %s", err)
 	}
 }

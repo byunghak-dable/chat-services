@@ -1,25 +1,21 @@
-package chat
+package messenger
 
 import (
-	"messenger-service/internal/adapter/driving/grpc/chat/pb"
+	"messenger-service/internal/adapter/driving/grpc/messenger/pb"
 	"messenger-service/internal/application/dto"
 )
 
 type client struct {
-	stream   pb.Chat_ConnectServer
-	name     string
-	imageUrl string
-	roomIdx  uint
-	userIdx  uint
+	stream  pb.Chat_ConnectServer
+	roomIdx uint
+	userIdx uint
 }
 
 func (c *client) SendMessage(message *dto.Message) error {
 	messageRes := pb.MessageRes{
-		RoomIdx:  uint32(message.RoomIdx),
-		UserIdx:  uint32(message.UserIdx),
-		Message:  message.Message,
-		Name:     message.Name,
-		ImageUrl: message.ImageUrl,
+		RoomIdx: uint32(message.RoomIdx),
+		UserIdx: uint32(message.UserIdx),
+		Message: message.Message,
 	}
 
 	return c.stream.Send(&messageRes)

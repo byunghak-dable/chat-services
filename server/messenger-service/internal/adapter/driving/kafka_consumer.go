@@ -3,32 +3,33 @@ package driving
 import (
 	"encoding/json"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"messenger-service/internal/application/dto"
+	"messenger-service/internal/adapter/driven/config"
 	"messenger-service/internal/port/driven"
 	"messenger-service/internal/port/driving"
 )
 
-type KafkaConsumer struct {
+type KafkaConsumer[T any] struct {
 	logger      driven.Logger
 	consumer    *kafka.Consumer
-	broadcaster driving.MessageBroadcaster
+	broadcaster driving.Broadcaster[T]
 	topics      []string
 }
 
-func NewKafkaConsumer(configStore driven.ConfigStore, logger driven.Logger, broadcaster driving.MessageBroadcaster) (*KafkaConsumer, error) {
+func NewKafkaConsumer[T any](configStore *config.Store, logger driven.Logger, broadcaster driving.Broadcaster[T]) (*KafkaConsumer[T], error) {
+	configs := configStore.GetKafkaConsumerConfig()
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": configStore.GetKafkaServers(),
-		"group.id":          configStore.GetKafkaGroupId(),
+		"bootstrap.servers": configs.Servers,
+		"group.id":          configs.GroupId,
 		"auto.offset.reset": "smallest",
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &KafkaConsumer{logger, consumer, broadcaster, []string{configStore.GetKafkaChatTopic()}}, nil
+	return &KafkaConsumer[T]{logger, consumer, broadcaster, []string{configs.Topic}}, nil
 }
 
-func (kc *KafkaConsumer) Run() error {
+func (kc *KafkaConsumer[T]) Run() error {
 	if err := kc.consumer.SubscribeTopics(kc.topics, nil); err != nil {
 		return err
 	}
@@ -47,8 +48,8 @@ func (kc *KafkaConsumer) Run() error {
 	}
 }
 
-func (kc *KafkaConsumer) handleMessage(bytes []byte) error {
-	var message dto.Message
+func (kc *KafkaConsumer[T]) handleMessage(bytes []byte) error {
+	var message T
 
 	if err := json.Unmarshal(bytes, &message); err != nil {
 		return err
@@ -57,6 +58,6 @@ func (kc *KafkaConsumer) handleMessage(bytes []byte) error {
 	return kc.broadcaster.Broadcast(&message)
 }
 
-func (kc *KafkaConsumer) Close() error {
+func (kc *KafkaConsumer[T]) Close() error {
 	return kc.consumer.Close()
 }

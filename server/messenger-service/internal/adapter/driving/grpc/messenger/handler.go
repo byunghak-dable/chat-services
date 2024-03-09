@@ -1,8 +1,8 @@
-package chat
+package messenger
 
 import (
 	"errors"
-	"messenger-service/internal/adapter/driving/grpc/chat/pb"
+	"messenger-service/internal/adapter/driving/grpc/messenger/pb"
 	"messenger-service/internal/application/dto"
 	"messenger-service/internal/port/driven"
 	"messenger-service/internal/port/driving"
@@ -10,14 +10,14 @@ import (
 
 type Handler struct {
 	pb.UnimplementedChatServer
-	logger           driven.Logger
-	messengerService driving.Messenger
+	logger driven.Logger
+	app    driving.Messenger
 }
 
 func New(logger driven.Logger, app driving.Messenger) *Handler {
 	return &Handler{
-		logger:           logger,
-		messengerService: app,
+		logger: logger,
+		app:    app,
 	}
 }
 
@@ -42,13 +42,13 @@ func (h *Handler) handleConnection(stream pb.Chat_ConnectServer, joinReq *pb.Joi
 		userIdx: uint(joinReq.RoomIdx),
 	}
 
-	if err := h.messengerService.Join(client); err != nil {
+	if err := h.app.Join(client); err != nil {
 		return err
 	}
 
 	defer func() {
-		if err := h.messengerService.Leave(client); err != nil {
-			h.logger.Errorf("rest chat leave error: %v", err)
+		if err := h.app.Leave(client); err != nil {
+			h.logger.Errorf("rest app leave error: %v", err)
 		}
 	}()
 
@@ -73,14 +73,12 @@ func (h *Handler) handleMessage(client *client) error {
 
 func (h *Handler) sendMessage(client *client, payload *pb.MessageReq) {
 	message := dto.Message{
-		RoomIdx:  client.roomIdx,
-		UserIdx:  client.userIdx,
-		Name:     client.name,
-		ImageUrl: client.imageUrl,
-		Message:  payload.GetMessage(),
+		RoomIdx: client.roomIdx,
+		UserIdx: client.userIdx,
+		Message: payload.GetMessage(),
 	}
 
-	if err := h.messengerService.SendMessage(&message); err != nil {
+	if err := h.app.SendMessage(&message); err != nil {
 		h.logger.Errorf("send message failed: %h", err)
 	}
 }

@@ -7,12 +7,12 @@ import (
 )
 
 type Messenger struct {
-	producer     driven.MessageProducer
-	messageStore driving.MessageStore
+	producer     driven.Producer[dto.Message]
+	messageStore driving.Message
 	roomManager  *RoomManager
 }
 
-func NewMessenger(producer driven.MessageProducer, messageStore driving.MessageStore, roomManager *RoomManager) *Messenger {
+func NewMessenger(producer driven.Producer[dto.Message], messageStore driving.Message, roomManager *RoomManager) *Messenger {
 	return &Messenger{producer, messageStore, roomManager}
 }
 

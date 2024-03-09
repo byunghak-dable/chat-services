@@ -1,6 +1,32 @@
 version: "3"
 
 services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - ${MONGODB_PORT}:${MONGODB_PORT}
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DB}
+      MONGO_NON_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_NON_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+      MONGO_NON_ROOT_DATABASE: ${MONGODB_AUTH_DB}
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGODB_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongodb:${MONGODB_PORT}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGODB_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGODB_PASSWORD}
+
   Kafka00Service:
     image: bitnami/kafka:3.5.1-debian-11-r44
     restart: unless-stopped
@@ -102,6 +128,7 @@ networks:
   kafka_network:
 
 volumes:
+  mongodb-data:
   Kafka00:
   Kafka01:
   Kafka02:

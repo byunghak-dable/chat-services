@@ -1,0 +1,33 @@
+package db
+
+import (
+	"context"
+	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"messenger-service/internal/adapter/driven/config"
+	"time"
+)
+
+type MongoDb struct {
+	*mongo.Client
+}
+
+func NewMongoDb(configStore *config.Store) (*MongoDb, error) {
+	configs := configStore.GetMongoDbConfig()
+	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s", configs.User, configs.Password, configs.Host, configs.Port)
+
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil {
+		return nil, err
+	}
+
+	return &MongoDb{client}, nil
+}
+
+func (md *MongoDb) Close() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	return md.Client.Disconnect(ctx)
+}

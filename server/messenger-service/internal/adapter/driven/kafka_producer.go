@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"messenger-service/internal/port/driven"
+	"messenger-service/internal/adapter/driven/config"
 )
 
 type KafkaProducer[T any] struct {
@@ -12,17 +12,18 @@ type KafkaProducer[T any] struct {
 	topic    string
 }
 
-func NewKafkaProducer[T any](configStore driven.ConfigStore) (*KafkaProducer[T], error) {
+func NewKafkaProducer[T any](configStore *config.Store) (*KafkaProducer[T], error) {
+	configs := configStore.GetKafkaProducerConfig()
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": configStore.GetKafkaServers(),
-		"client.id":         configStore.GetKafkaClientId(),
+		"bootstrap.servers": configs.Servers,
+		"client.id":         configs.ClientId,
 		"acks":              "all",
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &KafkaProducer[T]{producer, configStore.GetKafkaChatTopic()}, nil
+	return &KafkaProducer[T]{producer, configs.Topic}, nil
 }
 
 func (kp *KafkaProducer[T]) Produce(message *T) error {
@@ -31,8 +32,7 @@ func (kp *KafkaProducer[T]) Produce(message *T) error {
 		return fmt.Errorf("failed to produce message: %v", err)
 	}
 
-	err = kp.producer.Produce(kafkaMessage, nil)
-	if err != nil {
+	if err := kp.producer.Produce(kafkaMessage, nil); err != nil {
 		return fmt.Errorf("failed to produce message: %v", err)
 	}
 

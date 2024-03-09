@@ -1,17 +1,18 @@
-package chat
+package messenger
 
 import (
-	"messenger-service/internal/application/dto"
-
 	"github.com/gorilla/websocket"
+	"messenger-service/internal/application/dto"
 )
 
 type client struct {
 	websocketConn *websocket.Conn
-	name          string
-	imageUrl      string
 	userIdx       uint
 	roomIdx       uint
+}
+
+func (c *client) SendMessage(message *dto.Message) error {
+	return c.websocketConn.WriteJSON(message)
 }
 
 func (c *client) GetRoomIdx() uint {
@@ -20,8 +21,4 @@ func (c *client) GetRoomIdx() uint {
 
 func (c *client) GetUserIdx() uint {
 	return c.userIdx
-}
-
-func (c *client) SendMessage(message *dto.Message) error {
-	return c.websocketConn.WriteJSON(message)
 }

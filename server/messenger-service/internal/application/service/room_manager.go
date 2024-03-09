@@ -59,15 +59,24 @@ func (rm *RoomManager) Broadcast(message *dto.Message) error {
 
 	return rm.withRLock(roomIdx, func() error {
 		var errs []error
+		room := rm.roomMap[roomIdx]
+		errChan := make(chan error)
+		defer close(errChan)
 
-		for _, participant := range rm.roomMap[roomIdx] {
-			if err := participant.SendMessage(message); err != nil {
+		for _, participant := range room {
+			go func(participant driving.MessengerClient) {
+				errChan <- participant.SendMessage(message)
+			}(participant)
+		}
+
+		for range room {
+			if err := <-errChan; err != nil {
 				errs = append(errs, err)
 			}
 		}
 
 		if len(errs) > 0 {
-			return fmt.Errorf("bradcast error: %v", errs)
+			return fmt.Errorf("broadcast failed: %v", errs)
 		}
 
 		return nil

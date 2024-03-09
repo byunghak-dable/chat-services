@@ -3,7 +3,8 @@ package rest
 import (
 	"context"
 	"errors"
-	"messenger-service/internal/adapter/driving/rest/chat"
+	"messenger-service/internal/adapter/driven/config"
+	"messenger-service/internal/adapter/driving/rest/messenger"
 	"messenger-service/internal/port/driven"
 	"messenger-service/internal/port/driving"
 	"net/http"
@@ -13,20 +14,18 @@ import (
 )
 
 type Rest struct {
-	logger           driven.Logger
-	server           *http.Server
-	messengerService driving.Messenger
+	logger driven.Logger
+	server *http.Server
 }
 
-func New(configStore driven.ConfigStore, logger driven.Logger, messenger driving.Messenger) *Rest {
+func New(configStore *config.Store, logger driven.Logger, messengerApp driving.Messenger) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 
-	chat.NewHandler(logger, messenger).Register(group)
+	messenger.NewHandler(logger, messengerApp).Register(group)
 
 	return &Rest{
-		logger:           logger,
-		messengerService: messenger,
+		logger: logger,
 		server: &http.Server{
 			Handler:      router,
 			ReadTimeout:  5 * time.Second,

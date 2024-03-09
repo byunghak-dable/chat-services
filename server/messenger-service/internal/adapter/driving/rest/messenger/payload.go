@@ -1,4 +1,4 @@
-package chat
+package messenger
 
 type connection struct {
 	UserIdx uint `form:"user_idx" binding:"required"`
