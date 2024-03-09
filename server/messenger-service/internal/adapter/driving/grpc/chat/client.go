@@ -13,7 +13,7 @@ type client struct {
 	userIdx  uint
 }
 
-func (c *client) SendMessage(message *dto.MessageDto) error {
+func (c *client) SendMessage(message *dto.Message) error {
 	messageRes := pb.MessageRes{
 		RoomIdx:  uint32(message.RoomIdx),
 		UserIdx:  uint32(message.UserIdx),

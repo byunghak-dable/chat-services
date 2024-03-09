@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"messenger-service/internal/adapter/driven"
+	"messenger-service/internal/adapter/driven/persistence"
+	"messenger-service/internal/adapter/driven/persistence/db"
 	"messenger-service/internal/adapter/driving"
 	"messenger-service/internal/adapter/driving/grpc"
 	"messenger-service/internal/adapter/driving/rest"
+	"messenger-service/internal/application/dto"
 	"messenger-service/internal/application/service"
 	"os"
 	"os/signal"
@@ -25,8 +28,11 @@ type Closable interface {
 }
 
 var logger = log.New()
+var closableList []Closable
 
 func main() {
+	defer quit()
+
 	configStore, err := driven.NewConfigStore()
 
 	if err != nil {
@@ -34,35 +40,36 @@ func main() {
 		return
 	}
 
-	kafkaProducer, producerErr := driven.NewMessageProducer(configStore)
+	mongoDb := loadClosable(db.NewMongoDb(configStore))
+	kafkaProducer := loadClosable(driven.NewKafkaProducer[dto.Message](configStore))
 
-	defer quit(kafkaProducer)
+	messageRepository := persistence.NewMessageRepository(mongoDb)
+	messageStore := service.NewMessageStore(messageRepository)
+	messenger := service.NewMessenger(kafkaProducer, messageStore, service.NewRoomManager())
 
-	if producerErr != nil {
-		logger.Error(producerErr)
-		return
-	}
+	kafkaConsumer := loadClosable(driving.NewKafkaConsumer(configStore, logger, messenger))
+	restApp := loadClosable(rest.New(configStore, logger, messenger), nil)
+	grpcApp := loadClosable(grpc.New(configStore, logger, messenger), nil)
 
-	messengerService := service.NewMessengerService(logger, kafkaProducer)
-
-	kafkaConsumer, consumerErr := driving.NewMessageBroadcaster(configStore, logger, messengerService)
-	restApp := rest.New(configStore, logger, messengerService)
-	grpcApp := grpc.New(configStore, logger, messengerService)
-
-	defer quit(restApp, grpcApp, kafkaProducer)
-
-	if consumerErr != nil {
-		logger.Error(consumerErr)
-		return
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	run(cancel, kafkaConsumer, restApp, grpcApp)
-	handleTermination(ctx)
+	run(kafkaConsumer, restApp, grpcApp)
 }
 
-func run(cancel context.CancelFunc, runnables ...Runnable) {
+func loadClosable[T Closable](target T, err error) T {
+	closableList = append(closableList, target)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return target
+}
+
+func run(runnables ...Runnable) {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer waitTermination(ctx)
+	defer cancel()
+
 	for _, runnable := range runnables {
 		go func(runnable Runnable) {
 			if err := runnable.Run(); err != nil {
@@ -73,20 +80,21 @@ func run(cancel context.CancelFunc, runnables ...Runnable) {
 	}
 }
 
-func quit(closables ...Closable) {
-	for _, closable := range closables {
+func quit() {
+	for _, closable := range closableList {
 		if reflect.ValueOf(closable).IsNil() {
 			continue
 		}
 
-		err := closable.Close()
-		if err != nil {
+		if err := closable.Close(); err != nil {
 			logger.Errorf("%s exiting failed: %s", reflect.TypeOf(closable), err)
+			return
 		}
+		logger.Infof("%s successfully closed", reflect.TypeOf(closable))
 	}
 }
 
-func handleTermination(ctx context.Context) {
+func waitTermination(ctx context.Context) {
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 

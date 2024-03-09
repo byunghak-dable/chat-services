@@ -8,20 +8,20 @@ import (
 	"messenger-service/internal/port/driving"
 )
 
-type Server struct {
+type Handler struct {
 	pb.UnimplementedChatServer
 	logger           driven.Logger
 	messengerService driving.Messenger
 }
 
-func New(logger driven.Logger, app driving.Messenger) *Server {
-	return &Server{
+func New(logger driven.Logger, app driving.Messenger) *Handler {
+	return &Handler{
 		logger:           logger,
 		messengerService: app,
 	}
 }
 
-func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
+func (h *Handler) Connect(stream pb.Chat_ConnectServer) error {
 	req, err := stream.Recv()
 	if err != nil {
 		return err
@@ -32,30 +32,30 @@ func (s *Server) Connect(stream pb.Chat_ConnectServer) error {
 		return errors.New("should join before other request")
 	}
 
-	return s.handleConnection(stream, joinReq.Join)
+	return h.handleConnection(stream, joinReq.Join)
 }
 
-func (s *Server) handleConnection(stream pb.Chat_ConnectServer, joinReq *pb.JoinReq) error {
+func (h *Handler) handleConnection(stream pb.Chat_ConnectServer, joinReq *pb.JoinReq) error {
 	client := &client{
 		stream:  stream,
 		roomIdx: uint(joinReq.UserIdx),
 		userIdx: uint(joinReq.RoomIdx),
 	}
 
-	if err := s.messengerService.Join(client); err != nil {
+	if err := h.messengerService.Join(client); err != nil {
 		return err
 	}
 
 	defer func() {
-		if err := s.messengerService.Leave(client); err != nil {
-			s.logger.Errorf("rest chat leave error: %v", err)
+		if err := h.messengerService.Leave(client); err != nil {
+			h.logger.Errorf("rest chat leave error: %v", err)
 		}
 	}()
 
-	return s.handleMessage(client)
+	return h.handleMessage(client)
 }
 
-func (s *Server) handleMessage(client *client) error {
+func (h *Handler) handleMessage(client *client) error {
 	for {
 		req, err := client.stream.Recv()
 		if err != nil {
@@ -64,15 +64,15 @@ func (s *Server) handleMessage(client *client) error {
 
 		switch typedReq := req.GetType().(type) {
 		case *pb.ChatReq_Message:
-			s.sendMessage(client, typedReq.Message)
+			h.sendMessage(client, typedReq.Message)
 		default:
 			return errors.New("wrong request type")
 		}
 	}
 }
 
-func (s *Server) sendMessage(client *client, payload *pb.MessageReq) {
-	message := dto.MessageDto{
+func (h *Handler) sendMessage(client *client, payload *pb.MessageReq) {
+	message := dto.Message{
 		RoomIdx:  client.roomIdx,
 		UserIdx:  client.userIdx,
 		Name:     client.name,
@@ -80,7 +80,7 @@ func (s *Server) sendMessage(client *client, payload *pb.MessageReq) {
 		Message:  payload.GetMessage(),
 	}
 
-	if err := s.messengerService.SendMessage(&message); err != nil {
-		s.logger.Errorf("send message failed: %s", err)
+	if err := h.messengerService.SendMessage(&message); err != nil {
+		h.logger.Errorf("send message failed: %h", err)
 	}
 }

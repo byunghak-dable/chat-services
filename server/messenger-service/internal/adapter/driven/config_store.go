@@ -2,6 +2,7 @@ package driven
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"os"
 	"strings"
@@ -18,7 +19,7 @@ func NewConfigStore() (*ConfigStore, error) {
 	return &ConfigStore{}, nil
 }
 
-func (config *ConfigStore) GetKafkaServers() string {
+func (cs *ConfigStore) GetKafkaServers() string {
 	servers := []string{
 		fmt.Sprintf("%s:%s", os.Getenv("KAFKA_1_HOST"), os.Getenv("KAFKA_1_PORT")),
 		fmt.Sprintf("%s:%s", os.Getenv("KAFKA_2_HOST"), os.Getenv("KAFKA_2_PORT")),
@@ -28,22 +29,22 @@ func (config *ConfigStore) GetKafkaServers() string {
 	return strings.Join(servers, ",")
 }
 
-func (config *ConfigStore) GetKafkaGroupId() string {
-	return os.Getenv("KAFKA_GROUP_ID")
+func (cs *ConfigStore) GetKafkaGroupId() string {
+	return fmt.Sprintf("%s:%s", os.Getenv("KAFKA_GROUP_ID"), uuid.New())
 }
 
-func (config *ConfigStore) GetKafkaClientId() string {
+func (cs *ConfigStore) GetKafkaClientId() string {
 	return os.Getenv("KAFKA_CLIENT_ID")
 }
 
-func (config *ConfigStore) GetKafkaChatTopic() string {
+func (cs *ConfigStore) GetKafkaChatTopic() string {
 	return os.Getenv("KAFKA_CHAT_TOPIC")
 }
 
-func (config *ConfigStore) GetRestPort() string {
+func (cs *ConfigStore) GetRestPort() string {
 	return os.Getenv("REST_PORT")
 }
 
-func (config *ConfigStore) GetGrpcPort() string {
+func (cs *ConfigStore) GetGrpcPort() string {
 	return os.Getenv("GRPC_PORT")
 }

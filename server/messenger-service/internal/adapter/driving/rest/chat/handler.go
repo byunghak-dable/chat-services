@@ -101,7 +101,7 @@ func (h *Handler) handleMessage(client *client) error {
 }
 
 func (h *Handler) sendMessage(client *client, msg *message) {
-	message := &dto.MessageDto{
+	message := &dto.Message{
 		RoomIdx:  client.roomIdx,
 		UserIdx:  client.userIdx,
 		Name:     client.name,

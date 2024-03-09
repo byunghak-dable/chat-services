@@ -4,16 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"messenger-service/internal/application/dto"
 	"messenger-service/internal/port/driven"
 )
 
-type MessageProducer struct {
-	*kafka.Producer
-	topic string
+type KafkaProducer[T any] struct {
+	producer *kafka.Producer
+	topic    string
 }
 
-func NewMessageProducer(configStore driven.ConfigStore) (*MessageProducer, error) {
+func NewKafkaProducer[T any](configStore driven.ConfigStore) (*KafkaProducer[T], error) {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": configStore.GetKafkaServers(),
 		"client.id":         configStore.GetKafkaClientId(),
@@ -23,21 +22,21 @@ func NewMessageProducer(configStore driven.ConfigStore) (*MessageProducer, error
 		return nil, err
 	}
 
-	return &MessageProducer{producer, configStore.GetKafkaChatTopic()}, nil
+	return &KafkaProducer[T]{producer, configStore.GetKafkaChatTopic()}, nil
 }
 
-func (producer *MessageProducer) Produce(message *dto.MessageDto) error {
-	kafkaMessage, err := producer.makeMessage(message)
+func (kp *KafkaProducer[T]) Produce(message *T) error {
+	kafkaMessage, err := kp.makeMessage(message)
 	if err != nil {
 		return fmt.Errorf("failed to produce message: %v", err)
 	}
 
-	err = producer.Producer.Produce(kafkaMessage, nil)
+	err = kp.producer.Produce(kafkaMessage, nil)
 	if err != nil {
 		return fmt.Errorf("failed to produce message: %v", err)
 	}
 
-	switch event := (<-producer.Events()).(type) {
+	switch event := (<-kp.producer.Events()).(type) {
 	case *kafka.Message:
 		if event.TopicPartition.Error != nil {
 			return fmt.Errorf("delivery failed: %v", event.TopicPartition.Error)
@@ -49,19 +48,19 @@ func (producer *MessageProducer) Produce(message *dto.MessageDto) error {
 	return nil
 }
 
-func (producer *MessageProducer) makeMessage(message *dto.MessageDto) (*kafka.Message, error) {
+func (kp *KafkaProducer[T]) makeMessage(message *T) (*kafka.Message, error) {
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
 		return nil, err
 	}
 
 	return &kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &producer.topic, Partition: kafka.PartitionAny},
+		TopicPartition: kafka.TopicPartition{Topic: &kp.topic, Partition: kafka.PartitionAny},
 		Value:          jsonMessage,
 	}, nil
 }
 
-func (producer *MessageProducer) Close() error {
-	producer.Producer.Close()
+func (kp *KafkaProducer[T]) Close() error {
+	kp.producer.Close()
 	return nil
 }

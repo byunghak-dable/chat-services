@@ -37,8 +37,8 @@ func New(configStore driven.ConfigStore, logger driven.Logger, messenger driving
 	}
 }
 
-func (rest *Rest) Run() error {
-	err := rest.server.ListenAndServe()
+func (r *Rest) Run() error {
+	err := r.server.ListenAndServe()
 
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil
@@ -47,9 +47,9 @@ func (rest *Rest) Run() error {
 	return err
 }
 
-func (rest *Rest) Close() error {
+func (r *Rest) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	return rest.server.Shutdown(ctx)
+	return r.server.Shutdown(ctx)
 }

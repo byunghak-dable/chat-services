@@ -22,6 +22,6 @@ func (c *client) GetUserIdx() uint {
 	return c.userIdx
 }
 
-func (c *client) SendMessage(message *dto.MessageDto) error {
+func (c *client) SendMessage(message *dto.Message) error {
 	return c.websocketConn.WriteJSON(message)
 }

@@ -1,6 +1,6 @@
 package dto
 
-type MessageDto struct {
+type Message struct {
 	ImageUrl string
 	Name     string
 	Message  string
