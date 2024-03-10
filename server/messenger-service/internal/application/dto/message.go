@@ -1,7 +1,11 @@
 package dto
 
+import "time"
+
 type Message struct {
-	Message string
-	RoomIdx uint
-	UserIdx uint
+	Id        string
+	Message   string
+	RoomIdx   uint
+	UserIdx   uint
+	CreatedAt time.Time
 }

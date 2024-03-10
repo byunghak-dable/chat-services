@@ -38,12 +38,12 @@ func main() {
 	mongoDb := loadClosable(db.NewMongoDb(configStore))
 	kafkaProducer := loadClosable(driven.NewKafkaProducer[dto.Message](configStore))
 
-	messageRepository := persistence.NewMessageRepository(mongoDb)
+	messageRepository := persistence.NewMessageRepository(logger, mongoDb)
 	messageStore := service.NewMessageStore(messageRepository, mapper.NewMessage())
 	messenger := service.NewMessenger(kafkaProducer, messageStore, service.NewRoomManager())
 
 	kafkaConsumer := loadClosable(driving.NewKafkaConsumer[dto.Message](configStore, logger, messenger))
-	restApp := loadClosable(rest.New(configStore, logger, messenger), nil)
+	restApp := loadClosable(rest.New(configStore, logger, messenger, messageStore), nil)
 	grpcApp := loadClosable(grpc.New(configStore, logger, messenger), nil)
 
 	run(kafkaConsumer, restApp, grpcApp)

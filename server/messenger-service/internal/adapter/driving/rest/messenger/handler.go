@@ -60,6 +60,7 @@ func (h *Handler) chat(ctx *gin.Context) {
 	if err := h.handleConnection(conn, &param); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err)
 	}
+	ctx.JSON(http.StatusOK, gin.H{})
 }
 
 func (h *Handler) handleConnection(conn *websocket.Conn, param *connection) error {

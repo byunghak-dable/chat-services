@@ -79,6 +79,6 @@ func (h *Handler) sendMessage(client *client, payload *pb.MessageReq) {
 	}
 
 	if err := h.app.SendMessage(&message); err != nil {
-		h.logger.Errorf("send message failed: %h", err)
+		h.logger.Errorf("send message failed: %s", err)
 	}
 }

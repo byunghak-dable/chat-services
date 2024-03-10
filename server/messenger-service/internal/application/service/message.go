@@ -6,20 +6,20 @@ import (
 	"messenger-service/internal/port/driven/persistence"
 )
 
-type Message struct {
+type MessageStore struct {
 	repository persistence.MessageRepository
 	mapper     *mapper.Message
 }
 
-func NewMessageStore(repository persistence.MessageRepository, mapper *mapper.Message) *Message {
-	return &Message{repository, mapper}
+func NewMessageStore(repository persistence.MessageRepository, mapper *mapper.Message) *MessageStore {
+	return &MessageStore{repository, mapper}
 }
 
-func (ms *Message) SaveMessage(message *dto.Message) error {
+func (ms *MessageStore) SaveMessage(message *dto.Message) error {
 	return ms.repository.SaveMessage(ms.mapper.ToEntity(message))
 }
 
-func (ms *Message) GetMessages(query *dto.MessagesQuery) ([]*dto.Message, error) {
+func (ms *MessageStore) GetMessages(query *dto.MessagesQuery) ([]*dto.Message, error) {
 	entities, err := ms.repository.GetMessages(query)
 	if err != nil {
 		return nil, err

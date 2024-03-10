@@ -14,18 +14,21 @@ func NewMessage() *Message {
 
 func (mm *Message) ToEntity(dto *dto.Message) *entity.Message {
 	return &entity.Message{
-		Message: dto.Message,
-		RoomIdx: dto.RoomIdx,
-		UserIdx: dto.UserIdx,
+		Id:        dto.Id,
+		Message:   dto.Message,
+		RoomIdx:   dto.RoomIdx,
+		UserIdx:   dto.UserIdx,
+		CreatedAt: dto.CreatedAt,
 	}
-
 }
 
 func (mm *Message) ToDto(entity *entity.Message) *dto.Message {
 	return &dto.Message{
-		Message: entity.Message,
-		RoomIdx: entity.RoomIdx,
-		UserIdx: entity.UserIdx,
+		Id:        entity.Id,
+		Message:   entity.Message,
+		RoomIdx:   entity.RoomIdx,
+		UserIdx:   entity.UserIdx,
+		CreatedAt: entity.CreatedAt,
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"messenger-service/internal/adapter/driven/config"
+	"messenger-service/internal/adapter/driving/rest/message"
 	"messenger-service/internal/adapter/driving/rest/messenger"
 	"messenger-service/internal/port/driven"
 	"messenger-service/internal/port/driving"
@@ -18,11 +19,12 @@ type Rest struct {
 	server *http.Server
 }
 
-func New(configStore *config.Store, logger driven.Logger, messengerApp driving.Messenger) *Rest {
+func New(configStore *config.Store, logger driven.Logger, messengerApp driving.Messenger, messageApp driving.Message) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 
 	messenger.NewHandler(logger, messengerApp).Register(group)
+	message.NewHandler(logger, messageApp).Register(group)
 
 	return &Rest{
 		logger: logger,
@@ -47,7 +49,7 @@ func (r *Rest) Run() error {
 }
 
 func (r *Rest) Close() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	return r.server.Shutdown(ctx)
