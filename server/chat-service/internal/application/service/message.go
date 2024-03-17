@@ -18,7 +18,7 @@ func NewMessage(repository driven.MessageRepository, mapper *mapper.Message) *Me
 func (m *Message) Save(message *dto.Message) error {
 	entity := m.mapper.ToEntity(*message)
 
-	if err := m.repository.Save(&entity); err != nil {
+	if err := m.repository.Save(entity); err != nil {
 		return err
 	}
 

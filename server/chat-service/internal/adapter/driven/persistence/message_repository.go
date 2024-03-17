@@ -36,8 +36,8 @@ func (mr *MessageRepository) Save(message *entity.Message) error {
 	return nil
 }
 
-func (mr *MessageRepository) GetSeveral(query dto.MessagesQuery) ([]entity.Message, error) {
-	var messages []entity.Message
+func (mr *MessageRepository) GetSeveral(query dto.MessagesQuery) ([]*entity.Message, error) {
+	var messages []*entity.Message
 
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
