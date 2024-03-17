@@ -95,7 +95,7 @@ func (h *Handler) handleMessage(client *client) error {
 }
 
 func (h *Handler) sendMessage(client *client, message string) {
-	messageDto := &dto.Message{
+	messageDto := dto.Message{
 		RoomId:  client.roomId,
 		UserId:  client.userId,
 		Message: message,

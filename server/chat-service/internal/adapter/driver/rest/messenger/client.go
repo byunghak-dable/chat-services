@@ -11,7 +11,7 @@ type client struct {
 	roomId string
 }
 
-func (c *client) Send(message *dto.Message) error {
+func (c *client) Send(message dto.Message) error {
 	return c.conn.WriteJSON(message)
 }
 

@@ -28,7 +28,7 @@ func NewMessenger(logger driven.Logger, broker driven.MessageBroker, messageStor
 	return messenger
 }
 
-func (m *Messenger) OnReceive(message *dto.Message) {
+func (m *Messenger) OnReceive(message dto.Message) {
 	roomId := message.RoomId
 
 	m.withRLock(roomId, func() {
@@ -70,8 +70,8 @@ func (m *Messenger) Leave(client driver.MessengerClient) {
 	})
 }
 
-func (m *Messenger) Send(message *dto.Message) error {
-	if err := m.messageService.Save(message); err != nil {
+func (m *Messenger) Send(message dto.Message) error {
+	if err := m.messageService.Save(&message); err != nil {
 		return err
 	}
 

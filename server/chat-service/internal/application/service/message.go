@@ -16,9 +16,9 @@ func NewMessage(repository driven.MessageRepository, mapper *mapper.Message) *Me
 }
 
 func (m *Message) Save(message *dto.Message) error {
-	entity := m.mapper.ToEntity(message)
+	entity := m.mapper.ToEntity(*message)
 
-	if err := m.repository.Save(entity); err != nil {
+	if err := m.repository.Save(&entity); err != nil {
 		return err
 	}
 
@@ -26,7 +26,7 @@ func (m *Message) Save(message *dto.Message) error {
 	return nil
 }
 
-func (m *Message) GetSeveral(query *dto.MessagesQuery) ([]*dto.Message, error) {
+func (m *Message) GetSeveral(query dto.MessagesQuery) ([]dto.Message, error) {
 	entities, err := m.repository.GetSeveral(query)
 	if err != nil {
 		return nil, err

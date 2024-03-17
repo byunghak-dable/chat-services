@@ -1,7 +1,7 @@
 package rest
 
 import (
-	driven2 "chat-service/internal/adapter/driven/config"
+	"chat-service/internal/adapter/driven/config"
 	"chat-service/internal/adapter/driver/rest/message"
 	"chat-service/internal/adapter/driver/rest/messenger"
 	"chat-service/internal/port/driven"
@@ -19,7 +19,7 @@ type Rest struct {
 	server *http.Server
 }
 
-func New(configStore *driven2.Config, logger driven.Logger, messengerApp driver.Messenger, messageApp driver.Message) *Rest {
+func New(configStore *config.Config, logger driven.Logger, messengerApp driver.Messenger, messageApp driver.Message) *Rest {
 	router := gin.Default()
 	group := router.Group("/api/v1")
 

@@ -28,7 +28,7 @@ func (h *Handler) getSeveral(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, err)
 	}
 
-	messages, err := h.app.GetSeveral(&dto.MessagesQuery{
+	messages, err := h.app.GetSeveral(dto.MessagesQuery{
 		RoomId: ctx.Param("roomId"),
 		Cursor: query.Cursor,
 		Limit:  query.Limit,

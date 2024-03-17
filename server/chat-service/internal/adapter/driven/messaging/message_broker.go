@@ -1,7 +1,7 @@
 package messaging
 
 import (
-	driven2 "chat-service/internal/adapter/driven/config"
+	"chat-service/internal/adapter/driven/config"
 	"chat-service/internal/application/dto"
 	"chat-service/internal/port/driven"
 	"encoding/json"
@@ -17,7 +17,7 @@ type MessageBroker struct {
 	subscribers []driven.MessageSubscriber
 }
 
-func NewMessageBroker(configStore *driven2.Config, logger driven.Logger) (*MessageBroker, error) {
+func NewMessageBroker(configStore *config.Config, logger driven.Logger) (*MessageBroker, error) {
 	configs := configStore.GetMessageBrokerConfig()
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": configs.Servers,
@@ -45,7 +45,7 @@ func (mb *MessageBroker) Subscribe(subscriber driven.MessageSubscriber) {
 	mb.subscribers = append(mb.subscribers, subscriber)
 }
 
-func (mb *MessageBroker) Publish(message *dto.Message) error {
+func (mb *MessageBroker) Publish(message dto.Message) error {
 	kafkaMessage, err := mb.makeMessage(message)
 	if err != nil {
 		return fmt.Errorf("failed to produce message: %v", err)
@@ -84,7 +84,7 @@ func (mb *MessageBroker) Run() error {
 	}
 }
 
-func (mb *MessageBroker) makeMessage(message *dto.Message) (*kafka.Message, error) {
+func (mb *MessageBroker) makeMessage(message dto.Message) (*kafka.Message, error) {
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (mb *MessageBroker) emitMessage(bytes []byte) {
 	}
 
 	for _, subscriber := range mb.subscribers {
-		subscriber.OnReceive(&message)
+		subscriber.OnReceive(message)
 	}
 }
 
