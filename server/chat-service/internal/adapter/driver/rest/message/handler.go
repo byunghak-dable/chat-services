@@ -18,7 +18,7 @@ func NewHandler(logger driven.Logger, app driver.Message) *Handler {
 }
 
 func (h *Handler) Register(router *gin.RouterGroup) {
-	router.GET("/getSeveral/room/:roomIdx", h.getSeveral)
+	router.GET("/getSeveral/room/:roomId", h.getSeveral)
 }
 
 func (h *Handler) getSeveral(ctx *gin.Context) {
@@ -29,7 +29,7 @@ func (h *Handler) getSeveral(ctx *gin.Context) {
 	}
 
 	messages, err := h.app.GetSeveral(&dto.MessagesQuery{
-		RoomId: ctx.Param("roomIdx"),
+		RoomId: ctx.Param("roomId"),
 		Cursor: query.Cursor,
 		Limit:  query.Limit,
 	})

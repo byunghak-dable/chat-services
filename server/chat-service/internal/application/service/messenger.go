@@ -11,24 +11,30 @@ type Messenger struct {
 	logger         driven.Logger
 	broker         driven.MessageBroker
 	messageService driver.Message
-	lockByRoom     sync.Map
-	roomById       map[string][]driver.MessengerClient
+	lockByRoom     *sync.Map
+	roomById       map[string]map[driver.MessengerClient]struct{}
 }
 
 func NewMessenger(logger driven.Logger, broker driven.MessageBroker, messageStore driver.Message) *Messenger {
-	messenger := &Messenger{logger, broker, messageStore, sync.Map{}, make(map[string][]driver.MessengerClient)}
+	messenger := &Messenger{
+		logger,
+		broker,
+		messageStore,
+		new(sync.Map),
+		make(map[string]map[driver.MessengerClient]struct{}),
+	}
 	broker.Subscribe(messenger)
 
 	return messenger
 }
 
 func (m *Messenger) OnReceive(message *dto.Message) {
-	roomIdx := message.RoomId
+	roomId := message.RoomId
 
-	m.withRLock(roomIdx, func() {
-		room := m.roomById[roomIdx]
+	m.withRLock(roomId, func() {
+		room := m.roomById[roomId]
 
-		for _, participant := range room {
+		for participant := range room {
 			go func(participant driver.MessengerClient) {
 				if err := participant.Send(message); err != nil {
 					m.logger.Errorf("[MESSENGER] failed to send message: %s", err)
@@ -39,31 +45,27 @@ func (m *Messenger) OnReceive(message *dto.Message) {
 }
 
 func (m *Messenger) Join(client driver.MessengerClient) {
-	roomIdx := client.RoomId()
+	roomId := client.RoomId()
 
-	m.withLock(roomIdx, func() {
-		m.roomById[roomIdx] = append(m.roomById[roomIdx], client)
+	m.withLock(roomId, func() {
+		if _, ok := m.roomById[roomId]; !ok {
+			m.roomById[roomId] = make(map[driver.MessengerClient]struct{})
+		}
+		m.roomById[roomId][client] = struct{}{}
 	})
-
 }
 
 func (m *Messenger) Leave(client driver.MessengerClient) {
-	roomIdx := client.RoomId()
+	roomId := client.RoomId()
 
-	m.withLock(roomIdx, func() {
-		participants := m.roomById[roomIdx]
+	m.withLock(roomId, func() {
+		room := m.roomById[roomId]
 
-		for i, participant := range m.roomById[roomIdx] {
-			if client != participant {
-				continue
-			}
+		delete(room, client)
 
-			m.roomById[roomIdx] = append(participants[:i], participants[i+1:]...)
-
-			if len(m.roomById[roomIdx]) == 0 {
-				delete(m.roomById, roomIdx)
-				m.lockByRoom.Delete(roomIdx)
-			}
+		if len(room) == 0 {
+			delete(m.roomById, roomId)
+			m.lockByRoom.Delete(roomId)
 		}
 	})
 }
@@ -75,24 +77,24 @@ func (m *Messenger) Send(message *dto.Message) error {
 	return m.broker.Publish(message)
 }
 
-func (m *Messenger) withLock(roomIdx string, action func()) {
-	lock := m.getLock(roomIdx)
+func (m *Messenger) withLock(roomId string, action func()) {
+	lock := m.getLock(roomId)
 	lock.Lock()
 	defer lock.Unlock()
 
 	action()
 }
 
-func (m *Messenger) withRLock(roomIdx string, action func()) {
-	lock := m.getLock(roomIdx)
+func (m *Messenger) withRLock(roomId string, action func()) {
+	lock := m.getLock(roomId)
 	lock.RLock()
 	defer lock.RUnlock()
 
 	action()
 }
 
-func (m *Messenger) getLock(roomIdx string) *sync.RWMutex {
-	mutex, _ := m.lockByRoom.LoadOrStore(roomIdx, &sync.RWMutex{})
+func (m *Messenger) getLock(roomId string) *sync.RWMutex {
+	mutex, _ := m.lockByRoom.LoadOrStore(roomId, &sync.RWMutex{})
 
 	return mutex.(*sync.RWMutex)
 }
