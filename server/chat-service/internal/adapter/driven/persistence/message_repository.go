@@ -32,7 +32,7 @@ func (mr *MessageRepository) Save(message *entity.Message) error {
 		return err
 	}
 
-	message.Id = result.InsertedID.(primitive.ObjectID).Hex()
+	message.SetId(result.InsertedID.(primitive.ObjectID).Hex())
 	return nil
 }
 

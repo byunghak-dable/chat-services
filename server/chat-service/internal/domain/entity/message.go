@@ -13,3 +13,7 @@ type Message struct {
 	CreatedAt time.Time `bson:"created_at,"`
 	UpdatedAt time.Time
 }
+
+func (m *Message) SetId(id string) {
+	m.Id = id
+}
