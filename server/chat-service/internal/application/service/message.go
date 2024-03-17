@@ -18,7 +18,12 @@ func NewMessage(repository driven.MessageRepository, mapper *mapper.Message) *Me
 func (m *Message) Save(message *dto.Message) error {
 	entity := m.mapper.ToEntity(message)
 
-	return m.repository.Save(entity)
+	if err := m.repository.Save(entity); err != nil {
+		return err
+	}
+
+	message.Id = entity.Id
+	return nil
 }
 
 func (m *Message) GetSeveral(query *dto.MessagesQuery) ([]*dto.Message, error) {

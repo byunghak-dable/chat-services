@@ -6,6 +6,7 @@ import (
 	"chat-service/internal/domain/entity"
 	"chat-service/internal/port/driven"
 	"context"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
@@ -26,10 +27,12 @@ func (mr *MessageRepository) Save(message *entity.Message) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	if _, err := mr.collection.InsertOne(ctx, message); err != nil {
+	result, err := mr.collection.InsertOne(ctx, message)
+	if err != nil {
 		return err
 	}
 
+	message.Id = result.InsertedID.(primitive.ObjectID).Hex()
 	return nil
 }
 

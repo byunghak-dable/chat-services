@@ -74,6 +74,7 @@ func (m *Messenger) Send(message *dto.Message) error {
 	if err := m.messageService.Save(message); err != nil {
 		return err
 	}
+
 	return m.broker.Publish(message)
 }
 
