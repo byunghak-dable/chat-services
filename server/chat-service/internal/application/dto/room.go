@@ -7,4 +7,5 @@ type Room struct {
 	Name         string
 	Participants []string
 	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
