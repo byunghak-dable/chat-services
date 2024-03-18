@@ -32,21 +32,21 @@ func (m *Messenger) OnReceive(message dto.Message) {
 	roomId := message.RoomId
 
 	m.withRLock(roomId, func() {
-		var wg sync.WaitGroup
+		room := m.roomById[roomId]
+		errChan := make(chan error, len(room))
+		defer close(errChan)
 
-		for participant := range m.roomById[roomId] {
-			wg.Add(1)
-
+		for participant := range room {
 			go func(participant driver.MessengerClient) {
-				defer wg.Done()
-
-				if err := participant.Send(message); err != nil {
-					m.logger.Errorf("[MESSENGER] failed to send message: %s", err)
-				}
+				errChan <- participant.Send(message)
 			}(participant)
 		}
 
-		wg.Wait()
+		for range len(room) {
+			if err := <-errChan; err != nil {
+				m.logger.Errorf("[MESSENGER] failed to send: %s", err)
+			}
+		}
 	})
 }
 
@@ -67,7 +67,9 @@ func (m *Messenger) Leave(client driver.MessengerClient) {
 	m.withLock(roomId, func() {
 		room := m.roomById[roomId]
 
+		m.logger.Infoln("before", len(room))
 		delete(room, client)
+		m.logger.Infoln("after", len(room))
 
 		if len(room) == 0 {
 			delete(m.roomById, roomId)
