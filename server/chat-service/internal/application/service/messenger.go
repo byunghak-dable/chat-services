@@ -11,7 +11,7 @@ type Messenger struct {
 	logger         driven.Logger
 	broker         driven.MessageBroker
 	messageService driver.Message
-	lockByRoom     *sync.Map
+	lockByRoom     sync.Map
 	roomById       map[string]map[driver.MessengerClient]struct{}
 }
 
@@ -20,7 +20,7 @@ func NewMessenger(logger driven.Logger, broker driven.MessageBroker, messageStor
 		logger,
 		broker,
 		messageStore,
-		new(sync.Map),
+		sync.Map{},
 		make(map[string]map[driver.MessengerClient]struct{}),
 	}
 	broker.Subscribe(messenger)
@@ -33,13 +33,19 @@ func (m *Messenger) OnReceive(message dto.Message) {
 
 	m.withRLock(roomId, func() {
 		room := m.roomById[roomId]
+		errChan := make(chan error, len(room))
+		defer close(errChan)
 
 		for participant := range room {
 			go func(participant driver.MessengerClient) {
-				if err := participant.Send(message); err != nil {
-					m.logger.Errorf("[MESSENGER] failed to send message: %s", err)
-				}
+				errChan <- participant.Send(message)
 			}(participant)
+		}
+
+		for range len(room) {
+			if err := <-errChan; err != nil {
+				m.logger.Errorf("[MESSENGER] failed to send: %s", err)
+			}
 		}
 	})
 }
@@ -61,7 +67,9 @@ func (m *Messenger) Leave(client driver.MessengerClient) {
 	m.withLock(roomId, func() {
 		room := m.roomById[roomId]
 
+		m.logger.Infoln("before", len(room))
 		delete(room, client)
+		m.logger.Infoln("after", len(room))
 
 		if len(room) == 0 {
 			delete(m.roomById, roomId)

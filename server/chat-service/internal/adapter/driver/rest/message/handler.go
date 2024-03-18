@@ -18,18 +18,22 @@ func NewHandler(logger driven.Logger, app driver.Message) *Handler {
 }
 
 func (h *Handler) Register(router *gin.RouterGroup) {
-	router.GET("/getSeveral/room/:roomId", h.getSeveral)
+	router.GET("/messages/room/:roomId/cursor/:cursor", h.getMulti)
 }
 
-func (h *Handler) getSeveral(ctx *gin.Context) {
+func (h *Handler) getMulti(ctx *gin.Context) {
 	var query messagesQuery
+
+	if err := ctx.ShouldBindUri(&query); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, err)
+	}
 
 	if err := ctx.ShouldBindQuery(&query); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, err)
 	}
 
-	messages, err := h.app.GetSeveral(dto.MessagesQuery{
-		RoomId: ctx.Param("roomId"),
+	messages, err := h.app.GetMulti(dto.MessagesQuery{
+		RoomId: query.RoomId,
 		Cursor: query.Cursor,
 		Limit:  query.Limit,
 	})
