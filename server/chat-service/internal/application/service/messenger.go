@@ -11,7 +11,7 @@ type Messenger struct {
 	logger         driven.Logger
 	broker         driven.MessageBroker
 	messageService driver.Message
-	lockByRoom     *sync.Map
+	lockByRoom     sync.Map
 	roomById       map[string]map[driver.MessengerClient]struct{}
 }
 
@@ -20,7 +20,7 @@ func NewMessenger(logger driven.Logger, broker driven.MessageBroker, messageStor
 		logger,
 		broker,
 		messageStore,
-		new(sync.Map),
+		sync.Map{},
 		make(map[string]map[driver.MessengerClient]struct{}),
 	}
 	broker.Subscribe(messenger)
@@ -32,15 +32,21 @@ func (m *Messenger) OnReceive(message dto.Message) {
 	roomId := message.RoomId
 
 	m.withRLock(roomId, func() {
-		room := m.roomById[roomId]
+		var wg sync.WaitGroup
 
-		for participant := range room {
+		for participant := range m.roomById[roomId] {
+			wg.Add(1)
+
 			go func(participant driver.MessengerClient) {
+				defer wg.Done()
+
 				if err := participant.Send(message); err != nil {
 					m.logger.Errorf("[MESSENGER] failed to send message: %s", err)
 				}
 			}(participant)
 		}
+
+		wg.Wait()
 	})
 }
 

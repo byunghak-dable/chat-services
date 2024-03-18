@@ -26,8 +26,8 @@ func (m *Message) Save(message *dto.Message) error {
 	return nil
 }
 
-func (m *Message) GetSeveral(query dto.MessagesQuery) ([]dto.Message, error) {
-	entities, err := m.repository.GetSeveral(query)
+func (m *Message) GetMulti(query dto.MessagesQuery) ([]dto.Message, error) {
+	entities, err := m.repository.GetMulti(query)
 	if err != nil {
 		return nil, err
 	}
