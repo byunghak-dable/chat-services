@@ -5,6 +5,6 @@ import (
 )
 
 type RoomRepository interface {
-	Save(room *entity.Room) error
-	GetRooms() []*entity.Room
+	Save(room entity.Room) error
+	GetRooms() []entity.Room
 }

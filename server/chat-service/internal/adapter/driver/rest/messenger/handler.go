@@ -11,16 +11,20 @@ import (
 )
 
 type Handler struct {
-	logger   driven.Logger
-	app      driver.Messenger
-	upgrader *websocket.Upgrader
+	logger       driven.Logger
+	joinUseCase  driver.MessengerJoinUseCase
+	leaveUseCase driver.MessengerLeaveUseCase
+	sendUseCase  driver.MessengerSendUseCase
+	upgrader     websocket.Upgrader
 }
 
-func NewHandler(logger driven.Logger, app driver.Messenger) *Handler {
+func NewHandler(logger driven.Logger, joinUseCase driver.MessengerJoinUseCase, leaveUseCase driver.MessengerLeaveUseCase, sendUseCase driver.MessengerSendUseCase) *Handler {
 	return &Handler{
 		logger,
-		app,
-		&websocket.Upgrader{
+		joinUseCase,
+		leaveUseCase,
+		sendUseCase,
+		websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 			CheckOrigin: func(request *http.Request) bool {
@@ -38,40 +42,36 @@ func (h *Handler) chat(ctx *gin.Context) {
 	var param connection
 
 	if err := ctx.ShouldBindQuery(&param); err != nil {
-		h.logger.Errorf("connection params binding failed: %s", err)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, err)
 		return
 	}
 
 	conn, err := h.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-
 	if err != nil {
-		h.logger.Errorf("upgrade connections failed: %s", err)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, err)
 		return
 	}
 
 	defer func() {
 		if err := conn.Close(); err != nil {
-			h.logger.Errorf("webSocket close failed: %v", err)
+			h.logger.Errorf("[MESSENGER_HANDLER] webSocket close failed: %v", err)
 		}
 	}()
 
-	if err := h.handleConnection(conn, &param); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err)
+	if err := h.handleConnection(conn, param); err != nil {
+		h.logger.Infoln("[MESSENGER_HANDLER] connection closed: %v", err)
+		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{})
 }
 
-func (h *Handler) handleConnection(conn *websocket.Conn, param *connection) error {
+func (h *Handler) handleConnection(conn *websocket.Conn, param connection) error {
 	client := &client{
 		conn:   conn,
 		roomId: param.RoomId,
 		userId: param.UserId,
 	}
-
-	h.app.Join(client)
-	defer h.app.Leave(client)
+	h.joinUseCase.Handle(client)
+	defer h.leaveUseCase.Handle(client)
 
 	return h.handleMessage(client)
 }
@@ -101,7 +101,7 @@ func (h *Handler) sendMessage(client *client, message string) {
 		Message: message,
 	}
 
-	if err := h.app.Send(messageDto); err != nil {
-		h.logger.Errorf("send messageDto failed: %s", err)
+	if err := h.sendUseCase.Handle(messageDto); err != nil {
+		h.logger.Errorf("[MESSENGER_HANDLER] send message failed: %s", err)
 	}
 }

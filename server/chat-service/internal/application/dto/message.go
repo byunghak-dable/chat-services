@@ -3,15 +3,17 @@ package dto
 import "time"
 
 type Message struct {
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	Id        string
 	Message   string
 	RoomId    string
 	UserId    string
-	UpdatedAt time.Time
 }
 
 type MessagesQuery struct {
-	RoomId string
-	Cursor string
-	Limit  int64
+	RoomId    string
+	Cursor    string
+	UpdatedAt string
+	Limit     int64
 }

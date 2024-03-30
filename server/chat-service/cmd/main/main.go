@@ -3,11 +3,13 @@ package main
 import (
 	"chat-service/internal/adapter/driven/config"
 	"chat-service/internal/adapter/driven/messaging"
-	"chat-service/internal/adapter/driven/persistence"
 	"chat-service/internal/adapter/driven/persistence/db"
+	"chat-service/internal/adapter/driven/persistence/repository"
 	"chat-service/internal/adapter/driver/rest"
 	"chat-service/internal/application/mapper"
-	"chat-service/internal/application/service"
+	"chat-service/internal/application/usecase/message"
+	"chat-service/internal/application/usecase/messenger"
+	"chat-service/internal/domain/service"
 	"context"
 	"io"
 	"os"
@@ -22,8 +24,14 @@ type Runnable interface {
 	Run() error
 }
 
-var logger = log.New()
-var closables []io.Closer
+type Closable interface {
+	Close() error
+}
+
+var (
+	logger    = log.New()
+	closables []Closable
+)
 
 func main() {
 	defer exit()
@@ -36,14 +44,20 @@ func main() {
 
 	mongoDb := load(db.NewMongoDb(configStore))
 	messageBroker := load(messaging.NewMessageBroker(configStore, logger))
+	rest := load(rest.New(configStore, logger), nil)
 
-	messageRepo := persistence.NewMessageRepository(logger, mongoDb)
-	message := service.NewMessage(messageRepo, mapper.NewMessage())
-	messenger := service.NewMessenger(logger, messageBroker, message)
+	messageRepository := repository.NewMessage(logger, mongoDb)
+	messageMapper := mapper.NewMessage()
 
-	restApp := load(rest.New(configStore, logger, messenger, message), nil)
+	roomManager := service.NewRoomManager()
 
-	run(messageBroker, restApp)
+	rest.RegisterMessage(message.NewGetMultiUseCase(messageRepository, messageMapper))
+	rest.RegisterMessenger(
+		messenger.NewJoinUseCase(roomManager),
+		messenger.NewLeaveUseCase(roomManager),
+		messenger.NewSendUseCase(logger, messageBroker, messageRepository, roomManager, messageMapper))
+
+	run(messageBroker, rest)
 }
 
 func load[T io.Closer](target T, err error) T {

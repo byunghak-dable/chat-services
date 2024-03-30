@@ -4,9 +4,10 @@ import (
 	"chat-service/internal/adapter/driven/config"
 	"context"
 	"fmt"
+	"time"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 )
 
 type MongoDb struct {
@@ -29,5 +30,5 @@ func (md *MongoDb) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	return md.Client.Disconnect(ctx)
+	return md.Disconnect(ctx)
 }

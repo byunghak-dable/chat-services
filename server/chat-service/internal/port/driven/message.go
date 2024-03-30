@@ -7,5 +7,5 @@ import (
 
 type MessageRepository interface {
 	Save(message *entity.Message) error
-	GetMulti(query dto.MessagesQuery) ([]*entity.Message, error)
+	GetMulti(query dto.MessagesQuery) ([]entity.Message, error)
 }

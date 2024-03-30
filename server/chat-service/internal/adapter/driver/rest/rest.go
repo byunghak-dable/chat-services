@@ -19,17 +19,11 @@ type Rest struct {
 	server *http.Server
 }
 
-func New(configStore *config.Config, logger driven.Logger, messengerApp driver.Messenger, messageApp driver.Message) *Rest {
-	router := gin.Default()
-	group := router.Group("/api/v1")
-
-	messenger.NewHandler(logger, messengerApp).Register(group)
-	message.NewHandler(logger, messageApp).Register(group)
-
+func New(configStore *config.Config, logger driven.Logger) *Rest {
 	return &Rest{
 		logger: logger,
 		server: &http.Server{
-			Handler:      router,
+			Handler:      gin.Default(),
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
 			IdleTimeout:  120 * time.Second,
@@ -38,14 +32,24 @@ func New(configStore *config.Config, logger driven.Logger, messengerApp driver.M
 	}
 }
 
-func (r *Rest) Run() error {
-	err := r.server.ListenAndServe()
+func (r *Rest) RegisterMessenger(joinUseCase driver.MessengerJoinUseCase, leaveUseCase driver.MessengerLeaveUseCase, sendUseCase driver.MessengerSendUseCase) {
+	group := r.server.Handler.(*gin.Engine).Group("/api/v1")
 
-	if errors.Is(err, http.ErrServerClosed) {
-		return nil
+	messenger.NewHandler(r.logger, joinUseCase, leaveUseCase, sendUseCase).Register(group)
+}
+
+func (r *Rest) RegisterMessage(getMultiUseCase driver.GetMultiMessageUseCase) {
+	group := r.server.Handler.(*gin.Engine).Group("/api/v1")
+
+	message.NewHandler(r.logger, getMultiUseCase).Register(group)
+}
+
+func (r *Rest) Run() error {
+	if err := r.server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		return err
 	}
 
-	return err
+	return nil
 }
 
 func (r *Rest) Close() error {

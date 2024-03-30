@@ -6,6 +6,7 @@ import (
 	"chat-service/internal/port/driven"
 	"encoding/json"
 	"fmt"
+
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
@@ -33,7 +34,6 @@ func NewMessageBroker(configStore *config.Config, logger driven.Logger) (*Messag
 		"group.id":          configs.GroupId,
 		"auto.offset.reset": "smallest",
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,6 @@ func (mb *MessageBroker) Run() error {
 
 	for {
 		message, err := mb.consumer.ReadMessage(-1)
-
 		if err != nil {
 			mb.logger.Errorf("kafka consumer read message failed: %s", err)
 			continue
