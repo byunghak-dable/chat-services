@@ -27,6 +27,11 @@ func (rm *RoomManager) Leave(client driver.MessengerClient) {
 	room := rm.getRoom(roomId)
 
 	room.Leave(client)
+
+	if !room.IsEmpty() {
+		return
+	}
+
 	rm.withLock(func() {
 		if room.IsEmpty() {
 			delete(rm.roomById, roomId)
