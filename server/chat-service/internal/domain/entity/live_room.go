@@ -33,28 +33,20 @@ func (r *LiveRoom) Leave(client driver.MessengerClient) {
 }
 
 func (r *LiveRoom) Broadcast(message dto.Message) error {
-	var count int
-	errChan := make(chan error)
-
-	defer close(errChan)
+	var errs []error
+	var lock sync.Mutex
 
 	r.withRLock(func() {
-		count = len(r.participants)
-
 		for participant := range r.participants {
 			go func(participant driver.MessengerClient) {
-				errChan <- participant.Send(message)
+				if err := participant.Send(message); err != nil {
+					lock.Lock()
+					errs = append(errs, err)
+					lock.Unlock()
+				}
 			}(participant)
 		}
 	})
-
-	var errs []error
-
-	for range count {
-		if err := <-errChan; err != nil {
-			errs = append(errs, err)
-		}
-	}
 
 	if len(errs) > 0 {
 		return fmt.Errorf("%v", errs)
