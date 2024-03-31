@@ -1,6 +1,8 @@
 package message
 
 type messagesQuery struct {
-	Cursor string `form:"cursor"`
-	Limit  int64  `form:"limit" binding:"required"`
+	RoomId    string `uri:"room_id" binding:"required"`
+	Cursor    string `form:"cursor"`
+	UpdatedAt string `form:"updated_at"`
+	Limit     int64  `form:"limit"`
 }

@@ -14,7 +14,7 @@ import (
 var addr = flag.String("addr", "localhost:8080", "http service address")
 
 func main() {
-	flag.Parse()
+	flag.Parse( /**/ )
 	log.SetFlags(0)
 
 	interrupt := make(chan os.Signal, 1)
@@ -39,7 +39,7 @@ func main() {
 				log.Println("read:", err)
 				return
 			}
-			log.Printf("recv: %s, type: %s", message, mt)
+			log.Printf("recv: %s, type: %v", message, mt)
 		}
 	}()
 
