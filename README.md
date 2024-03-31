@@ -1,32 +1,63 @@
-# Chat Server
+# Chat App
 
-## Structure
+This is a toy project to use **Kafka** & **API Gateway**, and the server app is composed of Hexagonal Architecture.
 
-## Services
-  **1. User Service**
-  
-  - Environment Variable  
-    - Mysql : `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`
-    - Redis : `REDIS_HOST`, `REDIS_PASSWORD`, `REDIS_PORT`
-    - Server : `REST_PORT`, `GRPC_PORT`
+## ✨ Features
 
-  **2. Chat Service**
+- 🦼 **User Server**
+  - Manage user authentication using Oauth2(Google, Github) and JWT
+- 💬 **Chat Server**
+  - Chat server using web socket
+  - Broadcast messages to chat members participating in
+    different server instances through kafka message broker
+- 🚪 **Api Gateway(TODO)**
 
-  - Environment Variable
-    - Redis : `REDIS_HOST`, `REDIS_PASSWORD`, `REDIS_PORT`
-    - Server : `REST_PORT`, `GRPC_PORT`
+## ⚙️ Requirements
 
-  **3. Media Service**
+- Docker >= 26.0.0
+- Java 17 (for **User Service**)
+- Go 1.22 (for **Chat Service**)
 
-## Development
+## 🚀 Getting Started
 
-  1. run docker
-  2. install air(live-reload)
+### User Service
 
-  📝 configure `$GOBIN` path before installing 
+- **Set Environment**
 
-    go install github.com/cosmtrek/air@latest
+  - **Server** - `REST_PORT`
+  - **MongoDB** - `MONGO_HOST`, `MONGO_PORT`, `MONGO_USER`, `MONGO_PASSWORD`, `MONGO_DB`, `MONGO_AUTH_DB`
+  - **Oauth2(Google)** - `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`
+  - **Oauth2(Github)** - `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, `GITHUB_OAUTH_REDIRECT_URI`
 
-  3. run app with air
+- **Run Docker**
 
-    air
+  ```sh
+  docker-compose up -d
+  ```
+
+- **Run Server**
+
+  ```sh
+  ${USER_SERVICE_ROOT}/run.sh
+  ```
+
+### Chat Service
+
+- **Set Environment**
+
+  - **Server** - `REST_PORT`
+  - **MongoDB** - `MONGO_HOST`, `MONGO_PORT`, `MONGO_USER`, `MONGO_PASSWORD`, `MONGO_DB`, `MONGO_AUTH_DB`
+  - **Kafka** - `KAFKA_KRAFT_CLUSTER_ID`, `KAFKA_{1..3}_HOST`, `KAFKA_{1..3}_PORT`, `KAFKA_CHAT_TOPIC`, `KAFKA_CLIENT_ID`, `KAFKA_GROUP_ID`
+
+- **Run Docker**
+
+  ```sh
+  docker-compose up -d
+  ```
+
+- **Run Server**
+
+  ```sh
+  go run ${CHAT_SERVICE_ROOT}/cmd/main/main.go
+
+  ```
