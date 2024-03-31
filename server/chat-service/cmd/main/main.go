@@ -11,7 +11,6 @@ import (
 	"chat-service/internal/application/usecase/messenger"
 	"chat-service/internal/domain/service"
 	"context"
-	"io"
 	"os"
 	"os/signal"
 	"reflect"
@@ -60,7 +59,7 @@ func main() {
 	run(messageBroker, restServer)
 }
 
-func load[T io.Closer](target T, err error) T {
+func load[T Closable](target T, err error) T {
 	closables = append(closables, target)
 
 	if err != nil {
