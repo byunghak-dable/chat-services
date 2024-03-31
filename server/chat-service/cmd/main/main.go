@@ -44,20 +44,20 @@ func main() {
 
 	mongoDb := load(db.NewMongoDb(configStore))
 	messageBroker := load(messaging.NewMessageBroker(configStore, logger))
-	rest := load(rest.New(configStore, logger), nil)
+	restServer := load(rest.New(configStore, logger), nil)
 
 	messageRepository := repository.NewMessage(logger, mongoDb)
 	messageMapper := mapper.NewMessage()
 
 	roomManager := service.NewRoomManager()
 
-	rest.RegisterMessage(message.NewGetMultiUseCase(messageRepository, messageMapper))
-	rest.RegisterMessenger(
+	restServer.RegisterMessage(message.NewGetMultiUseCase(messageRepository, messageMapper))
+	restServer.RegisterMessenger(
 		messenger.NewJoinUseCase(roomManager),
 		messenger.NewLeaveUseCase(roomManager),
 		messenger.NewSendUseCase(logger, messageBroker, messageRepository, roomManager, messageMapper))
 
-	run(messageBroker, rest)
+	run(messageBroker, restServer)
 }
 
 func load[T io.Closer](target T, err error) T {
