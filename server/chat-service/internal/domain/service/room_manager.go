@@ -9,74 +9,73 @@ import (
 
 type RoomManager struct {
 	roomById map[string]*entity.LiveRoom
-	lockById *sync.Map
+	lock     sync.RWMutex
 }
 
 func NewRoomManager() *RoomManager {
 	return &RoomManager{
 		roomById: make(map[string]*entity.LiveRoom),
-		lockById: new(sync.Map),
 	}
 }
 
 func (rm *RoomManager) Join(client driver.MessengerClient) {
-	roomId := client.RoomId()
-
-	rm.withLock(roomId, func() {
-		if rm.roomById[roomId] == nil {
-			rm.roomById[roomId] = entity.NewLiveRoom(roomId)
-		}
-		rm.roomById[roomId].Join(client)
-	})
+	rm.getRoom(client.RoomId()).Join(client)
 }
 
 func (rm *RoomManager) Leave(client driver.MessengerClient) {
 	roomId := client.RoomId()
+	room := rm.getRoom(roomId)
 
-	rm.withLock(roomId, func() {
-		room := rm.roomById[roomId]
-		room.Leave(client)
+	room.Leave(client)
 
+	if !room.IsEmpty() {
+		return
+	}
+
+	rm.withLock(func() {
 		if room.IsEmpty() {
-			rm.clean(roomId)
+			delete(rm.roomById, roomId)
 		}
 	})
 }
 
 func (rm *RoomManager) Broadcast(message dto.Message) error {
-	var err error
-	roomId := message.RoomId
+	return rm.getRoom(message.RoomId).Broadcast(message)
+}
 
-	rm.withRLock(roomId, func() {
-		err = rm.roomById[roomId].Broadcast(message)
+func (rm *RoomManager) getRoom(roomId string) *entity.LiveRoom {
+	var room *entity.LiveRoom
+
+	rm.withRLock(func() {
+		room = rm.roomById[roomId]
 	})
 
-	return err
+	if room != nil {
+		return room
+	}
+
+	rm.withLock(func() {
+		room = rm.roomById[roomId]
+
+		if room == nil {
+			room = entity.NewLiveRoom(roomId)
+			rm.roomById[roomId] = room
+		}
+	})
+
+	return room
 }
 
-func (rm *RoomManager) clean(roomId string) {
-	delete(rm.roomById, roomId)
-	rm.lockById.Delete(roomId)
-}
-
-func (rm *RoomManager) withLock(roomId string, action func()) {
-	lock := rm.getLock(roomId)
-	lock.Lock()
-	defer lock.Unlock()
+func (rm *RoomManager) withLock(action func()) {
+	rm.lock.Lock()
+	defer rm.lock.Unlock()
 
 	action()
 }
 
-func (rm *RoomManager) withRLock(roomId string, action func()) {
-	lock := rm.getLock(roomId)
-	lock.RLock()
-	defer lock.RUnlock()
+func (rm *RoomManager) withRLock(action func()) {
+	rm.lock.RLock()
+	defer rm.lock.RUnlock()
 
 	action()
-}
-
-func (rm *RoomManager) getLock(roomId string) *sync.RWMutex {
-	lock, _ := rm.lockById.LoadOrStore(roomId, &sync.RWMutex{})
-
-	return lock.(*sync.RWMutex)
 }
