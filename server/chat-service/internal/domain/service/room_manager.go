@@ -5,11 +5,13 @@ import (
 	"chat-service/internal/domain/entity"
 	"chat-service/internal/port/driver"
 	"sync"
+	"sync/atomic"
 )
 
 type RoomManager struct {
 	roomById map[string]*entity.LiveRoom
-	lock     sync.RWMutex
+	mu       sync.RWMutex
+	ticket   int32
 }
 
 func NewRoomManager() *RoomManager {
@@ -19,63 +21,92 @@ func NewRoomManager() *RoomManager {
 }
 
 func (rm *RoomManager) Join(client driver.MessengerClient) {
-	rm.getRoom(client.RoomId()).Join(client)
+	rm.withTicket(func() {
+		rm.getOrCreateRoom(client.RoomId()).Join(client)
+	})
 }
 
 func (rm *RoomManager) Leave(client driver.MessengerClient) {
 	roomId := client.RoomId()
-	room := rm.getRoom(roomId)
 
-	room.Leave(client)
+	rm.withTicket(func() {
+		room := rm.getRoom(roomId)
+		room.Leave(client)
 
-	if !room.IsEmpty() {
-		return
-	}
-
-	rm.withLock(func() {
 		if room.IsEmpty() {
-			delete(rm.roomById, roomId)
+			rm.cleanRooms()
 		}
 	})
 }
 
 func (rm *RoomManager) Broadcast(message dto.Message) error {
-	return rm.getRoom(message.RoomId).Broadcast(message)
+	room := rm.getRoom(message.RoomId)
+
+	if room == nil {
+		return nil
+	}
+
+	return room.Broadcast(message)
 }
 
-func (rm *RoomManager) getRoom(roomId string) *entity.LiveRoom {
-	var room *entity.LiveRoom
-
-	rm.withRLock(func() {
-		room = rm.roomById[roomId]
-	})
+func (rm *RoomManager) getOrCreateRoom(roomId string) *entity.LiveRoom {
+	room := rm.getRoom(roomId)
 
 	if room != nil {
 		return room
 	}
 
-	rm.withLock(func() {
-		room = rm.roomById[roomId]
+	return rm.createRoom(roomId)
+}
 
-		if room == nil {
-			room = entity.NewLiveRoom(roomId)
-			rm.roomById[roomId] = room
-		}
-	})
+func (rm *RoomManager) getRoom(roomId string) *entity.LiveRoom {
+	rm.mu.RLock()
+	defer rm.mu.RUnlock()
+
+	return rm.roomById[roomId]
+}
+
+func (rm *RoomManager) createRoom(roomId string) *entity.LiveRoom {
+	rm.mu.Lock()
+	defer rm.mu.Unlock()
+
+	room, ok := rm.roomById[roomId]
+
+	if !ok {
+		room = entity.NewLiveRoom(roomId)
+		rm.roomById[roomId] = room
+	}
 
 	return room
 }
 
-func (rm *RoomManager) withLock(action func()) {
-	rm.lock.Lock()
-	defer rm.lock.Unlock()
+func (rm *RoomManager) cleanRooms() {
+	if !rm.isCleanable() {
+		return
+	}
+
+	rm.mu.Lock()
+	defer rm.mu.Unlock()
+
+	if !rm.isCleanable() {
+		return
+	}
+
+	// TODO: need optimizing to only remove empty room
+	for id, room := range rm.roomById {
+		if room.IsEmpty() {
+			delete(rm.roomById, id)
+		}
+	}
+}
+
+func (rm *RoomManager) withTicket(action func()) {
+	atomic.AddInt32(&rm.ticket, 1)
+	defer atomic.AddInt32(&rm.ticket, -1)
 
 	action()
 }
 
-func (rm *RoomManager) withRLock(action func()) {
-	rm.lock.RLock()
-	defer rm.lock.RUnlock()
-
-	action()
+func (rm *RoomManager) isCleanable() bool {
+	return atomic.LoadInt32(&rm.ticket) == 1
 }

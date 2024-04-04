@@ -10,7 +10,7 @@ import (
 type LiveRoom struct {
 	participants map[driver.MessengerClient]struct{}
 	id           string
-	lock         sync.RWMutex
+	mu           sync.RWMutex
 }
 
 func NewLiveRoom(id string) *LiveRoom {
@@ -21,38 +21,40 @@ func NewLiveRoom(id string) *LiveRoom {
 }
 
 func (r *LiveRoom) Join(client driver.MessengerClient) {
-	r.withLock(func() {
-		r.participants[client] = struct{}{}
-	})
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.participants[client] = struct{}{}
 }
 
 func (r *LiveRoom) Leave(client driver.MessengerClient) {
-	r.withLock(func() {
-		delete(r.participants, client)
-	})
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.participants, client)
 }
 
 func (r *LiveRoom) Broadcast(message dto.Message) error {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	count := len(r.participants)
+	errChan := make(chan error, count)
+
+	defer close(errChan)
+
+	for participant := range r.participants {
+		go func(participant driver.MessengerClient) {
+			errChan <- participant.Send(message)
+		}(participant)
+	}
+
 	var errs []error
 
-	r.withRLock(func() {
-		count := len(r.participants)
-		errChan := make(chan error, count)
-
-		defer close(errChan)
-
-		for participant := range r.participants {
-			go func(participant driver.MessengerClient) {
-				errChan <- participant.Send(message)
-			}(participant)
+	for range count {
+		if err := <-errChan; err != nil {
+			errs = append(errs, err)
 		}
-
-		for range count {
-			if err := <-errChan; err != nil {
-				errs = append(errs, err)
-			}
-		}
-	})
+	}
 
 	if len(errs) > 0 {
 		return fmt.Errorf("%v", errs)
@@ -62,29 +64,12 @@ func (r *LiveRoom) Broadcast(message dto.Message) error {
 }
 
 func (r *LiveRoom) IsEmpty() bool {
-	var isEmpty bool
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 
-	r.withRLock(func() {
-		isEmpty = len(r.participants) == 0
-	})
-
-	return isEmpty
+	return len(r.participants) == 0
 }
 
-func (r *LiveRoom) ID() string {
+func (r *LiveRoom) Id() string {
 	return r.id
-}
-
-func (r *LiveRoom) withLock(action func()) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
-	action()
-}
-
-func (r *LiveRoom) withRLock(action func()) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-
-	action()
 }
