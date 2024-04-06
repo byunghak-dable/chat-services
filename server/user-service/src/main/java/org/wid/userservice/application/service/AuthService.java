@@ -42,12 +42,12 @@ public class AuthService implements AuthServicePort {
 
   private AuthenticationDto generateTokens(User user) {
     return new AuthenticationDto(
-        Authentication.accessToken(user.id()).toJsonWebToken(),
-        Authentication.refreshToken(user.id()).toJsonWebToken());
+        Authentication.createAccess(user.id()).toJsonWebToken(),
+        Authentication.createRefresh(user.id()).toJsonWebToken());
   }
 
   @Override
   public String generateAccessToken(String refreshToken) {
-    return Authentication.from(refreshToken).toJsonWebToken();
+    return Authentication.renewAccess(refreshToken).toJsonWebToken();
   }
 }
