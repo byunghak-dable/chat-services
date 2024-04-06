@@ -2,13 +2,14 @@ package org.wid.userservice.adapter.driven.persistence.repository;
 
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import org.wid.userservice.adapter.driven.persistence.orm.UserEntity;
 import org.wid.userservice.domain.entity.User;
 import org.wid.userservice.port.driven.UserRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-interface UserDao extends ReactiveMongoRepository<User, String> {}
+interface UserDao extends ReactiveMongoRepository<UserEntity, String> {}
 
 @Repository
 @RequiredArgsConstructor
@@ -18,12 +19,11 @@ public class UserRepository implements UserRepositoryPort {
 
   @Override
   public Mono<User> upsertUser(User user) {
-    // TODO: need to check if upserting is working in mongodb
-    return userDao.save(user);
+    return userDao.save(UserEntity.from(user)).map(UserEntity::toDomain);
   }
 
   @Override
   public Mono<User> getUserById(String userId) {
-    return userDao.findById(userId);
+    return userDao.findById(userId).map(UserEntity::toDomain);
   }
 }
