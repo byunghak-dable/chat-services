@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.adapter.driven.config.Oauth2ClientConfig.OAuth2ClientProperties;
 import org.wid.userservice.adapter.driven.oauth2.dto.TokenResponseDto;
@@ -14,7 +14,7 @@ import org.wid.userservice.domain.entity.User;
 import org.wid.userservice.port.driven.Oauth2ClientPort;
 import reactor.core.publisher.Mono;
 
-@Service
+@Component
 @Qualifier("GoogleOauth2Client")
 public class GoogleOauth2Client implements Oauth2ClientPort {
   private final OAuth2ClientProperties googleProperties;
