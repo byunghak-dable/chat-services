@@ -1,4 +1,4 @@
-package org.wid.userservice.application.dto.oauth2.resource;
+package org.wid.userservice.adapter.driven.oauth2.dto.github;
 
 public record GithubUserDto(
     int id,
@@ -32,7 +32,4 @@ public record GithubUserDto(
     int followers,
     int following,
     String createdAt,
-    String updatedAt
-
-) {
-}
+    String updatedAt) {}

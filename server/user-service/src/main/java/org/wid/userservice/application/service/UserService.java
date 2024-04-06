@@ -1,13 +1,12 @@
 package org.wid.userservice.application.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.wid.userservice.application.dto.user.UserDto;
 import org.wid.userservice.application.mapper.UserMapper;
 import org.wid.userservice.domain.entity.User;
 import org.wid.userservice.port.driven.UserRepositoryPort;
 import org.wid.userservice.port.driving.UserServicePort;
-
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -30,5 +29,4 @@ public class UserService implements UserServicePort {
 
     return user.map(userMapper::entityToUserDto);
   }
-
 }

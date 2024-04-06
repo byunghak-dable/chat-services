@@ -1,4 +1,4 @@
-package org.wid.userservice.application.dto.oauth2.resource;
+package org.wid.userservice.adapter.driven.oauth2.dto.google;
 
 public record GoogleUserDto(
     String id,
@@ -8,5 +8,4 @@ public record GoogleUserDto(
     String familyName,
     String givenName,
     String picture,
-    String locale) {
-}
+    String locale) {}

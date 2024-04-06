@@ -1,28 +1,14 @@
 package org.wid.userservice.domain.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@Document(collection = "user")
 @Getter
 @Builder
-public class User {
-
+public record User(String id, String email, String name, String profile, LoginType loginType) {
   public enum LoginType {
-    GOOGLE, GITHUB
+    GOOGLE,
+    GITHUB
   }
-
-  @Id
-  private String id;
-
-  private String email;
-
-  private String name;
-
-  private String profile;
-
-  private LoginType loginType;
 }
