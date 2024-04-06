@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.wid.userservice.application.dto.auth.AuthenticationDto;
 import org.wid.userservice.application.dto.auth.Oauth2LoginRequestDto;
+import org.wid.userservice.application.mapper.UserMapper;
 import org.wid.userservice.domain.entity.Authentication;
 import org.wid.userservice.domain.entity.User;
 import org.wid.userservice.domain.entity.User.LoginType;
@@ -15,28 +16,26 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class AuthService implements AuthServicePort {
-
-  private final UserRepositoryPort userRepository;
   private final Map<LoginType, Oauth2ClientPort> oauth2ServiceMap;
+  private final UserRepositoryPort userRepository;
+  private final UserMapper userMapper;
 
   public AuthService(
-      UserRepositoryPort userRepository,
       @Qualifier("GoogleOauth2Client") Oauth2ClientPort googleClient,
-      @Qualifier("GithubOauth2Client") Oauth2ClientPort githubClient) {
+      @Qualifier("GithubOauth2Client") Oauth2ClientPort githubClient,
+      UserRepositoryPort userRepository,
+      UserMapper userMapper) {
+    this.oauth2ServiceMap = Map.of(LoginType.GOOGLE, googleClient, LoginType.GITHUB, githubClient);
     this.userRepository = userRepository;
-    this.oauth2ServiceMap =
-        Map.of(
-            LoginType.GOOGLE, googleClient,
-            LoginType.GITHUB, githubClient);
+    this.userMapper = userMapper;
   }
 
   @Override
   public Mono<AuthenticationDto> oauth2Login(Oauth2LoginRequestDto loginDto) {
-    Oauth2ClientPort client = oauth2ServiceMap.get(loginDto.getType());
-
-    return client
-        .getToken(loginDto.getCode())
-        .flatMap(client::getResource)
+    return oauth2ServiceMap
+        .get(loginDto.getType())
+        .getUserResource(loginDto.getCode())
+        .map(userMapper::toEntity)
         .flatMap(userRepository::upsertUser)
         .map(this::generateTokens);
   }

@@ -14,7 +14,7 @@ import org.wid.userservice.domain.entity.User;
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT)
 public interface UserMapper {
 
-  User userDtoToEntity(UserDto dto);
+  User toEntity(UserDto dto);
 
-  UserDto entityToUserDto(User user);
+  UserDto fromEntity(User user);
 }

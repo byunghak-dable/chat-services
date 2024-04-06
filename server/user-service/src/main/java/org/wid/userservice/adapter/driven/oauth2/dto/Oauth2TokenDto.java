@@ -1,10 +1,9 @@
 package org.wid.userservice.adapter.driven.oauth2.dto;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.Optional;
 
 @JsonNaming(SnakeCaseStrategy.class)
-public record TokenResponseDto(
+public record Oauth2TokenDto(
     String tokenType, String scope, String accessToken, Optional<String> refreshToken) {}

@@ -7,9 +7,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.adapter.driven.config.Oauth2ClientConfig.OAuth2ClientProperties;
-import org.wid.userservice.adapter.driven.oauth2.dto.TokenResponseDto;
+import org.wid.userservice.adapter.driven.oauth2.dto.Oauth2TokenDto;
 import org.wid.userservice.adapter.driven.oauth2.dto.github.GithubTokenRequestDto;
 import org.wid.userservice.adapter.driven.oauth2.dto.github.GithubUserDto;
+import org.wid.userservice.application.dto.user.UserDto;
 import org.wid.userservice.domain.entity.User;
 import org.wid.userservice.port.driven.Oauth2ClientPort;
 import reactor.core.publisher.Mono;
@@ -36,8 +37,12 @@ public class GithubOauth2Client implements Oauth2ClientPort {
   }
 
   @Override
-  public Mono<TokenResponseDto> getToken(String code) {
-    GithubTokenRequestDto requestDto =
+  public Mono<UserDto> getUserResource(String code) {
+    return this.getToken(code).flatMap(this::getResource);
+  }
+
+  private Mono<Oauth2TokenDto> getToken(String code) {
+    GithubTokenRequestDto tokenRequest =
         new GithubTokenRequestDto(
             githubProperties.getClientId(),
             githubProperties.getClientSecret(),
@@ -46,24 +51,23 @@ public class GithubOauth2Client implements Oauth2ClientPort {
 
     return tokenWebClient
         .post()
-        .bodyValue(requestDto)
+        .bodyValue(tokenRequest)
         .retrieve()
         .onStatus(HttpStatusCode::is4xxClientError, this::handleClientErrorResponse)
-        .bodyToMono(TokenResponseDto.class);
+        .bodyToMono(Oauth2TokenDto.class);
   }
 
-  @Override
-  public Mono<User> getResource(TokenResponseDto tokenResponseDto) {
+  private Mono<UserDto> getResource(Oauth2TokenDto token) {
     return resourceWebClient
         .get()
-        .headers(headers -> headers.setBearerAuth(tokenResponseDto.accessToken()))
+        .headers(headers -> headers.setBearerAuth(token.accessToken()))
         .retrieve()
         .onStatus(HttpStatusCode::is4xxClientError, this::handleClientErrorResponse)
         .bodyToMono(GithubUserDto.class)
         .map(this::toUser);
   }
 
-  private User toUser(GithubUserDto githubDto) {
-    return new User(null, githubDto.email(), githubDto.name(), null, User.LoginType.GITHUB);
+  private UserDto toUser(GithubUserDto githubUser) {
+    return new UserDto(null, githubUser.email(), githubUser.name(), null, User.LoginType.GITHUB);
   }
 }

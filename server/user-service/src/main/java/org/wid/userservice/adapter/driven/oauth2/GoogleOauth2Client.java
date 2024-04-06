@@ -7,9 +7,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.adapter.driven.config.Oauth2ClientConfig.OAuth2ClientProperties;
-import org.wid.userservice.adapter.driven.oauth2.dto.TokenResponseDto;
+import org.wid.userservice.adapter.driven.oauth2.dto.Oauth2TokenDto;
 import org.wid.userservice.adapter.driven.oauth2.dto.google.GoogleTokenRequestDto;
 import org.wid.userservice.adapter.driven.oauth2.dto.google.GoogleUserDto;
+import org.wid.userservice.application.dto.user.UserDto;
 import org.wid.userservice.domain.entity.User;
 import org.wid.userservice.port.driven.Oauth2ClientPort;
 import reactor.core.publisher.Mono;
@@ -36,7 +37,11 @@ public class GoogleOauth2Client implements Oauth2ClientPort {
   }
 
   @Override
-  public Mono<TokenResponseDto> getToken(String code) {
+  public Mono<UserDto> getUserResource(String code) {
+    return this.getToken(code).flatMap(this::getResource);
+  }
+
+  private Mono<Oauth2TokenDto> getToken(String code) {
     GoogleTokenRequestDto requestDto =
         new GoogleTokenRequestDto(
             googleProperties.getClientId(),
@@ -49,23 +54,20 @@ public class GoogleOauth2Client implements Oauth2ClientPort {
         .bodyValue(requestDto)
         .retrieve()
         .onStatus(HttpStatusCode::is4xxClientError, this::handleClientErrorResponse)
-        .bodyToMono(TokenResponseDto.class);
+        .bodyToMono(Oauth2TokenDto.class);
   }
 
-  @Override
-  public Mono<User> getResource(TokenResponseDto tokenResponseDto) {
+  private Mono<UserDto> getResource(Oauth2TokenDto token) {
     return resourceWebClient
         .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder.queryParam("access_token", tokenResponseDto.accessToken()).build())
+        .uri(uriBuilder -> uriBuilder.queryParam("access_token", token.accessToken()).build())
         .retrieve()
         .onStatus(HttpStatusCode::is4xxClientError, this::handleClientErrorResponse)
         .bodyToMono(GoogleUserDto.class)
         .map(this::toUser);
   }
 
-  private User toUser(GoogleUserDto googleUserDto) {
-    return new User(null, googleUserDto.email(), googleUserDto.name(), null, User.LoginType.GOOGLE);
+  private UserDto toUser(GoogleUserDto googleUser) {
+    return new UserDto(null, googleUser.email(), googleUser.name(), null, User.LoginType.GOOGLE);
   }
 }
