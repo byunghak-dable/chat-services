@@ -1,4 +1,4 @@
-package org.wid.userservice.adapter.driven.oauth2;
+package org.wid.userservice.adapter.driven.client.oauth2;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -7,31 +7,31 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.wid.userservice.adapter.driven.config.Oauth2ClientConfig.OAuth2ClientProperties;
-import org.wid.userservice.adapter.driven.oauth2.dto.Oauth2TokenDto;
-import org.wid.userservice.adapter.driven.oauth2.dto.google.GoogleTokenRequestDto;
-import org.wid.userservice.adapter.driven.oauth2.dto.google.GoogleUserDto;
+import org.wid.userservice.adapter.driven.client.oauth2.dto.Oauth2TokenDto;
+import org.wid.userservice.adapter.driven.client.oauth2.dto.github.GithubTokenRequestDto;
+import org.wid.userservice.adapter.driven.client.oauth2.dto.github.GithubUserDto;
 import org.wid.userservice.application.dto.user.UserDto;
 import org.wid.userservice.domain.entity.User;
 import org.wid.userservice.port.driven.Oauth2ClientPort;
 import reactor.core.publisher.Mono;
 
 @Component
-@Qualifier("GoogleOauth2Client")
-public class GoogleOauth2Client implements Oauth2ClientPort {
-  private final OAuth2ClientProperties googleProperties;
+@Qualifier("GithubOauth2Client")
+public class GithubOauth2Client implements Oauth2ClientPort {
+  private final OAuth2ClientProperties githubProperties;
   private final WebClient tokenWebClient;
   private final WebClient resourceWebClient;
 
-  public GoogleOauth2Client(OAuth2ClientProperties googleProperties) {
-    this.googleProperties = googleProperties;
+  public GithubOauth2Client(OAuth2ClientProperties githubProperties) {
+    this.githubProperties = githubProperties;
     this.tokenWebClient =
         WebClient.builder()
-            .baseUrl(googleProperties.getTokenUri())
+            .baseUrl(githubProperties.getTokenUri())
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .build();
     this.resourceWebClient =
         WebClient.builder()
-            .baseUrl(googleProperties.getResourceUri())
+            .baseUrl(githubProperties.getResourceUri())
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .build();
   }
@@ -42,16 +42,16 @@ public class GoogleOauth2Client implements Oauth2ClientPort {
   }
 
   private Mono<Oauth2TokenDto> getToken(String code) {
-    GoogleTokenRequestDto requestDto =
-        new GoogleTokenRequestDto(
-            googleProperties.getClientId(),
-            googleProperties.getClientSecret(),
-            googleProperties.getRedirectUri(),
+    GithubTokenRequestDto tokenRequest =
+        new GithubTokenRequestDto(
+            githubProperties.getClientId(),
+            githubProperties.getClientSecret(),
+            githubProperties.getRedirectUri(),
             code);
 
     return tokenWebClient
         .post()
-        .bodyValue(requestDto)
+        .bodyValue(tokenRequest)
         .retrieve()
         .onStatus(HttpStatusCode::is4xxClientError, this::handleClientErrorResponse)
         .bodyToMono(Oauth2TokenDto.class);
@@ -60,14 +60,14 @@ public class GoogleOauth2Client implements Oauth2ClientPort {
   private Mono<UserDto> getResource(Oauth2TokenDto token) {
     return resourceWebClient
         .get()
-        .uri(uriBuilder -> uriBuilder.queryParam("access_token", token.accessToken()).build())
+        .headers(headers -> headers.setBearerAuth(token.accessToken()))
         .retrieve()
         .onStatus(HttpStatusCode::is4xxClientError, this::handleClientErrorResponse)
-        .bodyToMono(GoogleUserDto.class)
+        .bodyToMono(GithubUserDto.class)
         .map(this::toUser);
   }
 
-  private UserDto toUser(GoogleUserDto googleUser) {
-    return new UserDto(null, googleUser.email(), googleUser.name(), null, User.LoginType.GOOGLE);
+  private UserDto toUser(GithubUserDto githubUser) {
+    return new UserDto(null, githubUser.email(), githubUser.name(), null, User.LoginType.GITHUB);
   }
 }

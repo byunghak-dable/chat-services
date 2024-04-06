@@ -1,4 +1,4 @@
-package org.wid.userservice.adapter.driven.oauth2.dto.google;
+package org.wid.userservice.adapter.driven.client.oauth2.dto.google;
 
 public record GoogleTokenRequestDto(
     String grantType, String clientId, String clientSecret, String code, String redirectUri) {

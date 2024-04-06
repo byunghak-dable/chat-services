@@ -1,4 +1,4 @@
-package org.wid.userservice.adapter.driven.oauth2.dto;
+package org.wid.userservice.adapter.driven.client.oauth2.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

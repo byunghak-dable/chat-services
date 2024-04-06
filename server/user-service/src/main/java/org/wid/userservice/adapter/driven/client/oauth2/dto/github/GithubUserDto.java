@@ -1,4 +1,4 @@
-package org.wid.userservice.adapter.driven.oauth2.dto.github;
+package org.wid.userservice.adapter.driven.client.oauth2.dto.github;
 
 public record GithubUserDto(
     int id,
