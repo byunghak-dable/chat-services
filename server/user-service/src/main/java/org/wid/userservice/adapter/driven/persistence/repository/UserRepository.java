@@ -1,12 +1,11 @@
 package org.wid.userservice.adapter.driven.persistence.repository;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 import org.wid.userservice.adapter.driven.persistence.orm.UserEntity;
 import org.wid.userservice.domain.entity.User;
 import org.wid.userservice.port.driven.UserRepositoryPort;
-
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 interface UserDao extends ReactiveMongoRepository<UserEntity, String> {}

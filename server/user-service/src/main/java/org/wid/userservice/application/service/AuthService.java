@@ -42,8 +42,8 @@ public class AuthService implements AuthServicePort {
 
   private AuthenticationDto generateTokens(User user) {
     return new AuthenticationDto(
-        Authentication.createAccess(user.id()).toJsonWebToken(),
-        Authentication.createRefresh(user.id()).toJsonWebToken());
+        Authentication.createAccess(user.getId()).toJsonWebToken(),
+        Authentication.createRefresh(user.getId()).toJsonWebToken());
   }
 
   @Override

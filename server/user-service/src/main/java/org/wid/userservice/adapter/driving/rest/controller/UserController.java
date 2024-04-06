@@ -1,7 +1,7 @@
 package org.wid.userservice.adapter.driving.rest.controller;
 
 import java.util.Map;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.wid.userservice.application.dto.user.UserDto;
 import org.wid.userservice.domain.entity.User.LoginType;
 import org.wid.userservice.port.driving.UserServicePort;
-
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @RestController
