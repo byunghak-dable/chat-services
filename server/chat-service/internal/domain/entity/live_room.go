@@ -34,9 +34,7 @@ func (r *LiveRoom) Leave(client driver.MessengerClient) {
 }
 
 func (r *LiveRoom) Broadcast(message dto.Message) error {
-	errChan := r.broadcast(message)
-
-	for err := range errChan {
+	for err := range r.broadcast(message) {
 		if err != nil {
 			return err
 		}
