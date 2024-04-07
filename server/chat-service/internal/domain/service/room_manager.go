@@ -9,9 +9,9 @@ import (
 )
 
 type RoomManager struct {
-	roomById map[string]*entity.LiveRoom
-	mu       sync.RWMutex
-	ticket   int32
+	roomById    map[string]*entity.LiveRoom
+	mu          sync.RWMutex
+	ticketCount int32
 }
 
 func NewRoomManager() *RoomManager {
@@ -50,9 +50,7 @@ func (rm *RoomManager) Broadcast(message dto.Message) error {
 }
 
 func (rm *RoomManager) getOrCreateRoom(roomId string) *entity.LiveRoom {
-	room := rm.getRoom(roomId)
-
-	if room != nil {
+	if room := rm.getRoom(roomId); room != nil {
 		return room
 	}
 
@@ -70,14 +68,13 @@ func (rm *RoomManager) createRoom(roomId string) *entity.LiveRoom {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
 
-	room, ok := rm.roomById[roomId]
-
-	if !ok {
-		room = entity.NewLiveRoom(roomId)
-		rm.roomById[roomId] = room
+	if room, ok := rm.roomById[roomId]; ok {
+		return room
 	}
 
-	return room
+	rm.roomById[roomId] = entity.NewLiveRoom(roomId)
+
+	return rm.roomById[roomId]
 }
 
 func (rm *RoomManager) cleanRooms() {
@@ -101,12 +98,12 @@ func (rm *RoomManager) cleanRooms() {
 }
 
 func (rm *RoomManager) withTicket(action func()) {
-	atomic.AddInt32(&rm.ticket, 1)
-	defer atomic.AddInt32(&rm.ticket, -1)
+	atomic.AddInt32(&rm.ticketCount, 1)
+	defer atomic.AddInt32(&rm.ticketCount, -1)
 
 	action()
 }
 
 func (rm *RoomManager) isCleanable() bool {
-	return atomic.LoadInt32(&rm.ticket) == 1
+	return atomic.LoadInt32(&rm.ticketCount) == 1
 }
