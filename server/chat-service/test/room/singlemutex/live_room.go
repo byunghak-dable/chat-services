@@ -3,7 +3,7 @@ package singlemutex
 import (
 	"chat-service/internal/application/dto"
 	"chat-service/internal/port/driver"
-	"fmt"
+	"sync"
 )
 
 type LiveRoom struct {
@@ -27,27 +27,10 @@ func (r *LiveRoom) Leave(client driver.MessengerClient) {
 }
 
 func (r *LiveRoom) Broadcast(message dto.Message) error {
-	count := len(r.participants)
-	errChan := make(chan error, count)
-
-	defer close(errChan)
-
-	for participant := range r.participants {
-		go func(participant driver.MessengerClient) {
-			errChan <- participant.Send(message)
-		}(participant)
-	}
-
-	var errs []error
-
-	for range count {
-		if err := <-errChan; err != nil {
-			errs = append(errs, err)
+	for err := range r.broadcast(message) {
+		if err != nil {
+			return err
 		}
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("%v", errs)
 	}
 
 	return nil
@@ -55,4 +38,25 @@ func (r *LiveRoom) Broadcast(message dto.Message) error {
 
 func (r *LiveRoom) IsEmpty() bool {
 	return len(r.participants) == 0
+}
+
+func (r *LiveRoom) broadcast(message dto.Message) <-chan error {
+	var wg sync.WaitGroup
+	errChan := make(chan error)
+
+	for participant := range r.participants {
+		wg.Add(1)
+
+		go func(participant driver.MessengerClient) {
+			defer wg.Done()
+			errChan <- participant.Send(message)
+		}(participant)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	return errChan
 }
