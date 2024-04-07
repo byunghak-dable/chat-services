@@ -9,14 +9,14 @@ import (
 )
 
 type RoomManager struct {
-	roomById    map[string]*entity.LiveRoom
-	mu          sync.RWMutex
-	ticketCount int32
+	rooms   map[string]*entity.LiveRoom
+	mu      sync.RWMutex
+	tickets int32
 }
 
 func NewRoomManager() *RoomManager {
 	return &RoomManager{
-		roomById: make(map[string]*entity.LiveRoom),
+		rooms: make(map[string]*entity.LiveRoom),
 	}
 }
 
@@ -31,6 +31,7 @@ func (rm *RoomManager) Leave(client driver.MessengerClient) {
 
 	rm.withTicket(func() {
 		room := rm.getRoom(roomId)
+
 		room.Leave(client)
 
 		if room.IsEmpty() {
@@ -46,6 +47,7 @@ func (rm *RoomManager) Broadcast(message dto.Message) error {
 		return nil
 	}
 
+	println(room)
 	return room.Broadcast(message)
 }
 
@@ -61,20 +63,20 @@ func (rm *RoomManager) getRoom(roomId string) *entity.LiveRoom {
 	rm.mu.RLock()
 	defer rm.mu.RUnlock()
 
-	return rm.roomById[roomId]
+	return rm.rooms[roomId]
 }
 
 func (rm *RoomManager) createRoom(roomId string) *entity.LiveRoom {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
 
-	if room, ok := rm.roomById[roomId]; ok {
+	if room, ok := rm.rooms[roomId]; ok {
 		return room
 	}
 
-	rm.roomById[roomId] = entity.NewLiveRoom(roomId)
+	rm.rooms[roomId] = entity.NewLiveRoom(roomId)
 
-	return rm.roomById[roomId]
+	return rm.rooms[roomId]
 }
 
 func (rm *RoomManager) cleanRooms() {
@@ -90,20 +92,20 @@ func (rm *RoomManager) cleanRooms() {
 	}
 
 	// TODO: need optimizing to only remove empty room
-	for id, room := range rm.roomById {
+	for id, room := range rm.rooms {
 		if room.IsEmpty() {
-			delete(rm.roomById, id)
+			delete(rm.rooms, id)
 		}
 	}
 }
 
 func (rm *RoomManager) withTicket(action func()) {
-	atomic.AddInt32(&rm.ticketCount, 1)
-	defer atomic.AddInt32(&rm.ticketCount, -1)
+	atomic.AddInt32(&rm.tickets, 1)
+	defer atomic.AddInt32(&rm.tickets, -1)
 
 	action()
 }
 
 func (rm *RoomManager) isCleanable() bool {
-	return atomic.LoadInt32(&rm.ticketCount) == 1
+	return atomic.LoadInt32(&rm.tickets) == 1
 }

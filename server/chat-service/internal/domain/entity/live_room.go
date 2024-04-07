@@ -3,7 +3,6 @@ package entity
 import (
 	"chat-service/internal/application/dto"
 	"chat-service/internal/port/driver"
-	"fmt"
 	"sync"
 )
 
@@ -30,34 +29,17 @@ func (r *LiveRoom) Join(client driver.MessengerClient) {
 func (r *LiveRoom) Leave(client driver.MessengerClient) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
 	delete(r.participants, client)
 }
 
 func (r *LiveRoom) Broadcast(message dto.Message) error {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+	errChan := r.broadcast(message)
 
-	count := len(r.participants)
-	errChan := make(chan error, count)
-
-	defer close(errChan)
-
-	for participant := range r.participants {
-		go func(participant driver.MessengerClient) {
-			errChan <- participant.Send(message)
-		}(participant)
-	}
-
-	var errs []error
-
-	for range count {
-		if err := <-errChan; err != nil {
-			errs = append(errs, err)
+	for err := range errChan {
+		if err != nil {
+			return err
 		}
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("%v", errs)
 	}
 
 	return nil
@@ -72,4 +54,28 @@ func (r *LiveRoom) IsEmpty() bool {
 
 func (r *LiveRoom) Id() string {
 	return r.id
+}
+
+func (r *LiveRoom) broadcast(message dto.Message) <-chan error {
+	var wg sync.WaitGroup
+	errChan := make(chan error)
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for participant := range r.participants {
+		wg.Add(1)
+
+		go func(participant driver.MessengerClient) {
+			defer wg.Done()
+			errChan <- participant.Send(message)
+		}(participant)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	return errChan
 }

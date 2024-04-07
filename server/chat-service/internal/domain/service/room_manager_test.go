@@ -35,7 +35,7 @@ func TestThreadSafety(t *testing.T) {
 	var clients []*MockClient
 	var sendCount uint32
 	roomById := make(map[string]*entity.LiveRoom)
-	roomManager := &RoomManager{roomById: roomById}
+	roomManager := &RoomManager{rooms: roomById}
 
 	for i := range 100 {
 		for j := 0; j < 100; j++ {
