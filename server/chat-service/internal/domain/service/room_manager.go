@@ -47,7 +47,6 @@ func (rm *RoomManager) Broadcast(message dto.Message) error {
 		return nil
 	}
 
-	println(room)
 	return room.Broadcast(message)
 }
 
