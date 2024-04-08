@@ -99,7 +99,6 @@ func exit() {
 func run(runnables ...Runnable) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	defer waitTermination(ctx)
 
 	for _, runnable := range runnables {
 		go func(runnable Runnable) {
@@ -109,6 +108,8 @@ func run(runnables ...Runnable) {
 			}
 		}(runnable)
 	}
+
+	waitTermination(ctx)
 }
 
 func waitTermination(ctx context.Context) {
