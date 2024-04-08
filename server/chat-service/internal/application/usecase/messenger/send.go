@@ -26,7 +26,7 @@ func NewSendUseCase(logger driven.Logger, broker driven.MessageBroker, repositor
 func (u *SendUseCase) Handle(message dto.Message) error {
 	entity := u.mapper.ToEntity(message)
 
-	if err := u.repository.Save(&entity); err != nil {
+	if err := u.repository.Create(&entity); err != nil {
 		return err
 	}
 

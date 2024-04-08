@@ -34,7 +34,7 @@ func NewHandler(logger driven.Logger, joinUseCase driver.MessengerJoinUseCase, l
 	}
 }
 
-func (h *Handler) Register(router *gin.RouterGroup) {
+func (h *Handler) Register(router gin.IRoutes) {
 	router.GET("/chat", h.chat)
 }
 

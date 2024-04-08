@@ -10,15 +10,15 @@ import (
 )
 
 type Handler struct {
-	logger          driven.Logger
-	getMultiUseCase driver.GetMultiMessageUseCase
+	logger           driven.Logger
+	readMultiUseCase driver.ReadMultiMessageUseCase
 }
 
-func NewHandler(logger driven.Logger, getMultiUseCase driver.GetMultiMessageUseCase) *Handler {
+func NewHandler(logger driven.Logger, getMultiUseCase driver.ReadMultiMessageUseCase) *Handler {
 	return &Handler{logger, getMultiUseCase}
 }
 
-func (h *Handler) Register(router *gin.RouterGroup) {
+func (h *Handler) Register(router gin.IRoutes) {
 	router.GET("/messages/room/:room_id", h.getMulti)
 }
 
@@ -35,7 +35,7 @@ func (h *Handler) getMulti(ctx *gin.Context) {
 		return
 	}
 
-	messages, err := h.getMultiUseCase.Handle(dto.MessagesQuery{
+	messages, err := h.readMultiUseCase.Handle(dto.MessagesQuery{
 		RoomId:    query.RoomId,
 		Cursor:    query.Cursor,
 		UpdatedAt: query.UpdatedAt,

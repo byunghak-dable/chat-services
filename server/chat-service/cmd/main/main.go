@@ -6,6 +6,8 @@ import (
 	"chat-service/internal/adapter/driven/persistence/db"
 	"chat-service/internal/adapter/driven/persistence/repository"
 	"chat-service/internal/adapter/driver/rest"
+	hmessage "chat-service/internal/adapter/driver/rest/message"
+	hmessenger "chat-service/internal/adapter/driver/rest/messenger"
 	"chat-service/internal/application/mapper"
 	"chat-service/internal/application/usecase/message"
 	"chat-service/internal/application/usecase/messenger"
@@ -35,33 +37,42 @@ var (
 func main() {
 	defer exit()
 
-	configStore, err := config.New()
-	if err != nil {
-		logger.Errorf("[MAIN] load config failed: %v", err)
-		panic(err)
-	}
+	configStore := load(config.New())
+	mongoDb := loadClosable(db.NewMongoDb(configStore))
+	restServer := loadClosable(rest.New(configStore, logger), nil)
 
-	mongoDb := load(db.NewMongoDb(configStore))
-	messageBroker := load(messaging.NewMessageBroker(configStore, logger))
-	restServer := load(rest.New(configStore, logger), nil)
-
+	// adapter
+	messageBroker := loadClosable(messaging.NewMessageBroker(configStore, logger))
 	messageRepository := repository.NewMessage(logger, mongoDb)
+
+	// mapper
 	messageMapper := mapper.NewMessage()
 
+	// domain
 	roomManager := service.NewRoomManager()
 
-	restServer.RegisterMessage(message.NewGetMultiUseCase(messageRepository, messageMapper))
-	restServer.RegisterMessenger(
-		messenger.NewJoinUseCase(roomManager),
-		messenger.NewLeaveUseCase(roomManager),
-		messenger.NewSendUseCase(logger, messageBroker, messageRepository, roomManager, messageMapper))
+	// use case
+	messageRead := message.NewReadMultiUseCase(messageRepository, messageMapper)
+
+	messengerJoin := messenger.NewJoinUseCase(roomManager)
+	messengerLeave := messenger.NewLeaveUseCase(roomManager)
+	messengerSend := messenger.NewSendUseCase(logger, messageBroker, messageRepository, roomManager, messageMapper)
+
+	restServer.Register(
+		hmessage.NewHandler(logger, messageRead),
+		hmessenger.NewHandler(logger, messengerJoin, messengerLeave, messengerSend),
+	)
 
 	run(messageBroker, restServer)
 }
 
-func load[T Closable](target T, err error) T {
+func loadClosable[T Closable](target T, err error) T {
 	closables = append(closables, target)
 
+	return load(target, err)
+}
+
+func load[T any](target T, err error) T {
 	if err != nil {
 		logger.Errorf("[MAIN] load failed: %v", err)
 		panic(err)

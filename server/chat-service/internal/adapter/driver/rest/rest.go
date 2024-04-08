@@ -2,10 +2,7 @@ package rest
 
 import (
 	"chat-service/internal/adapter/driven/config"
-	"chat-service/internal/adapter/driver/rest/message"
-	"chat-service/internal/adapter/driver/rest/messenger"
 	"chat-service/internal/port/driven"
-	"chat-service/internal/port/driver"
 	"context"
 	"errors"
 	"net/http"
@@ -14,35 +11,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Register interface {
+	Register(router gin.IRoutes)
+}
+
 type Rest struct {
-	logger        driven.Logger
-	server        *http.Server
-	routerGroupV1 *gin.RouterGroup
+	logger driven.Logger
+	server *http.Server
 }
 
 func New(configStore *config.Config, logger driven.Logger) *Rest {
-	handler := gin.Default()
-	routeGroupV1 := handler.Group("/api/v1")
-
 	return &Rest{
 		logger: logger,
 		server: &http.Server{
-			Handler:      handler,
+			Handler:      gin.Default(),
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
 			IdleTimeout:  120 * time.Second,
 			Addr:         ":" + configStore.GetRestPort(),
 		},
-		routerGroupV1: routeGroupV1,
 	}
 }
 
-func (r *Rest) RegisterMessenger(joinUseCase driver.MessengerJoinUseCase, leaveUseCase driver.MessengerLeaveUseCase, sendUseCase driver.MessengerSendUseCase) {
-	messenger.NewHandler(r.logger, joinUseCase, leaveUseCase, sendUseCase).Register(r.routerGroupV1)
-}
+func (r *Rest) Register(handlers ...Register) {
+	group := r.server.Handler.(*gin.Engine).Group("/api/v1")
 
-func (r *Rest) RegisterMessage(getMultiUseCase driver.GetMultiMessageUseCase) {
-	message.NewHandler(r.logger, getMultiUseCase).Register(r.routerGroupV1)
+	for _, handler := range handlers {
+		handler.Register(group)
+	}
 }
 
 func (r *Rest) Run() error {

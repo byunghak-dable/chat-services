@@ -6,16 +6,16 @@ import (
 	"chat-service/internal/port/driven"
 )
 
-type GetMultiUseCase struct {
+type ReadMultiUseCase struct {
 	repository driven.MessageRepository
 	mapper     *mapper.Message
 }
 
-func NewGetMultiUseCase(service driven.MessageRepository, mapper *mapper.Message) *GetMultiUseCase {
-	return &GetMultiUseCase{service, mapper}
+func NewReadMultiUseCase(service driven.MessageRepository, mapper *mapper.Message) *ReadMultiUseCase {
+	return &ReadMultiUseCase{service, mapper}
 }
 
-func (u *GetMultiUseCase) Handle(query dto.MessagesQuery) ([]dto.Message, error) {
+func (u *ReadMultiUseCase) Handle(query dto.MessagesQuery) ([]dto.Message, error) {
 	entities, err := u.repository.GetMulti(query)
 	if err != nil {
 		return nil, err

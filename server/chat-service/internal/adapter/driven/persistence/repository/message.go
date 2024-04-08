@@ -25,7 +25,7 @@ func NewMessage(logger driven.Logger, mongoDb *db.MongoDb) *Message {
 	return &Message{logger, collection}
 }
 
-func (m *Message) Save(message *entity.Message) error {
+func (m *Message) Create(message *entity.Message) error {
 	ctx := context.TODO()
 
 	result, err := m.collection.InsertOne(ctx, orm.FromMessage(*message))
