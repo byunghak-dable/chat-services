@@ -15,33 +15,34 @@ import (
 )
 
 type Rest struct {
-	logger driven.Logger
-	server *http.Server
+	logger        driven.Logger
+	server        *http.Server
+	routerGroupV1 *gin.RouterGroup
 }
 
 func New(configStore *config.Config, logger driven.Logger) *Rest {
+	handler := gin.Default()
+	routeGroupV1 := handler.Group("/api/v1")
+
 	return &Rest{
 		logger: logger,
 		server: &http.Server{
-			Handler:      gin.Default(),
+			Handler:      handler,
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
 			IdleTimeout:  120 * time.Second,
 			Addr:         ":" + configStore.GetRestPort(),
 		},
+		routerGroupV1: routeGroupV1,
 	}
 }
 
 func (r *Rest) RegisterMessenger(joinUseCase driver.MessengerJoinUseCase, leaveUseCase driver.MessengerLeaveUseCase, sendUseCase driver.MessengerSendUseCase) {
-	group := r.server.Handler.(*gin.Engine).Group("/api/v1")
-
-	messenger.NewHandler(r.logger, joinUseCase, leaveUseCase, sendUseCase).Register(group)
+	messenger.NewHandler(r.logger, joinUseCase, leaveUseCase, sendUseCase).Register(r.routerGroupV1)
 }
 
 func (r *Rest) RegisterMessage(getMultiUseCase driver.GetMultiMessageUseCase) {
-	group := r.server.Handler.(*gin.Engine).Group("/api/v1")
-
-	message.NewHandler(r.logger, getMultiUseCase).Register(group)
+	message.NewHandler(r.logger, getMultiUseCase).Register(r.routerGroupV1)
 }
 
 func (r *Rest) Run() error {
