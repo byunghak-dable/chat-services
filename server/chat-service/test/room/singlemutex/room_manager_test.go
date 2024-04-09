@@ -10,11 +10,13 @@ import (
 	"chat-service/internal/port/driver"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
 
 type MockClient struct {
+	count  *int32
 	roomId string
 	userId string
 }
@@ -28,19 +30,21 @@ func (m *MockClient) UserId() string {
 }
 
 func (m *MockClient) Send(message dto.Message) error {
+	atomic.AddInt32(m.count, 1)
 	time.Sleep(time.Millisecond)
 	return nil
 }
 
 var (
-	benchRoomCount        = 100
-	benchParticipantCount = 100
-	benchBroadcastCount   = 10
+	benchRoomCount        = 10000
+	benchParticipantCount = 1
+	benchBroadcastCount   = 100
 )
 
-func BenchmarkRoomManager(b *testing.B) {
+func BenchmarkLiveRoomManager(b *testing.B) {
 	// given
 	var clients []*MockClient
+	var count int32
 	roomManager := service.NewRoomManager()
 
 	for i := range benchRoomCount {
@@ -48,6 +52,7 @@ func BenchmarkRoomManager(b *testing.B) {
 			clients = append(clients, &MockClient{
 				roomId: fmt.Sprintf("room-bench-%d", i),
 				userId: fmt.Sprintf("user-bench-%d", j),
+				count:  &count,
 			})
 		}
 	}
@@ -71,11 +76,13 @@ func BenchmarkRoomManager(b *testing.B) {
 	}
 
 	wg.Wait()
+	// println("live", count)
 }
 
 func BenchmarkSingleMutexRoomManager(b *testing.B) {
 	// given
 	var clients []*MockClient
+	var count int32
 	roomManager := NewRoomManager()
 
 	for i := range benchRoomCount {
@@ -83,6 +90,7 @@ func BenchmarkSingleMutexRoomManager(b *testing.B) {
 			clients = append(clients, &MockClient{
 				roomId: fmt.Sprintf("room-bench-%d", i),
 				userId: fmt.Sprintf("user-bench-%d", j),
+				count:  &count,
 			})
 		}
 	}
@@ -106,4 +114,5 @@ func BenchmarkSingleMutexRoomManager(b *testing.B) {
 	}
 
 	wg.Wait()
+	// println("mu", count)
 }
