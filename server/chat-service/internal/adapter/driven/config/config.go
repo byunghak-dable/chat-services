@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"os"
 	"strings"
+
+	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 )
 
 type MongoDb struct {
@@ -23,18 +24,17 @@ type MessageBroker struct {
 	ClientId string
 }
 
-type Config struct {
-}
+type Store struct{}
 
-func New() (*Config, error) {
+func New() (*Store, error) {
 	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
 
-	return &Config{}, nil
+	return &Store{}, nil
 }
 
-func (cs *Config) GetMongoDbConfig() MongoDb {
+func (s *Store) GetMongoDbConfig() MongoDb {
 	return MongoDb{
 		Host:     os.Getenv("MONGODB_HOST"),
 		Port:     os.Getenv("MONGODB_PORT"),
@@ -44,7 +44,7 @@ func (cs *Config) GetMongoDbConfig() MongoDb {
 	}
 }
 
-func (cs *Config) GetMessageBrokerConfig() MessageBroker {
+func (s *Store) GetMessageBrokerConfig() MessageBroker {
 	servers := []string{
 		fmt.Sprintf("%s:%s", os.Getenv("KAFKA_1_HOST"), os.Getenv("KAFKA_1_PORT")),
 		fmt.Sprintf("%s:%s", os.Getenv("KAFKA_2_HOST"), os.Getenv("KAFKA_2_PORT")),
@@ -59,10 +59,10 @@ func (cs *Config) GetMessageBrokerConfig() MessageBroker {
 	}
 }
 
-func (cs *Config) GetRestPort() string {
+func (s *Store) GetRestPort() string {
 	return os.Getenv("REST_PORT")
 }
 
-func (cs *Config) GetGrpcPort() string {
+func (s *Store) GetGrpcPort() string {
 	return os.Getenv("GRPC_PORT")
 }

@@ -14,7 +14,7 @@ type MongoDb struct {
 	*mongo.Client
 }
 
-func NewMongoDb(configStore *config.Config) (*MongoDb, error) {
+func NewMongoDb(configStore *config.Store) (*MongoDb, error) {
 	configs := configStore.GetMongoDbConfig()
 	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s", configs.User, configs.Password, configs.Host, configs.Port)
 

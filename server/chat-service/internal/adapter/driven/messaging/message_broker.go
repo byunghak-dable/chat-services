@@ -20,7 +20,7 @@ type MessageBroker struct {
 	subscribers []driven.MessageSubscriber
 }
 
-func NewMessageBroker(configStore *config.Config, logger driven.Logger) (*MessageBroker, error) {
+func NewMessageBroker(configStore *config.Store, logger driven.Logger) (*MessageBroker, error) {
 	configs := configStore.GetMessageBrokerConfig()
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": configs.Servers,

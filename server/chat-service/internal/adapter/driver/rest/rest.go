@@ -20,7 +20,7 @@ type Rest struct {
 	server *http.Server
 }
 
-func New(configStore *config.Config, logger driven.Logger) *Rest {
+func New(configStore *config.Store, logger driven.Logger) *Rest {
 	return &Rest{
 		logger: logger,
 		server: &http.Server{
