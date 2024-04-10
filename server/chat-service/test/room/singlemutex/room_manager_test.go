@@ -1,10 +1,9 @@
-/*
- * Performance comparison between "Room Manager of Production" and "Room Manager using single Mutex"
- * Result: Production uses more memory, but it's 6x faster when dealing with Broadcasting
- */
 package singlemutex
 
+// Performance comparison between "Room Manager of Production" and "Room Manager using single Mutex"
+
 import (
+	"chat-service/internal/application/abstraction"
 	"chat-service/internal/application/dto"
 	"chat-service/internal/domain/service"
 	"chat-service/internal/port/driver"
@@ -35,55 +34,28 @@ func (m *MockClient) Send(message dto.Message) error {
 	return nil
 }
 
-var (
-	benchRoomCount        = 10000
+const (
+	benchRoomCount = 1000
+	/**
+	 * Because the number of calls may vary due to differences in "client.Send" locking methods.
+	 * the number of chat participants in each room is limited to one.
+	 */
 	benchParticipantCount = 1
-	benchBroadcastCount   = 100
+	benchBroadcastCount   = 10
 )
 
 func BenchmarkLiveRoomManager(b *testing.B) {
-	// given
-	var clients []*MockClient
-	var count int32
-	roomManager := service.NewRoomManager()
-
-	for i := range benchRoomCount {
-		for j := range benchParticipantCount {
-			clients = append(clients, &MockClient{
-				roomId: fmt.Sprintf("room-bench-%d", i),
-				userId: fmt.Sprintf("user-bench-%d", j),
-				count:  &count,
-			})
-		}
-	}
-
-	// when
-	var wg sync.WaitGroup
-
-	for _, client := range clients {
-		wg.Add(1)
-
-		go func(c driver.MessengerClient) {
-			defer wg.Done()
-
-			roomManager.Join(c)
-			defer roomManager.Leave(c)
-
-			for range benchBroadcastCount {
-				_ = roomManager.Broadcast(dto.Message{RoomId: c.RoomId()})
-			}
-		}(client)
-	}
-
-	wg.Wait()
-	// println("live", count)
+	stressTest(service.NewRoomManager())
 }
 
 func BenchmarkSingleMutexRoomManager(b *testing.B) {
+	stressTest(NewRoomManager())
+}
+
+func stressTest(roomManager abstraction.RoomManager) {
 	// given
 	var clients []*MockClient
 	var count int32
-	roomManager := NewRoomManager()
 
 	for i := range benchRoomCount {
 		for j := range benchParticipantCount {
@@ -114,5 +86,4 @@ func BenchmarkSingleMutexRoomManager(b *testing.B) {
 	}
 
 	wg.Wait()
-	// println("mu", count)
 }
