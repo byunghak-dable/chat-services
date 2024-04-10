@@ -63,7 +63,6 @@ func main() {
 		hmessenger.NewHandler(logger, messengerJoin, messengerLeave, messengerSend),
 	)
 
-	println(len(closables))
 	run(messageBroker, restServer)
 }
 
@@ -85,7 +84,6 @@ func load[T any](target T, err error) T {
 func exit() {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
-			println("nil")
 			continue
 		}
 

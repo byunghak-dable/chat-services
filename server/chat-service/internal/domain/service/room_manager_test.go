@@ -69,7 +69,6 @@ func TestThreadSafety(t *testing.T) {
 	expectedRooms := 0
 	actualRooms := len(roomById)
 
-	println(sendCount)
 	if actualRooms != expectedRooms {
 		t.Errorf("Expected %d rooms, but got %d", expectedRooms, actualRooms)
 	}
