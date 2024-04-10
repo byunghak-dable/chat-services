@@ -22,7 +22,7 @@ import (
 )
 
 type Runnable interface {
-	Run() error
+	Run(ctx context.Context) error
 }
 
 type Closable interface {
@@ -102,7 +102,7 @@ func run(runnables ...Runnable) {
 
 	for _, runnable := range runnables {
 		go func(runnable Runnable) {
-			if err := runnable.Run(); err != nil {
+			if err := runnable.Run(ctx); err != nil {
 				logger.Errorf("[MAIN] %s run failed: %s", reflect.TypeOf(runnable), err)
 				cancel()
 			}

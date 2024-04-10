@@ -41,7 +41,7 @@ func (r *Rest) Register(handlers ...Register) {
 	}
 }
 
-func (r *Rest) Run() error {
+func (r *Rest) Run(_ context.Context) error {
 	if err := r.server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

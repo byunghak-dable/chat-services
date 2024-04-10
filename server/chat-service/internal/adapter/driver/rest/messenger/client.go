@@ -2,6 +2,7 @@ package messenger
 
 import (
 	"chat-service/internal/application/dto"
+
 	"github.com/gorilla/websocket"
 )
 

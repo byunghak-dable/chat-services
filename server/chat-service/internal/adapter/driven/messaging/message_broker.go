@@ -4,8 +4,10 @@ import (
 	"chat-service/internal/adapter/driven/config"
 	"chat-service/internal/application/dto"
 	"chat-service/internal/port/driven"
+	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
@@ -30,8 +32,7 @@ func NewMessageBroker(configStore *config.Config, logger driven.Logger) (*Messag
 	}
 
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": configs.Servers,
-		"group.id":          configs.GroupId,
+		"bootstrap.servers": configs.Servers, "group.id": configs.GroupId,
 		"auto.offset.reset": "smallest",
 	})
 	if err != nil {
@@ -67,19 +68,29 @@ func (mb *MessageBroker) Publish(message dto.Message) error {
 	return nil
 }
 
-func (mb *MessageBroker) Run() error {
+func (mb *MessageBroker) Run(ctx context.Context) error {
 	if err := mb.consumer.SubscribeTopics([]string{mb.topic}, nil); err != nil {
 		return err
 	}
 
 	for {
-		message, err := mb.consumer.ReadMessage(-1)
-		if err != nil {
-			mb.logger.Errorf("kafka consumer read message failed: %s", err)
-			continue
-		}
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+			message, err := mb.consumer.ReadMessage(time.Second)
 
-		mb.emitMessage(message.Value)
+			if err == nil {
+				mb.emitMessage(message.Value)
+				continue
+			}
+
+			if err.(kafka.Error).IsTimeout() {
+				continue
+			}
+
+			mb.logger.Errorf("kafka consumer read message failed: %s", err)
+		}
 	}
 }
 
@@ -109,6 +120,7 @@ func (mb *MessageBroker) emitMessage(bytes []byte) {
 }
 
 func (mb *MessageBroker) Close() error {
+	mb.producer.Flush(1000)
 	mb.producer.Close()
 	if err := mb.consumer.Close(); err != nil {
 		return err
