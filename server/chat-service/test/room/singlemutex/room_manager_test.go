@@ -36,10 +36,7 @@ func (m *MockClient) Send(message dto.Message) error {
 
 const (
 	benchRoomCount = 1000
-	/**
-	 * Because the number of calls may vary due to differences in "client.Send" locking methods.
-	 * the number of chat participants in each room is limited to one.
-	 */
+	// The number of chat participants in each room is limited to one, Because the number of "client.Send" calls may vary due to differences of lock implementation.
 	benchParticipantCount = 1
 	benchBroadcastCount   = 10
 )

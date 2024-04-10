@@ -88,7 +88,6 @@ func (rm *RoomManager) cleanRooms() {
 		return
 	}
 
-	// TODO: need optimizing to only remove empty room
 	for id, room := range rm.rooms {
 		if room.IsEmpty() {
 			delete(rm.rooms, id)

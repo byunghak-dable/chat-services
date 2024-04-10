@@ -8,7 +8,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
-	"time"
 )
 
 type MockClient struct {
@@ -34,11 +33,9 @@ func TestThreadSafety(t *testing.T) {
 	// given
 	var clients []*MockClient
 	var sendCount uint32
-	roomById := make(map[string]*entity.LiveRoom)
-	roomManager := &RoomManager{rooms: roomById}
 
 	for i := range 100 {
-		for j := 0; j < 100; j++ {
+		for j := range 100 {
 			clients = append(clients, &MockClient{
 				sendCount: &sendCount,
 				roomId:    fmt.Sprintf("room-%d", i),
@@ -49,6 +46,10 @@ func TestThreadSafety(t *testing.T) {
 
 	// when
 	var wg sync.WaitGroup
+	roomById := make(map[string]*entity.LiveRoom)
+	roomManager := &RoomManager{
+		rooms: roomById,
+	}
 
 	for _, client := range clients {
 		wg.Add(1)
@@ -58,7 +59,6 @@ func TestThreadSafety(t *testing.T) {
 
 			roomManager.Join(c)
 			_ = roomManager.Broadcast(dto.Message{RoomId: c.RoomId()})
-			time.Sleep(10 * time.Millisecond)
 			roomManager.Leave(c)
 		}(client)
 	}
