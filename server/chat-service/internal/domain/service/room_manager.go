@@ -41,13 +41,11 @@ func (rm *RoomManager) Leave(client driver.MessengerClient) {
 }
 
 func (rm *RoomManager) Broadcast(message dto.Message) error {
-	room := rm.getRoom(message.RoomId)
-
-	if room == nil {
-		return nil
+	if room := rm.getRoom(message.RoomId); room != nil {
+		return room.Broadcast(message)
 	}
 
-	return room.Broadcast(message)
+	return nil
 }
 
 func (rm *RoomManager) getOrCreateRoom(roomId string) *entity.LiveRoom {
