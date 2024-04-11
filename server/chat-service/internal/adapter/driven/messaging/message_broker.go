@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
@@ -69,9 +68,7 @@ func (mb *MessageBroker) Publish(message dto.Message) error {
 	return nil
 }
 
-func (mb *MessageBroker) Run(ctx context.Context, wg *sync.WaitGroup) error {
-	defer wg.Done()
-
+func (mb *MessageBroker) Run(ctx context.Context) error {
 	if err := mb.consumer.SubscribeTopics([]string{mb.topic}, nil); err != nil {
 		return err
 	}
@@ -80,7 +77,6 @@ func (mb *MessageBroker) Run(ctx context.Context, wg *sync.WaitGroup) error {
 		select {
 		case <-ctx.Done():
 			mb.close()
-			mb.logger.Infoln("[MESSAGE_BROKER] successfully closed")
 			return nil
 		default:
 			message, err := mb.consumer.ReadMessage(time.Second)

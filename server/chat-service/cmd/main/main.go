@@ -23,7 +23,7 @@ import (
 )
 
 type Runnable interface {
-	Run(ctx context.Context, wg *sync.WaitGroup) error
+	Run(ctx context.Context) error
 }
 
 type Closable interface {
@@ -53,9 +53,17 @@ func main() {
 		wg.Add(1)
 
 		go func(runnable Runnable) {
-			if err := runnable.Run(ctx, &wg); err != nil {
+			defer wg.Done()
+
+			runnableType := reflect.TypeOf(runnable)
+
+			if err := runnable.Run(ctx); err != nil {
 				cancel()
+				logger.Errorf("[MAIN] run %s failed %s", runnableType, err)
+				return
 			}
+
+			logger.Infof("[MAIN] running %s exited", runnableType)
 		}(runnable)
 	}
 }

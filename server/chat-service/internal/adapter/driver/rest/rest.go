@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -42,9 +41,7 @@ func (r *Rest) Register(handlers ...Register) {
 	}
 }
 
-func (r *Rest) Run(_ context.Context, wg *sync.WaitGroup) error {
-	defer wg.Done()
-
+func (r *Rest) Run(_ context.Context) error {
 	if err := r.server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
