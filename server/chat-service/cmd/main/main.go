@@ -95,17 +95,14 @@ func load[T any](target T, err error) T {
 		panic(err)
 	}
 
-	targetType := reflect.TypeOf(target)
 	targetInterface := reflect.ValueOf(target).Interface()
-	closableType := reflect.TypeOf((*Closable)(nil)).Elem()
-	runnableType := reflect.TypeOf((*Runnable)(nil)).Elem()
 
-	if ok := targetType.Implements(closableType); ok {
-		closables = append(closables, targetInterface.(Closable))
+	if closable, ok := targetInterface.(Closable); ok {
+		closables = append(closables, closable)
 	}
 
-	if ok := targetType.Implements(runnableType); ok {
-		runnables = append(runnables, targetInterface.(Runnable))
+	if runnable, ok := targetInterface.(Runnable); ok {
+		runnables = append(runnables, runnable)
 	}
 
 	return target
