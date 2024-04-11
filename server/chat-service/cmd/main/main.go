@@ -71,7 +71,7 @@ func main() {
 func initialize() {
 	configStore := load(config.New())
 	mongoDb := load(db.NewMongoDb(configStore))
-	restServer := load(rest.New(configStore, logger), nil)
+	restServer := load(rest.New(configStore), nil)
 
 	// adapter
 	messageBroker := load(messaging.NewMessageBroker(configStore, logger))

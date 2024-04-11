@@ -2,7 +2,6 @@ package rest
 
 import (
 	"chat-service/internal/adapter/driven/config"
-	"chat-service/internal/port/driven"
 	"context"
 	"errors"
 	"net/http"
@@ -16,13 +15,11 @@ type Register interface {
 }
 
 type Rest struct {
-	logger driven.Logger
 	server *http.Server
 }
 
-func New(configStore *config.Store, logger driven.Logger) *Rest {
+func New(configStore *config.Store) *Rest {
 	return &Rest{
-		logger: logger,
 		server: &http.Server{
 			Handler:      gin.Default(),
 			ReadTimeout:  5 * time.Second,
