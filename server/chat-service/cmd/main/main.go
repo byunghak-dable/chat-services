@@ -40,25 +40,25 @@ func main() {
 	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(context.Background())
 
-	defer terminate(&wg, cancel)
+	defer func() {
+		exit()
+		cancel()
+		wg.Wait()
+	}()
 
-	run(&wg, ctx)
-	waitTermination(ctx)
-}
-
-func run(wg *sync.WaitGroup, ctx context.Context) {
 	initialize()
 
 	for _, runnable := range runnables {
 		wg.Add(1)
 
 		go func(runnable Runnable) {
-			if err := runnable.Run(ctx, wg); err != nil {
-				logger.Errorf("[MAIN] %s run failed: %s", reflect.TypeOf(runnable), err)
-				panic(err)
+			if err := runnable.Run(ctx, &wg); err != nil {
+				cancel()
 			}
 		}(runnable)
 	}
+
+	waitExitSignal(ctx)
 }
 
 func initialize() {
@@ -108,7 +108,7 @@ func load[T any](target T, err error) T {
 	return target
 }
 
-func waitTermination(ctx context.Context) {
+func waitExitSignal(ctx context.Context) {
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 
@@ -120,7 +120,7 @@ func waitTermination(ctx context.Context) {
 	}
 }
 
-func terminate(wg *sync.WaitGroup, cancel context.CancelFunc) {
+func exit() {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue
@@ -133,7 +133,4 @@ func terminate(wg *sync.WaitGroup, cancel context.CancelFunc) {
 
 		logger.Infof("[MAIN] %s successfully closed", reflect.TypeOf(closable))
 	}
-
-	cancel()
-	wg.Wait()
 }
