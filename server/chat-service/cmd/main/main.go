@@ -31,14 +31,19 @@ type Closable interface {
 }
 
 var (
-	logger    = log.New()
-	closables []Closable
+	logger      = log.New()
+	ctx, cancel = context.WithCancel(context.Background())
+	closables   []Closable
 )
 
 func main() {
+	var wg sync.WaitGroup
+
+	defer terminate(&wg)
+
 	configStore := load(config.New())
-	mongoDb := loadClosable(db.NewMongoDb(configStore))
-	restServer := loadClosable(rest.New(configStore, logger), nil)
+	mongoDb := load(db.NewMongoDb(configStore))
+	restServer := load(rest.New(configStore, logger), nil)
 
 	// adapter
 	messageBroker := load(messaging.NewMessageBroker(configStore, logger))
@@ -62,13 +67,8 @@ func main() {
 		hmessenger.NewHandler(logger, messengerJoin, messengerLeave, messengerSend),
 	)
 
-	run(messageBroker, restServer)
-}
-
-func loadClosable[T Closable](target T, err error) T {
-	closables = append(closables, target)
-
-	return load(target, err)
+	run(&wg, restServer, messageBroker)
+	waitTermination()
 }
 
 func load[T any](target T, err error) T {
@@ -77,10 +77,43 @@ func load[T any](target T, err error) T {
 		panic(err)
 	}
 
+	targetType := reflect.TypeOf(target)
+	targetInterface := reflect.ValueOf(target).Interface()
+	closableType := reflect.TypeOf((*Closable)(nil)).Elem()
+
+	if ok := targetType.Implements(closableType); ok {
+		closables = append(closables, targetInterface.(Closable))
+	}
+
 	return target
 }
 
-func exit() {
+func run(wg *sync.WaitGroup, runnables ...Runnable) {
+	for _, runnable := range runnables {
+		wg.Add(1)
+
+		go func(runnable Runnable) {
+			if err := runnable.Run(ctx, wg); err != nil {
+				logger.Errorf("[MAIN] %s run failed: %s", reflect.TypeOf(runnable), err)
+				cancel()
+			}
+		}(runnable)
+	}
+}
+
+func waitTermination() {
+	terminationChan := make(chan os.Signal, 1)
+	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
+
+	select {
+	case <-ctx.Done():
+		logger.Infoln("[MAIN] received context done")
+	case s := <-terminationChan:
+		logger.Infof("[MAIN] received signal: %s", s)
+	}
+}
+
+func terminate(wg *sync.WaitGroup) {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue
@@ -93,38 +126,7 @@ func exit() {
 
 		logger.Infof("[MAIN] %s successfully closed", reflect.TypeOf(closable))
 	}
-}
 
-func run(runnables ...Runnable) {
-	var wg sync.WaitGroup
-	ctx, cancel := context.WithCancel(context.Background())
-
-	for _, runnable := range runnables {
-		wg.Add(1)
-
-		go func(runnable Runnable) {
-			if err := runnable.Run(ctx, &wg); err != nil {
-				logger.Errorf("[MAIN] %s run failed: %s", reflect.TypeOf(runnable), err)
-				cancel()
-			}
-		}(runnable)
-	}
-
-	waitTermination(ctx)
 	cancel()
 	wg.Wait()
-}
-
-func waitTermination(ctx context.Context) {
-	defer exit()
-
-	terminationChan := make(chan os.Signal, 1)
-	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
-
-	select {
-	case <-ctx.Done():
-		logger.Infoln("[MAIN] received context done")
-	case s := <-terminationChan:
-		logger.Infof("[MAIN] received signal: %s", s)
-	}
 }
