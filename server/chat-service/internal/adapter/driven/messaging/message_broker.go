@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
@@ -68,7 +69,9 @@ func (mb *MessageBroker) Publish(message dto.Message) error {
 	return nil
 }
 
-func (mb *MessageBroker) Run(ctx context.Context) error {
+func (mb *MessageBroker) Run(ctx context.Context, wg *sync.WaitGroup) error {
+	defer wg.Done()
+
 	if err := mb.consumer.SubscribeTopics([]string{mb.topic}, nil); err != nil {
 		return err
 	}
@@ -76,6 +79,8 @@ func (mb *MessageBroker) Run(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
+			mb.close()
+			mb.logger.Infoln("[MESSAGE_BROKER] successfully closed")
 			return nil
 		default:
 			message, err := mb.consumer.ReadMessage(time.Second)
@@ -89,7 +94,7 @@ func (mb *MessageBroker) Run(ctx context.Context) error {
 				continue
 			}
 
-			mb.logger.Errorf("kafka consumer read message failed: %s", err)
+			mb.logger.Errorf("[MESSAGE_BROKER] consumer read message failed: %s", err)
 		}
 	}
 }
@@ -119,9 +124,10 @@ func (mb *MessageBroker) emitMessage(bytes []byte) {
 	}
 }
 
-func (mb *MessageBroker) Close() error {
+func (mb *MessageBroker) close() error {
 	mb.producer.Flush(1000)
 	mb.producer.Close()
+
 	if err := mb.consumer.Close(); err != nil {
 		return err
 	}

@@ -16,13 +16,14 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
+	"sync"
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type Runnable interface {
-	Run(ctx context.Context) error
+	Run(ctx context.Context, wg *sync.WaitGroup) error
 }
 
 type Closable interface {
@@ -35,14 +36,12 @@ var (
 )
 
 func main() {
-	defer exit()
-
 	configStore := load(config.New())
 	mongoDb := loadClosable(db.NewMongoDb(configStore))
 	restServer := loadClosable(rest.New(configStore, logger), nil)
 
 	// adapter
-	messageBroker := loadClosable(messaging.NewMessageBroker(configStore, logger))
+	messageBroker := load(messaging.NewMessageBroker(configStore, logger))
 	messageRepository := repository.NewMessage(logger, mongoDb)
 
 	// mapper
@@ -97,12 +96,14 @@ func exit() {
 }
 
 func run(runnables ...Runnable) {
+	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	for _, runnable := range runnables {
+		wg.Add(1)
+
 		go func(runnable Runnable) {
-			if err := runnable.Run(ctx); err != nil {
+			if err := runnable.Run(ctx, &wg); err != nil {
 				logger.Errorf("[MAIN] %s run failed: %s", reflect.TypeOf(runnable), err)
 				cancel()
 			}
@@ -110,9 +111,13 @@ func run(runnables ...Runnable) {
 	}
 
 	waitTermination(ctx)
+	cancel()
+	wg.Wait()
 }
 
 func waitTermination(ctx context.Context) {
+	defer exit()
+
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 
