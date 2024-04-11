@@ -47,6 +47,7 @@ func main() {
 	}()
 
 	initialize()
+	defer waitExitSignal(ctx)
 
 	for _, runnable := range runnables {
 		wg.Add(1)
@@ -57,8 +58,6 @@ func main() {
 			}
 		}(runnable)
 	}
-
-	waitExitSignal(ctx)
 }
 
 func initialize() {
