@@ -31,16 +31,37 @@ type Closable interface {
 }
 
 var (
-	logger      = log.New()
-	ctx, cancel = context.WithCancel(context.Background())
-	closables   []Closable
+	logger    = log.New()
+	closables []Closable
+	runnables []Runnable
 )
 
 func main() {
 	var wg sync.WaitGroup
+	ctx, cancel := context.WithCancel(context.Background())
 
-	defer terminate(&wg)
+	defer terminate(&wg, cancel)
 
+	run(&wg, ctx)
+	waitTermination(ctx)
+}
+
+func run(wg *sync.WaitGroup, ctx context.Context) {
+	initialize()
+
+	for _, runnable := range runnables {
+		wg.Add(1)
+
+		go func(runnable Runnable) {
+			if err := runnable.Run(ctx, wg); err != nil {
+				logger.Errorf("[MAIN] %s run failed: %s", reflect.TypeOf(runnable), err)
+				panic(err)
+			}
+		}(runnable)
+	}
+}
+
+func initialize() {
 	configStore := load(config.New())
 	mongoDb := load(db.NewMongoDb(configStore))
 	restServer := load(rest.New(configStore, logger), nil)
@@ -66,9 +87,6 @@ func main() {
 		hmessage.NewHandler(logger, messageRead),
 		hmessenger.NewHandler(logger, messengerJoin, messengerLeave, messengerSend),
 	)
-
-	run(&wg, restServer, messageBroker)
-	waitTermination()
 }
 
 func load[T any](target T, err error) T {
@@ -80,28 +98,20 @@ func load[T any](target T, err error) T {
 	targetType := reflect.TypeOf(target)
 	targetInterface := reflect.ValueOf(target).Interface()
 	closableType := reflect.TypeOf((*Closable)(nil)).Elem()
+	runnableType := reflect.TypeOf((*Runnable)(nil)).Elem()
 
 	if ok := targetType.Implements(closableType); ok {
 		closables = append(closables, targetInterface.(Closable))
 	}
 
+	if ok := targetType.Implements(runnableType); ok {
+		runnables = append(runnables, targetInterface.(Runnable))
+	}
+
 	return target
 }
 
-func run(wg *sync.WaitGroup, runnables ...Runnable) {
-	for _, runnable := range runnables {
-		wg.Add(1)
-
-		go func(runnable Runnable) {
-			if err := runnable.Run(ctx, wg); err != nil {
-				logger.Errorf("[MAIN] %s run failed: %s", reflect.TypeOf(runnable), err)
-				cancel()
-			}
-		}(runnable)
-	}
-}
-
-func waitTermination() {
+func waitTermination(ctx context.Context) {
 	terminationChan := make(chan os.Signal, 1)
 	signal.Notify(terminationChan, os.Interrupt, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 
@@ -113,7 +123,7 @@ func waitTermination() {
 	}
 }
 
-func terminate(wg *sync.WaitGroup) {
+func terminate(wg *sync.WaitGroup, cancel context.CancelFunc) {
 	for _, closable := range closables {
 		if reflect.ValueOf(closable).IsNil() {
 			continue
