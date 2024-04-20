@@ -59,7 +59,7 @@ func (m *Message) GetMulti(query dto.MessagesQuery) ([]entity.Message, error) {
 			return nil, err
 		}
 
-		messages = append(messages, message.ToMessage())
+		messages = append(messages, message.ToDomain())
 	}
 
 	return messages, nil

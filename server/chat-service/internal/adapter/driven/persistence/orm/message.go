@@ -25,6 +25,6 @@ func FromMessage(entity entity.Message) Message {
 	}
 }
 
-func (m *Message) ToMessage() entity.Message {
+func (m *Message) ToDomain() entity.Message {
 	return entity.NewMessage(m.Id, m.RoomId, m.UserId, m.Message, m.CreatedAt, m.UpdatedAt)
 }
