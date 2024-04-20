@@ -12,8 +12,7 @@ type Message struct {
 }
 
 type MessagesQuery struct {
-	RoomId    string
-	Cursor    string
-	UpdatedAt string
-	Limit     int64
+	RoomId string
+	Cursor string
+	Limit  int64
 }

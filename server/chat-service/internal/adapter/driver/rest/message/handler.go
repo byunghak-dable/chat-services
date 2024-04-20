@@ -36,10 +36,9 @@ func (h *Handler) getMulti(ctx *gin.Context) {
 	}
 
 	messages, err := h.readMultiUseCase.Handle(dto.MessagesQuery{
-		RoomId:    query.RoomId,
-		Cursor:    query.Cursor,
-		UpdatedAt: query.UpdatedAt,
-		Limit:     query.Limit,
+		RoomId: query.RoomId,
+		Cursor: query.Cursor,
+		Limit:  query.Limit,
 	})
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err)

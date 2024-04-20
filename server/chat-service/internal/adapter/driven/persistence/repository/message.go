@@ -40,8 +40,14 @@ func (m *Message) Create(message *entity.Message) error {
 
 func (m *Message) GetMulti(query dto.MessagesQuery) ([]entity.Message, error) {
 	ctx := context.TODO()
-	filter := options.Find().SetLimit(query.Limit)
-	cursor, err := m.collection.Find(ctx, bson.D{{}}, filter)
+	filter := []bson.E{{Key: "room_id", Value: query.RoomId}}
+	findOpts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}}).SetLimit(query.Limit)
+
+	if cursorId, err := primitive.ObjectIDFromHex(query.Cursor); err == nil {
+		filter = append(filter, bson.E{Key: "_id", Value: bson.D{{Key: "$gte", Value: cursorId}}})
+	}
+
+	cursor, err := m.collection.Find(ctx, filter, findOpts)
 	if err != nil {
 		return nil, err
 	}
