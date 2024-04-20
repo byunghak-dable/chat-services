@@ -46,9 +46,9 @@ func (m *Message) GetMulti(query dto.MessagesQuery) ([]entity.Message, error) {
 		return nil, err
 	}
 
-	defer func(cursor *mongo.Cursor, ctx context.Context) {
+	defer func() {
 		_ = cursor.Close(ctx)
-	}(cursor, ctx)
+	}()
 
 	var messages []entity.Message
 
